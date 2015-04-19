@@ -29,6 +29,10 @@ if (!isProduction) {
 
 }
 
+proxy.on('error', function(e) {
+  console.log('Could not connect to proxy, please try again...');
+});
+
 // And run the server
 app.listen(port, function () {
   console.log('Server running on port ' + port);
