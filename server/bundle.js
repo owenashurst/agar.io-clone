@@ -13,7 +13,7 @@ module.exports = function () {
   });
 
   var bundler = new WebpackDevServer(compiler, {
-    publicPath: '/build',
+    publicPath: '/build/',
     inline: true,
     hot: true,
     quiet: false,
