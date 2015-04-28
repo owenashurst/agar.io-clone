@@ -7,8 +7,8 @@ var mainPath = path.resolve(__dirname, '..', 'app', 'main.js');
 
 module.exports = function () {
 
-  var compiler = webpack(webpackConfig, function () {
-    fs.writeFileSync(mainPath, fs.readFileSync(mainPath).toString());
+  var compiler = webpack(webpackConfig);
+  compiler.plugin("done", function() {
     console.log('Project is ready!');
   });
 

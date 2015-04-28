@@ -5,6 +5,7 @@ var nodeModulesPath = path.resolve(__dirname, 'node_modules');
 var buildPath = path.resolve(__dirname, 'public', 'build');
 
 var config = {
+  context: __dirname,
   devtool: 'eval',
   entry: [
     'webpack-dev-server/client?http://localhost:8080', 
