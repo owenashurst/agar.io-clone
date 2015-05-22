@@ -182,7 +182,7 @@ canvas {
 						)
 					) {
 					if (enemies[i].dead == false) {
-						if (player.mass > enemies[i].mass + 5) {
+						if (enemies[i].mass > 0 && player.mass > enemies[i].mass + 5) {
 							player.mass += enemies[i].mass;
 							playerSlowDown();
 							enemies[i].dead = true;
