@@ -1,223 +1,223 @@
 <script src="/socket.io/socket.io.js"></script>
 
 <style>
-	html, body {
-		margin: 0; padding: 0; 
-		width: 100%; height: 100%;
-	}
+    html, body {
+        margin: 0; padding: 0; 
+        width: 100%; height: 100%;
+    }
 
-	canvas {
-		width: 100%; height: 100%; 
-		margin: 0; padding: 0;
-	}
+    canvas {
+        width: 100%; height: 100%; 
+        margin: 0; padding: 0;
+    }
 
-	#status {
-		position: absolute;
-		padding: 10px; background: rgba(0, 0, 0, 0.7);
-		color: #FFF; font-size: 20px;
-		top: 0; left: 0;
-	}
+    #status {
+        position: absolute;
+        padding: 10px; background: rgba(0, 0, 0, 0.7);
+        color: #FFF; font-size: 20px;
+        top: 0; left: 0;
+    }
 </style>
 
 <body>
-	<div id="status">Players: 0</div>
-	<canvas tabindex="1" id="cvs"></canvas>
+    <div id="status">Players: 0</div>
+    <canvas tabindex="1" id="cvs"></canvas>
 
-	<script>
-	var playerName = prompt("Your name please:");
+    <script>
+    var playerName = prompt("Your name please:");
 
-	var socket = io();
-	var gameStart = false;
-	var disconnected = false;
+    var socket = io();
+    var gameStart = false;
+    var disconnected = false;
 
-	var player = {
-		playerID: -1,
-	  	x: gameWidth / 2, y: gameHeight / 2,
-	  	mass: 0, speed: 80
-	};
+    var player = {
+        playerID: -1,
+        x: gameWidth / 2, y: gameHeight / 2,
+        mass: 0, speed: 80
+    };
 
-	var foods = [];
-	var enemies = [];
-	var target = {x: player.x, y: player.y};
+    var foods = [];
+    var enemies = [];
+    var target = {x: player.x, y: player.y};
 
-	// Canvas
-	var gameWidth = window.innerWidth;
-	var gameHeight = window.innerHeight;
+    // Canvas
+    var gameWidth = window.innerWidth;
+    var gameHeight = window.innerHeight;
 
-	var c = document.getElementById("cvs");
-	c.addEventListener("mousemove", gameInput, false);
-	c.width = gameWidth; c.height = gameHeight;
+    var c = document.getElementById("cvs");
+    c.addEventListener("mousemove", gameInput, false);
+    c.width = gameWidth; c.height = gameHeight;
 
-	var graph = c.getContext("2d");
-
-
-	// Handle error
-	socket.on("connect_failed", function() {
-		socket.close();
-		disconnected = true;
-	});
-
-	socket.on("disconnect", function() {
-		socket.close();
-		disconnected = true;
-	});
+    var graph = c.getContext("2d");
 
 
-	// Handle connection 
-	socket.on("welcome", function(userID) {
-	  	player.playerID = userID;
-	  	player.name = playerName;
-	  	socket.emit("gotit", player);
-	  	gameStart = true;
-	  	console.log("Game is started: " + gameStart);
-	});
+    // Handle error
+    socket.on("connect_failed", function() {
+        socket.close();
+        disconnected = true;
+    });
 
-	socket.on("playerDisconnect", function(players) {
-		enemies = players;
-		document.getElementById("status").innerHTML = "Total Player: " + enemies.length;
-	});
-
-	socket.on("playerJoin", function(players) {
-		enemies = players;
-		document.getElementById("status").innerHTML = "Total Player: " + enemies.length;
-	});
+    socket.on("disconnect", function() {
+        socket.close();
+        disconnected = true;
+    });
 
 
-	// Handle movement
-	socket.on("serverTellPlayerMove", function(playerData) {
-		player = playerData;
-	});
+    // Handle connection 
+    socket.on("welcome", function(userID) {
+        player.playerID = userID;
+        player.name = playerName;
+        socket.emit("gotit", player);
+        gameStart = true;
+        console.log("Game is started: " + gameStart);
+    });
 
-	socket.on("serverUpdateAllPlayers", function(players) {
-		enemies = players;
-	});
+    socket.on("playerDisconnect", function(players) {
+        enemies = players;
+        document.getElementById("status").innerHTML = "Total Player: " + enemies.length;
+    });
 
-
-	// Update others
-	socket.on("serverTellPlayerUpdateFoods", function(foodsList) {
-		foods = foodsList;
-	});
-
-	socket.on("serverUpdateAllFoods", function(foodsList) {
-		foods = foodsList;
-	});
-
-
-	// Die
-	socket.on("RIP", function(){
-		gameStart = false;
-		socket.close();
-	});
+    socket.on("playerJoin", function(players) {
+        enemies = players;
+        document.getElementById("status").innerHTML = "Total Player: " + enemies.length;
+    });
 
 
-	function drawFood(food) {
-  		graph.arc(food.x, food.y, 5, 0, 2 * Math.PI);
-		graph.strokeStyle = "#f39c12";
-  		graph.fillStyle = "#f1c40f";
-  		graph.lineWidth = 2;
-  		graph.beginPath();
-  		graph.stroke();
-  		graph.fill();
-	}
+    // Handle movement
+    socket.on("serverTellPlayerMove", function(playerData) {
+        player = playerData;
+    });
 
-	function drawPlayer() {
-		graph.strokeStyle = "#c0392b";
-  		graph.fillStyle = "#ea6153";
-  		graph.lineWidth = 3;
-  		graph.beginPath();
-  		graph.arc(player.x, player.y, 10 + player.mass, 0, 2 * Math.PI);
-  		graph.stroke();
-  		graph.fill();
+    socket.on("serverUpdateAllPlayers", function(players) {
+        enemies = players;
+    });
 
-  		var fontSize = (player.mass / 2) + 10;
-  		graph.lineWidth = "3"
-  		graph.textAlign = "center";
-  		graph.fillStyle = "#FFFFFF";
-  		graph.textBaseline = 'middle';
-  		graph.strokeStyle = "#000000";
-  		graph.font = "bold " + fontSize + "px sans-serif";
-  		graph.strokeText(player.name, player.x, player.y);
-  		graph.fillText(player.name, player.x, player.y);
-	}
 
-	function drawEnemy(enemy) {
-		graph.strokeStyle = "#27ae60";
-  		graph.fillStyle = "#2ecc71";
-  		graph.lineWidth = 3;
-  		graph.beginPath();
-  		graph.arc(enemy.x, enemy.y, 10 + enemy.mass, 0, 2 * Math.PI);
-  		graph.fill();
-  		graph.stroke();
+    // Update others
+    socket.on("serverTellPlayerUpdateFoods", function(foodsList) {
+        foods = foodsList;
+    });
 
-  		var fontSize = (enemy.mass / 2) + 10;
+    socket.on("serverUpdateAllFoods", function(foodsList) {
+        foods = foodsList;
+    });
 
-  		graph.lineWidth = "3"
-  		graph.textAlign = "center";
-  		graph.fillStyle = "#FFFFFF";
-  		graph.textBaseline = 'middle';
-  		graph.strokeStyle = "#000000";
-  		graph.font = "bold " + fontSize + "px sans-serif";
-  		graph.strokeText(enemy.name, enemy.x, enemy.y);
-  		graph.fillText(enemy.name, enemy.x, enemy.y);
-	}	
 
-	function gameInput(e) {
-		target.x = e.x; target.y = e.y;
-	}
+    // Die
+    socket.on("RIP", function(){
+        gameStart = false;
+        socket.close();
+    });
 
-	window.requestAnimFrame = (function(){
-	  return  window.requestAnimationFrame       ||
-	          window.webkitRequestAnimationFrame ||
-	          window.mozRequestAnimationFrame    ||
-	          function( callback ){
-	            window.setTimeout(callback, 1000 / 60);
-	          };
-	})();
 
-	(function animloop(){
-	  requestAnimFrame(animloop);
-	  gameLoop();
-	})();
+    function drawFood(food) {
+        graph.arc(food.x, food.y, 5, 0, 2 * Math.PI);
+        graph.strokeStyle = "#f39c12";
+        graph.fillStyle = "#f1c40f";
+        graph.lineWidth = 2;
+        graph.beginPath();
+        graph.stroke();
+        graph.fill();
+    }
 
-	function gameLoop() {
-		if (!disconnected) {
-			if (gameStart) {
-				graph.fillStyle = "#EEEEEE";
-		  		graph.fillRect(0, 0, gameWidth, gameHeight);
+    function drawPlayer() {
+        graph.strokeStyle = "#c0392b";
+        graph.fillStyle = "#ea6153";
+        graph.lineWidth = 3;
+        graph.beginPath();
+        graph.arc(player.x, player.y, 10 + player.mass, 0, 2 * Math.PI);
+        graph.stroke();
+        graph.fill();
 
-		  		for (var i = 0; i < foods.length; i++) {
-		  			drawFood(foods[i]);
-		  		}
+        var fontSize = (player.mass / 2) + 10;
+        graph.lineWidth = "3"
+        graph.textAlign = "center";
+        graph.fillStyle = "#FFFFFF";
+        graph.textBaseline = 'middle';
+        graph.strokeStyle = "#000000";
+        graph.font = "bold " + fontSize + "px sans-serif";
+        graph.strokeText(player.name, player.x, player.y);
+        graph.fillText(player.name, player.x, player.y);
+    }
 
-		  		for (var i = 0; i < enemies.length; i++) {
-		  			if (enemies[i].playerID != player.playerID) {
-		  				drawEnemy(enemies[i]);
-		  			}
-		  		}
+    function drawEnemy(enemy) {
+        graph.strokeStyle = "#27ae60";
+        graph.fillStyle = "#2ecc71";
+        graph.lineWidth = 3;
+        graph.beginPath();
+        graph.arc(enemy.x, enemy.y, 10 + enemy.mass, 0, 2 * Math.PI);
+        graph.fill();
+        graph.stroke();
 
-		  		drawPlayer();
-		  		socket.emit("playerSendTarget", target);
+        var fontSize = (enemy.mass / 2) + 10;
 
-		  		//processGameEvent();
-			} else {
-				graph.fillStyle = "#333333";
-		  		graph.fillRect(0, 0, gameWidth, gameHeight);
+        graph.lineWidth = "3"
+        graph.textAlign = "center";
+        graph.fillStyle = "#FFFFFF";
+        graph.textBaseline = 'middle';
+        graph.strokeStyle = "#000000";
+        graph.font = "bold " + fontSize + "px sans-serif";
+        graph.strokeText(enemy.name, enemy.x, enemy.y);
+        graph.fillText(enemy.name, enemy.x, enemy.y);
+    }   
 
-		  		graph.textAlign = "center";
-		  		graph.fillStyle = "#FFFFFF";
-		  		graph.font = "bold 30px sans-serif";
-		  		graph.fillText("Game Over!", gameWidth / 2, gameHeight / 2);
-			}
-		} else {
-			graph.fillStyle = "#333333";
-	  		graph.fillRect(0, 0, gameWidth, gameHeight);
+    function gameInput(e) {
+        target.x = e.x; target.y = e.y;
+    }
 
-	  		graph.textAlign = "center";
-	  		graph.fillStyle = "#FFFFFF";
-	  		graph.font = "bold 30px sans-serif";
-	  		graph.fillText("Disconnected!", gameWidth / 2, gameHeight / 2);
-		}
-  	}
+    window.requestAnimFrame = (function(){
+      return  window.requestAnimationFrame       ||
+              window.webkitRequestAnimationFrame ||
+              window.mozRequestAnimationFrame    ||
+              function( callback ){
+                window.setTimeout(callback, 1000 / 60);
+              };
+    })();
 
-	</script>
+    (function animloop(){
+      requestAnimFrame(animloop);
+      gameLoop();
+    })();
+
+    function gameLoop() {
+        if (!disconnected) {
+            if (gameStart) {
+                graph.fillStyle = "#EEEEEE";
+                graph.fillRect(0, 0, gameWidth, gameHeight);
+
+                for (var i = 0; i < foods.length; i++) {
+                    drawFood(foods[i]);
+                }
+
+                for (var i = 0; i < enemies.length; i++) {
+                    if (enemies[i].playerID != player.playerID) {
+                        drawEnemy(enemies[i]);
+                    }
+                }
+
+                drawPlayer();
+                socket.emit("playerSendTarget", target);
+
+                //processGameEvent();
+            } else {
+                graph.fillStyle = "#333333";
+                graph.fillRect(0, 0, gameWidth, gameHeight);
+
+                graph.textAlign = "center";
+                graph.fillStyle = "#FFFFFF";
+                graph.font = "bold 30px sans-serif";
+                graph.fillText("Game Over!", gameWidth / 2, gameHeight / 2);
+            }
+        } else {
+            graph.fillStyle = "#333333";
+            graph.fillRect(0, 0, gameWidth, gameHeight);
+
+            graph.textAlign = "center";
+            graph.fillStyle = "#FFFFFF";
+            graph.font = "bold 30px sans-serif";
+            graph.fillText("Disconnected!", gameWidth / 2, gameHeight / 2);
+        }
+    }
+
+    </script>
 </body>
