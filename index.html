@@ -111,11 +111,11 @@
 
 
     function drawFood(food) {
-        graph.arc(food.x, food.y, 5, 0, 2 * Math.PI);
         graph.strokeStyle = "#f39c12";
         graph.fillStyle = "#f1c40f";
         graph.lineWidth = 2;
         graph.beginPath();
+        graph.arc(food.x, food.y, 5, 0, 2 * Math.PI);
         graph.stroke();
         graph.fill();
     }
