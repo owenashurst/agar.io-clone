@@ -1,0 +1,16 @@
+{
+  "name": "agar-clone",
+  "version": "1.0.0",
+  "description": "A simple clone of Agar.io game",
+  "main": "server.js",
+  "dependencies": {
+    "socket.io": "^1.3.5",
+    "express": "^4.12.4"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "author": "Huy Tran",
+}
