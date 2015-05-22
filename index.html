@@ -21,15 +21,17 @@ canvas {
 
 <body>
 	<div id="status">Total Player: 0</div>
-	<canvas id="cvs"></canvas>
+	<canvas tabindex="1" id="cvs"></canvas>
 
 	<script>
+	var playerName = prompt("Your name please:");
+
 	var socket = io();
 
 	var gameStart = false;
 	
 	var c = document.getElementById("cvs");
-	c.addEventListener("click", gameInput, false);
+	c.addEventListener("mousemove", gameInput, false);
 
 	var gameWidth = window.innerWidth;
 	var gameHeight = window.innerHeight;
@@ -41,7 +43,7 @@ canvas {
 	var player = {
 		playerID: -1,
 	  	x: gameWidth / 2, y: gameHeight / 2,
-	  	mass: 0, speed: 2,
+	  	mass: 0, speed: 80,
 	  	dead: false
 	};
 
@@ -52,6 +54,7 @@ canvas {
 
 	socket.on("welcome", function(userID){
 	  	player.playerID = userID;
+	  	player.name = playerName;
 	  	socket.emit("gotit", player);
 	  	gameStart = true;
 	  	console.log("Game is started: " + gameStart);
@@ -102,6 +105,16 @@ canvas {
   		graph.arc(player.x, player.y, 10 + player.mass, 0, 2*Math.PI);
   		graph.fill();
   		graph.stroke();
+
+  		var fontSize = (player.mass / 2) + 10;
+  		graph.font = "bold " + fontSize + "px sans-serif";
+  		graph.textAlign = "center";
+  		graph.textBaseline = 'middle';
+  		graph.fillStyle = "#FFFFFF";
+  		graph.lineWidth = "3"
+  		graph.strokeStyle = "#000000";
+  		graph.strokeText(player.name, player.x, player.y);
+  		graph.fillText(player.name, player.x, player.y);
 	}
 
 	function drawEnemy(enemy) {
@@ -112,6 +125,17 @@ canvas {
   		graph.arc(enemy.x, enemy.y, 10 + enemy.mass, 0, 2*Math.PI);
   		graph.fill();
   		graph.stroke();
+
+  		var fontSize = (enemy.mass / 2) + 10;
+
+  		graph.font = "bold " + fontSize + "px sans-serif";
+  		graph.textAlign = "center";
+  		graph.textBaseline = 'middle';
+  		graph.fillStyle = "#FFFFFF";
+  		graph.lineWidth = "3"
+  		graph.strokeStyle = "#000000";
+  		graph.strokeText(enemy.name, enemy.x, enemy.y);
+  		graph.fillText(enemy.name, enemy.x, enemy.y);
 	}	
 
 	function gameInput(e) {
@@ -128,6 +152,10 @@ canvas {
 		return (distance <= (player.mass + 10));
 	}
 
+	function playerSlowDown() {
+		if (player.speed < 100) player.speed += player.mass / 500;
+	}
+
 	function processGameEvent() {
 		for (var i = 0; i < foods.length; i++) {
 			if (hitTest(
@@ -138,6 +166,7 @@ canvas {
 				if (foods[i].ate == false) {
 					foods[i].ate = true;
 					player.mass += 1;
+					playerSlowDown();
 					socket.emit("playerEat", player, foods[i]);
 					foods.splice(i, 1);
 				}
@@ -155,6 +184,7 @@ canvas {
 					if (enemies[i].dead == false) {
 						if (player.mass > enemies[i].mass + 5) {
 							player.mass += enemies[i].mass;
+							playerSlowDown();
 							enemies[i].dead = true;
 							socket.emit("playerKill", player, enemies[i]);
 							console.log("Eat him!");
@@ -168,20 +198,9 @@ canvas {
 	}
 
 	function updatePosition() {
-		if (target.x - player.x > player.speed) {
-			player.x += player.speed;
-			sendPosition();
-		}
-		if (target.x - player.x < -player.speed) {
-			player.x -= player.speed;
-			sendPosition();
-		}
-		if (target.y - player.y > player.speed) {
-			player.y += player.speed;
-			sendPosition();
-		}
-		if (target.y - player.y < -player.speed) {
-			player.y -= player.speed;
+		if (target.x != player.x && target.y != player.y) {
+			player.x += (target.x - player.x) / player.speed;
+			player.y += (target.y - player.y) / player.speed;
 			sendPosition();
 		}
 	}
