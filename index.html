@@ -43,14 +43,29 @@ canvas {
 	var player = {
 		playerID: -1,
 	  	x: gameWidth / 2, y: gameHeight / 2,
-	  	mass: 0, speed: 80,
-	  	dead: false
+	  	mass: 0, speed: 80
 	};
 
 	var target = { x: player.x, y: player.y };
 
 	var enemies = [];
 	var foods = [];
+
+	var disconnected = false;
+
+	// Handle error
+
+	socket.on("connect_failed", function(){
+		socket.close();
+		disconnected = true;
+	});
+
+	socket.on("disconnect", function(){
+		socket.close();
+		disconnected = true;
+	});
+
+	// Handle connection 
 
 	socket.on("welcome", function(userID){
 	  	player.playerID = userID;
@@ -60,10 +75,6 @@ canvas {
 	  	console.log("Game is started: " + gameStart);
 	});
 
-	socket.on("foodUpdate", function(foodList){
-		foods = foodList;
-	});
-
 	socket.on("playerDisconnect", function(players){
 		enemies = players;
 		document.getElementById("status").innerHTML = "Total Player: " + enemies.length;
@@ -71,20 +82,34 @@ canvas {
 
 	socket.on("playerJoin", function(players){
 		enemies = players;
-		console.log("Update players: " + enemies.length);
 		document.getElementById("status").innerHTML = "Total Player: " + enemies.length;
-		console.log(JSON.stringify(enemies));
-		console.log("Me: " + player.playerID);
 	});
 
-	socket.on("DIE", function(){
+	// Handle movement
+
+	socket.on("serverTellPlayerMove", function(playerData){
+		player = playerData;
+	});
+
+	socket.on("serverUpdateAllPlayers", function(players){
+		enemies = players;
+	});
+
+	// Update others
+
+	socket.on("serverTellPlayerUpdateFoods", function(foodsList){
+		foods = foodsList;
+	});
+
+	socket.on("serverUpdateAllFoods", function(foodsList){
+		foods = foodsList;
+	});
+
+	// Die
+
+	socket.on("RIP", function(){
 		gameStart = false;
 		socket.close();
-	});
-
-	socket.on("playerUpdate", function(players){
-		enemies = players;
-		document.getElementById("status").innerHTML = "Total Player: " + enemies.length;
 	});
 
 	function drawFood(food) {
@@ -139,70 +164,7 @@ canvas {
 	}	
 
 	function gameInput(e) {
-		console.log(e.x + ":" + e.y);
 		target.x = e.x; target.y = e.y;
-	}
-
-	function sendPosition() {
-		socket.emit("playerSendPos", player);
-	}
-
-	function hitTest(start, end) {
-		var distance = Math.sqrt( (start.x - end.x) * (start.x - end.x) + (start.y - end.y) * (start.y - end.y) );
-		return (distance <= (player.mass + 10));
-	}
-
-	function playerSlowDown() {
-		if (player.speed < 100) player.speed += player.mass / 500;
-	}
-
-	function processGameEvent() {
-		for (var i = 0; i < foods.length; i++) {
-			if (hitTest(
-					{x:foods[i].x, y:foods[i].y}, 
-					{x:player.x, y:player.y}
-					)
-				) {
-				if (foods[i].ate == false) {
-					foods[i].ate = true;
-					player.mass += 1;
-					playerSlowDown();
-					socket.emit("playerEat", player, foods[i]);
-					foods.splice(i, 1);
-				}
-				break;
-			}
-		}
-
-		for (var i = 0; i < enemies.length; i++) {
-			if (enemies[i].playerID != player.playerID) {
-				if (hitTest(
-						{x:enemies[i].x, y:enemies[i].y}, 
-						{x:player.x, y:player.y}
-						)
-					) {
-					if (enemies[i].dead == false) {
-						if (enemies[i].mass > 0 && player.mass > enemies[i].mass + 5) {
-							player.mass += enemies[i].mass;
-							playerSlowDown();
-							enemies[i].dead = true;
-							socket.emit("playerKill", player, enemies[i]);
-							console.log("Eat him!");
-							enemies.splice(i, 1);
-						}
-					}
-					break;
-				}
-			}
-		}
-	}
-
-	function updatePosition() {
-		if (target.x != player.x && target.y != player.y) {
-			player.x += (target.x - player.x) / player.speed;
-			player.y += (target.y - player.y) / player.speed;
-			sendPosition();
-		}
 	}
 
 	window.requestAnimFrame = (function(){
@@ -220,24 +182,34 @@ canvas {
 	})();
 
 	function gameLoop() {
-		if (gameStart) {
-			graph.fillStyle = "#EEEEEE";
-	  		graph.fillRect(0, 0, gameWidth, gameHeight);
+		if (!disconnected) {
+			if (gameStart) {
+				graph.fillStyle = "#EEEEEE";
+		  		graph.fillRect(0, 0, gameWidth, gameHeight);
 
-	  		for (var i = 0; i < foods.length; i++) {
-	  			drawFood(foods[i]);
-	  		}
+		  		for (var i = 0; i < foods.length; i++) {
+		  			drawFood(foods[i]);
+		  		}
 
-	  		for (var i = 0; i < enemies.length; i++) {
-	  			if (enemies[i].playerID != player.playerID) {
-	  				drawEnemy(enemies[i]);
-	  			}
-	  		}
+		  		for (var i = 0; i < enemies.length; i++) {
+		  			if (enemies[i].playerID != player.playerID) {
+		  				drawEnemy(enemies[i]);
+		  			}
+		  		}
 
-	  		drawPlayer();
+		  		drawPlayer();
+		  		socket.emit("playerSendTarget", target);
 
-	  		updatePosition();
-	  		processGameEvent();
+		  		//processGameEvent();
+			} else {
+				graph.fillStyle = "#333333";
+		  		graph.fillRect(0, 0, gameWidth, gameHeight);
+
+		  		graph.font = "bold 30px sans-serif";
+		  		graph.textAlign = "center";
+		  		graph.fillStyle = "#FFFFFF";
+		  		graph.fillText("Game Over!", gameWidth / 2, gameHeight / 2);
+			}
 		} else {
 			graph.fillStyle = "#333333";
 	  		graph.fillRect(0, 0, gameWidth, gameHeight);
@@ -245,7 +217,7 @@ canvas {
 	  		graph.font = "bold 30px sans-serif";
 	  		graph.textAlign = "center";
 	  		graph.fillStyle = "#FFFFFF";
-	  		graph.fillText("Game Over!", gameWidth / 2, gameHeight / 2);
+	  		graph.fillText("Disconnected!", gameWidth / 2, gameHeight / 2);
 		}
   	}
 

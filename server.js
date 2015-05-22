@@ -6,6 +6,8 @@ var users = [];
 var foods = [];
 var sockets = [];
 
+var maxSizeMass = 50;
+
 app.get('/', function(req, res){
   res.sendfile('index.html');
 });
@@ -19,14 +21,13 @@ function addFoods() {
 	var ry = genPos(0, 1000);
 	var food = {
 		foodID: (new Date()).getTime(),
-		x: rx, y: ry,
-		ate: false
+		x: rx, y: ry
 	};
 	foods[foods.length] = food;
 }
 
 setInterval(function(){
-	if (foods.length < 200) {
+	if (foods.length < 50) {
 		addFoods();
 	}
   if (users.length == 0) {
@@ -61,53 +62,95 @@ function findFoodIndex(id) {
   return -1;
 }
 
+function hitTest(start, end, min) {
+  var distance = Math.sqrt( (start.x - end.x) * (start.x - end.x) + (start.y - end.y) * (start.y - end.y) );
+  console.log("Hit test: " + distance + " ± " + min);
+  return (distance <= min);
+}
 
 io.on('connection', function(socket){  
   console.log('A user connected. Assigning UserID...');
 
   var userID = socket.id;
+  var currentPlayer = {};
 
   socket.emit("welcome", userID);
 
   socket.on("gotit", function(player){
-  	console.log("User #" + userID + " accepted!");
   	player.playerID = userID;
   	sockets[player.playerID] = socket;
   	if (findPlayer(player.playerID) == null) {
-  		console.log("Add player");
+  		console.log("Player " + player.playerID + " connected!");
       users.push(player);
+      currentPlayer = player;
   	}
 
   	console.log("Total player: " + users.length);
 
   	socket.emit("playerJoin", users);
-  });
-
-  socket.on("playerKill", function(player, victim){
-  	console.log("KILLING");
-  	users[findPlayerIndex(player.playerID)] = player;
-  	sockets[victim.playerID].emit("DIE");
-  	socket.emit("playerUpdate", users);
-  });
-
-  socket.on("playerEat", function(player, food){
-  	users[findPlayerIndex(player.playerID)] = player;
-    foods.splice(findFoodIndex(food.foodID), 1);
-
-  	socket.emit("playerUpdate", users);
-  	socket.emit("foodUpdate", foods);
-  });
-
-  socket.on("playerSendPos", function(player){
-  	users[findPlayerIndex(player.playerID)] = player;
-  	socket.emit("playerUpdate", users);
-  	socket.emit("foodUpdate", foods);
+    socket.broadcast.emit("playerJoin", users);
   });
 
   socket.on('disconnect', function(){
   	users.splice(findPlayerIndex(userID), 1);
   	console.log('User #' + userID + ' disconnected');
-  	socket.emit("playerDisconnect", users);
+  	socket.broadcast.emit("playerDisconnect", users);
+  });
+
+  // Heartbeat function, update everytime
+
+  socket.on("playerSendTarget", function(target){
+    if (target.x != currentPlayer.x && target.y != currentPlayer.y) {
+      currentPlayer.x += (target.x - currentPlayer.x) / currentPlayer.speed;
+      currentPlayer.y += (target.y - currentPlayer.y) / currentPlayer.speed;
+
+      users[findPlayerIndex(currentPlayer.playerID)] = currentPlayer;
+      
+      for (var f = 0; f < foods.length; f++) {
+        if (hitTest(
+                  { x: foods[f].x, y: foods[f].y },
+                  { x: currentPlayer.x, y: currentPlayer.y },
+                  currentPlayer.mass + 10
+            )) {
+          foods[f] = {};
+          foods.splice(f, 1);
+          if (currentPlayer.mass < maxSizeMass) {
+            currentPlayer.mass += 1;
+          }
+          if (currentPlayer.speed < 100) {
+            currentPlayer.speed += currentPlayer.mass / 1000;
+          }
+          console.log("Playr eat");
+          break;
+        }
+      }
+
+      for (var e = 0; e < users.length; e++) {
+        if (hitTest(
+                  { x: users[e].x, y: users[e].y },
+                  { x: currentPlayer.x, y: currentPlayer.y },
+                  currentPlayer.mass + 10
+          )) {
+            if (users[e].mass != 0 && users[e].mass < currentPlayer.mass - 5) {           
+              if (currentPlayer.mass < maxSizeMass) {
+                currentPlayer.mass += users[e].mass;
+              }
+              if (currentPlayer.speed < 100) {
+                currentPlayer.speed += currentPlayer.mass / 1000;
+              }
+              sockets[users[e].playerID].emit("RIP");
+              users.splice(e, 1);
+              break;
+            }
+        }
+      }
+
+      // Do some continuos emit
+      socket.emit("serverTellPlayerMove", currentPlayer);
+      socket.emit("serverTellPlayerUpdateFoods", foods);
+      socket.broadcast.emit("serverUpdateAllPlayers", users);
+      socket.broadcast.emit("serverUpdateAllFoods", foods);
+    }
   });
 
 });
