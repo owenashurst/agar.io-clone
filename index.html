@@ -52,7 +52,6 @@ canvas {
 
 	socket.on("welcome", function(userID){
 	  	player.playerID = userID;
-	  	console.log(JSON.stringify(player));
 	  	socket.emit("gotit", player);
 	  	gameStart = true;
 	  	console.log("Game is started: " + gameStart);
@@ -140,6 +139,7 @@ canvas {
 					foods[i].ate = true;
 					player.mass += 1;
 					socket.emit("playerEat", player, foods[i]);
+					foods.splice(i, 1);
 				}
 				break;
 			}
@@ -158,6 +158,7 @@ canvas {
 							enemies[i].dead = true;
 							socket.emit("playerKill", player, enemies[i]);
 							console.log("Eat him!");
+							enemies.splice(i, 1);
 						}
 					}
 					break;

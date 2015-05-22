@@ -18,7 +18,7 @@ function addFoods() {
 	var rx = genPos(0, 2000);
 	var ry = genPos(0, 1000);
 	var food = {
-		foodID: foods.length,
+		foodID: (new Date()).getTime(),
 		x: rx, y: ry,
 		ate: false
 	};
@@ -29,12 +29,43 @@ setInterval(function(){
 	if (foods.length < 200) {
 		addFoods();
 	}
+  if (users.length == 0) {
+    foods = [];
+  }
 }, 1000);
+
+function findPlayer(id) {
+  for (var i = 0; i < users.length; i++) {
+    if (users[i].playerID == id) {
+      return users[i];
+    }
+  }
+  return null;
+}
+
+function findPlayerIndex(id) {
+  for (var i = 0; i < users.length; i++) {
+    if (users[i].playerID == id) {
+      return i;
+    }
+  }
+  return -1;
+}
+
+function findFoodIndex(id) {
+  for (var i = 0; i < foods.length; i++) {
+    if (foods[i].foodID == id) {
+      return i;
+    }
+  }
+  return -1;
+}
+
 
 io.on('connection', function(socket){  
   console.log('A user connected. Assigning UserID...');
 
-  var userID = users.length;
+  var userID = socket.id;
 
   socket.emit("welcome", userID);
 
@@ -42,13 +73,9 @@ io.on('connection', function(socket){
   	console.log("User #" + userID + " accepted!");
   	player.playerID = userID;
   	sockets[player.playerID] = socket;
-  	var found = false;
-  	if (users[player.playerID] != undefined) {
-  		found = true;
-  	}
-  	if (!found) {
+  	if (findPlayer(player.playerID) == null) {
   		console.log("Add player");
-  		users[player.playerID] = player;
+      users.push(player);
   	}
 
   	console.log("Total player: " + users.length);
@@ -58,36 +85,27 @@ io.on('connection', function(socket){
 
   socket.on("playerKill", function(player, victim){
   	console.log("KILLING");
-  	users[player.playerID] = player;
+  	users[findPlayerIndex(player.playerID)] = player;
   	sockets[victim.playerID].emit("DIE");
   	socket.emit("playerUpdate", users);
   });
 
   socket.on("playerEat", function(player, food){
-  	users[player.playerID] = player;
-  	var idToRemove = -1;
-  	for (var i = 0; i < foods.length; i++) {
-  		if (foods[i].foodID == food.foodID) {
-  			idToRemove = i;
-  			break;
-  		}
-  	}
-  	if (idToRemove != -1) {
-  		foods.splice(idToRemove, 1);
-  	}
+  	users[findPlayerIndex(player.playerID)] = player;
+    foods.splice(findFoodIndex(food.foodID), 1);
 
   	socket.emit("playerUpdate", users);
   	socket.emit("foodUpdate", foods);
   });
 
   socket.on("playerSendPos", function(player){
-  	users[player.playerID] = player;
+  	users[findPlayerIndex(player.playerID)] = player;
   	socket.emit("playerUpdate", users);
   	socket.emit("foodUpdate", foods);
   });
 
   socket.on('disconnect', function(){
-  	users.splice(userID, 1);
+  	users.splice(findPlayerIndex(userID), 1);
   	console.log('User #' + userID + ' disconnected');
   	socket.emit("playerDisconnect", users);
   });
