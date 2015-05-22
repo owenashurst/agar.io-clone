@@ -4,9 +4,10 @@ This is a simple Agar.io clone written with Socket.IO and HTML5 Canvas.
 
 ![](http://i.imgur.com/yJ96Lyi.jpg)
 
-## Feature
+## Latest Changes
 - Game logic handled by server
 - Client side is for rendering only
+- Display player name
 
 ## Requirement
 To run the game, you need to have: 
@@ -38,7 +39,7 @@ The game will run at http://localhost:3000
 
 You are the red circle.
 
-Tap on screen to move your self.
+Move mouse on screen to move your self.
 
 Eat all yellow food. Food will respawn every 1 second.
 
