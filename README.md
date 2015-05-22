@@ -2,6 +2,8 @@
 
 This is a simple Agar.io clone written with Socket.IO and HTML5 Canvas.
 
+![](http://i.imgur.com/ZDfhcpO.png)
+
 There are still a lot of bug, and the code are not optimized yet. 
 
 ## Requirement
