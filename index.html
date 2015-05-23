@@ -89,7 +89,7 @@
     // Canvas
     var gameWidth = window.innerWidth;
     var gameHeight = window.innerHeight;
-    
+
     var socket = io();
     var gameStart = false;
     var disconnected = false;
@@ -192,6 +192,14 @@
         gameStart = true;
         console.log("Game is started: " + gameStart);
         addSystemLine("Connected to the game!");
+
+        // Ping
+        var startTime = Date.now();
+        socket.emit("ping");
+        socket.on("pong", function(){
+            var latency = Date.now() - startTime;
+            console.log("Latency: " + latency + "ms");
+        });
     });
 
     socket.on("playerDisconnect", function(data) {
