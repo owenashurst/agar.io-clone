@@ -161,13 +161,28 @@
         chatList.insertBefore(chatLine, chatList.childNodes[0]);
     }
 
+    function checkLatency() {
+        // Ping
+        var startTime = Date.now();
+        socket.emit("ping");
+        socket.on("pong", function(){
+            var latency = Date.now() - startTime;
+            console.log("Latency: " + latency + "ms");
+            addSystemLine("Ping: " + latency + "ms");
+        });
+    }
+
     function sendChat(key) {
         var key = key.which || key.keyCode;
         if (key == KEY_ENTER) {
             var text = chatInput.value.replace(/(<([^>]+)>)/ig,"");
             if (text != "") {
-                socket.emit("playerChat", { sender: player.name, message: text });
-                addChatLine(player.name, text);
+                if (text != "-ping") {
+                    socket.emit("playerChat", { sender: player.name, message: text });
+                    addChatLine(player.name, text);
+                } else {
+                    checkLatency();
+                }
                 chatInput.value = "";
             }
         }
@@ -192,14 +207,6 @@
         gameStart = true;
         console.log("Game is started: " + gameStart);
         addSystemLine("Connected to the game!");
-
-        // Ping
-        var startTime = Date.now();
-        socket.emit("ping");
-        socket.on("pong", function(){
-            var latency = Date.now() - startTime;
-            console.log("Latency: " + latency + "ms");
-        });
     });
 
     socket.on("playerDisconnect", function(data) {

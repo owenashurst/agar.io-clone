@@ -11,6 +11,7 @@ This is a simple Agar.io clone written with Socket.IO and HTML5 Canvas.
 - Client side is for rendering only
 - Display player name
 - Now support chat 
+- Type to chat box `-ping` to check ping
 
 ## Requirement
 To run the game, you need to have: 
