@@ -1,6 +1,11 @@
 <script src="/socket.io/socket.io.js"></script>
 
 <style>
+    * {
+        font-family: sans-serif;
+        font-size: 14px;
+    }
+
     html, body {
         margin: 0; padding: 0; 
         width: 100%; height: 100%;
@@ -15,20 +20,77 @@
         position: absolute;
         padding: 10px; background: rgba(0, 0, 0, 0.7);
         color: #FFF; font-size: 20px;
-        top: 0; left: 0;
+        top: 0; right: 0;
+        text-align: right;
     }
+
+    .chatbox {
+        position: absolute;
+        width: 300px; height: 160px;
+        background: rgba(255, 255, 255, 0.7);
+        bottom: 5px; left: 5px;
+        border-radius: 5px;
+        pointer-events: none;
+    }
+
+    .chatbox .chat-list {
+        padding: 5px; margin: 0;
+        list-style: none;
+        box-sizing: border-box;
+        height: 125px; overflow: hidden;
+    }
+
+    .chatbox .chat-list li {
+        padding: 2px; margin: 3px;
+    }
+
+    .chatbox .chat-list li.me b {
+        color: #ea6153;
+    }
+
+    .chatbox .chat-list li.friend b {
+        color: #2ecc71;
+    }
+
+    .chatbox .chat-list li.system {
+        color: #9b59b6;
+        font-style: italic;
+    }
+
+    .chatbox .chat-list li.system:before {
+        content: "» ";
+    }
+
+    .chatbox .chat-input {
+        pointer-events: all;
+        box-sizing:border-box;
+        width:100%;
+        padding:8px;
+        background: transparent;
+        border: none;
+        border-top: 1px solid #DDD;
+        outline: none;
+    }
+
 </style>
 
 <body>
     <div id="status">Players: 0</div>
+    <div class="chatbox">
+        <ul id="chatList" class="chat-list">
+        </ul>
+        <input id="chatInput" type="text" class="chat-input" placeholder="Chat here..." />
+    </div>
     <canvas tabindex="1" id="cvs"></canvas>
 
     <script>
-    var playerName = prompt("Your name please:");
+    var playerName = prompt("Your name please:").replace(/(<([^>]+)>)/ig,"");
 
     var socket = io();
     var gameStart = false;
     var disconnected = false;
+
+    var KEY_ENTER = 13;
 
     var foodConfig = {
         border: 2,
@@ -77,6 +139,37 @@
 
     var graph = c.getContext("2d");
 
+    var chatInput = document.getElementById("chatInput");
+    chatInput.addEventListener("keypress", sendChat);
+
+    // Chat
+    function addChatLine(name, text) {
+        var chatLine = document.createElement("li");
+        chatLine.className = (name == player.name)?"me":"friend";
+        chatLine.innerHTML = "<b>" + name + "</b>: " + text;
+        var chatList = document.getElementById("chatList"); 
+        chatList.insertBefore(chatLine, chatList.childNodes[0]);
+    }
+
+    function addSystemLine(text) {
+        var chatLine = document.createElement("li");
+        chatLine.className = "system";
+        chatLine.innerHTML = text;
+        var chatList = document.getElementById("chatList"); 
+        chatList.insertBefore(chatLine, chatList.childNodes[0]);
+    }
+
+    function sendChat(key) {
+        var key = key.which || key.keyCode;
+        if (key == KEY_ENTER) {
+            var text = chatInput.value.replace(/(<([^>]+)>)/ig,"");
+            if (text != "") {
+                socket.emit("playerChat", { sender: player.name, message: text });
+                addChatLine(player.name, text);
+                chatInput.value = "";
+            }
+        }
+    }
 
     // Handle error
     socket.on("connect_failed", function() {
@@ -89,7 +182,6 @@
         disconnected = true;
     });
 
-
     // Handle connection 
     socket.on("welcome", function(userID) {
         player.playerID = userID;
@@ -97,18 +189,26 @@
         socket.emit("gotit", player);
         gameStart = true;
         console.log("Game is started: " + gameStart);
+        addSystemLine("Connected to the game!");
     });
 
-    socket.on("playerDisconnect", function(players) {
-        enemies = players;
+    socket.on("playerDisconnect", function(data) {
+        enemies = data.playersList;
         document.getElementById("status").innerHTML = "Players: " + enemies.length;
+        addSystemLine("Player <b>" + data.disconnectName + "</b> disconnected!");
     });
 
-    socket.on("playerJoin", function(players) {
-        enemies = players;
+    socket.on("playerJoin", function(data) {
+        console.log(data);
+        enemies = data.playersList;
         document.getElementById("status").innerHTML = "Players: " + enemies.length;
+        addSystemLine("Player <b>" + data.connectedName + "</b> joined!");
     });
 
+    // Chat
+    socket.on("serverSendPlayerChat", function(data){
+        addChatLine(data.sender, data.message);
+    });
 
     // Handle movement
     socket.on("serverTellPlayerMove", function(playerData) {

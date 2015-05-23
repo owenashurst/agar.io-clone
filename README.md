@@ -10,6 +10,7 @@ This is a simple Agar.io clone written with Socket.IO and HTML5 Canvas.
 - Game logic handled by server
 - Client side is for rendering only
 - Display player name
+- Now support chat 
 
 ## Requirement
 To run the game, you need to have: 

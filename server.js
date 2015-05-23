@@ -109,15 +109,23 @@ io.on('connection', function(socket) {
             currentPlayer = player;
         }
 
-        socket.emit("playerJoin", users);
-        socket.broadcast.emit("playerJoin", users);
+        socket.emit("playerJoin", { playersList: users, connectedName: player.name });
+        socket.broadcast.emit("playerJoin", { playersList: users, connectedName: player.name });
         console.log("Total player: " + users.length);
     });
 
     socket.on('disconnect', function() {
-        users.splice(findPlayerIndex(userID), 1);
+        var playerIndex = findPlayerIndex(userID);
+        var playerName = users[playerIndex].name;
+        users.splice(playerIndex, 1);
         console.log('User #' + userID + ' disconnected');
-        socket.broadcast.emit("playerDisconnect", users);
+        socket.broadcast.emit("playerDisconnect", { playersList: users, disconnectName: playerName });
+    });
+
+    socket.on("playerChat", function(data){
+        var _sender = data.sender.replace(/(<([^>]+)>)/ig,"");
+        var _message = data.message.replace(/(<([^>]+)>)/ig,"");
+        socket.broadcast.emit("serverSendPlayerChat", { sender: _sender, message: _message });
     });
 
     // Heartbeat function, update everytime
