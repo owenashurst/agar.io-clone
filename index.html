@@ -94,6 +94,8 @@
     var gameStart = false;
     var disconnected = false;
 
+    var startPingTime = 0;
+
     var KEY_ENTER = 13;
 
     var foodConfig = {
@@ -163,13 +165,8 @@
 
     function checkLatency() {
         // Ping
-        var startTime = Date.now();
+        startPingTime = Date.now();
         socket.emit("ping");
-        socket.on("pong", function(){
-            var latency = Date.now() - startTime;
-            console.log("Latency: " + latency + "ms");
-            addSystemLine("Ping: " + latency + "ms");
-        });
     }
 
     function sendChat(key) {
@@ -187,6 +184,13 @@
             }
         }
     }
+
+    // Handle ping
+    socket.on("pong", function(){
+        var latency = Date.now() - startPingTime;
+        console.log("Latency: " + latency + "ms");
+        addSystemLine("Ping: " + latency + "ms");
+    });
 
     // Handle error
     socket.on("connect_failed", function() {
