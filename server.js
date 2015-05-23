@@ -15,8 +15,11 @@ var massDecreaseRatio = 1000;
 
 var foodMass = 1;
 
-var foodRandomWidth = 2000;
-var foodRandomHeight = 1000;
+var newFoodPerPlayer = 3;
+var respawnFoodPerPlayer = 1;
+
+var foodRandomWidth = 500;
+var foodRandomHeight = 500;
 var maxFoodCount = 50;
 
 var noPlayer = 0;
@@ -34,9 +37,9 @@ function genPos(from, to) {
     return Math.floor(Math.random() * to) + from;
 }
 
-function addFoods() {
-    var rx = genPos(0, foodRandomWidth);
-    var ry = genPos(0, foodRandomHeight);
+function addFoods(target) {
+    var rx = genPos(0, target.screenWidth);
+    var ry = genPos(0, target.screenHeight);
     var food = {
         foodID: (new Date()).getTime(),
         x: rx, y: ry
@@ -45,15 +48,11 @@ function addFoods() {
     foods[foods.length] = food;
 }
 
-setInterval(function(){
+function generateFood(target) {
     if (foods.length < maxFoodCount) {
-        addFoods();
+        addFoods(target);
     }
-    // Clear all food when the server is free (nobody connected)
-    if (users.length == noPlayer) {
-        foods = [];
-    }
-}, 1000);
+}
 
 function findPlayer(id) {
     for (var i = 0; i < users.length; i++) {
@@ -87,7 +86,6 @@ function findFoodIndex(id) {
 
 function hitTest(start, end, min) {
     var distance = Math.sqrt((start.x - end.x) * (start.x - end.x) + (start.y - end.y) * (start.y - end.y));
-    console.log("Hit test: " + distance + " - Min distance: " + min);
     return (distance <= min);
 }
 
@@ -112,6 +110,11 @@ io.on('connection', function(socket) {
         socket.emit("playerJoin", { playersList: users, connectedName: player.name });
         socket.broadcast.emit("playerJoin", { playersList: users, connectedName: player.name });
         console.log("Total player: " + users.length);
+
+        // Add new food when player connected
+        for (var i = 0; i < newFoodPerPlayer; i++) {
+            generateFood(player);
+        }
     });
 
     socket.on('disconnect', function() {
@@ -153,7 +156,12 @@ io.on('connection', function(socket) {
                         currentPlayer.speed += currentPlayer.mass / massDecreaseRatio;
                     }
 
-                    console.log("Player eaten");
+                    console.log("Food eaten");
+
+                    // Respawn food
+                    for (var r = 0; r < respawnFoodPerPlayer; r++) {
+                        generateFood(currentPlayer);
+                    }
                     break;
                 }
             }
@@ -174,6 +182,7 @@ io.on('connection', function(socket) {
                         }
 
                         sockets[users[e].playerID].emit("RIP");
+                        sockets[users[e].playerID].disconnect();
                         users.splice(e, 1);
                         break;
                     }
