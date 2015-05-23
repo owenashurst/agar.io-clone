@@ -69,7 +69,7 @@ function findFoodIndex(id) {
 
 function hitTest(start, end, min) {
     var distance = Math.sqrt((start.x - end.x) * (start.x - end.x) + (start.y - end.y) * (start.y - end.y));
-    console.log("Hit test: " + distance + " ± " + min);
+    console.log("Hit test: " + distance + " - Min distance: " + min);
     return (distance <= min);
 }
 
