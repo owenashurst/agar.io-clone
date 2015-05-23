@@ -6,7 +6,25 @@ var users = [];
 var foods = [];
 var sockets = [];
 
+var serverPort = 3000;
+
 var maxSizeMass = 50;
+var maxMoveSpeed = 100;
+
+var massDecreaseRatio = 1000;
+
+var foodMass = 1;
+
+var foodRandomWidth = 2000;
+var foodRandomHeight = 1000;
+var maxFoodCount = 50;
+
+var noPlayer = 0;
+
+var defaultPlayerSize = 10;
+
+var eatableMassDistance = 5;
+
 
 app.get('/', function(req, res){
     res.sendFile(__dirname + '/index.html');
@@ -17,8 +35,8 @@ function genPos(from, to) {
 }
 
 function addFoods() {
-    var rx = genPos(0, 2000);
-    var ry = genPos(0, 1000);
+    var rx = genPos(0, foodRandomWidth);
+    var ry = genPos(0, foodRandomHeight);
     var food = {
         foodID: (new Date()).getTime(),
         x: rx, y: ry
@@ -28,11 +46,11 @@ function addFoods() {
 }
 
 setInterval(function(){
-    if (foods.length < 50) {
+    if (foods.length < maxFoodCount) {
         addFoods();
     }
-
-    if (users.length == 0) {
+    // Clear all food when the server is free (nobody connected)
+    if (users.length == noPlayer) {
         foods = [];
     }
 }, 1000);
@@ -114,17 +132,17 @@ io.on('connection', function(socket) {
                 if (hitTest(
                     { x: foods[f].x, y: foods[f].y },
                     { x: currentPlayer.x, y: currentPlayer.y },
-                    currentPlayer.mass + 10
+                    currentPlayer.mass + defaultPlayerSize
                 )) {
                     foods[f] = {};
                     foods.splice(f, 1);
 
                     if (currentPlayer.mass < maxSizeMass) {
-                        currentPlayer.mass += 1;
+                        currentPlayer.mass += foodMass;
                     }
 
-                    if (currentPlayer.speed < 100) {
-                        currentPlayer.speed += currentPlayer.mass / 1000;
+                    if (currentPlayer.speed < maxMoveSpeed) {
+                        currentPlayer.speed += currentPlayer.mass / massDecreaseRatio;
                     }
 
                     console.log("Player eaten");
@@ -136,15 +154,15 @@ io.on('connection', function(socket) {
                 if (hitTest(
                     { x: users[e].x, y: users[e].y },
                     { x: currentPlayer.x, y: currentPlayer.y },
-                    currentPlayer.mass + 10
+                    currentPlayer.mass + defaultPlayerSize
                 )) {
-                    if (users[e].mass != 0 && users[e].mass < currentPlayer.mass - 5) {           
+                    if (users[e].mass != 0 && users[e].mass < currentPlayer.mass - eatableMassDistance) {           
                         if (currentPlayer.mass < maxSizeMass) {
                             currentPlayer.mass += users[e].mass;
                         }
 
-                        if (currentPlayer.speed < 100) {
-                            currentPlayer.speed += currentPlayer.mass / 1000;
+                        if (currentPlayer.speed < maxMoveSpeed) {
+                            currentPlayer.speed += currentPlayer.mass / massDecreaseRatio;
                         }
 
                         sockets[users[e].playerID].emit("RIP");
@@ -163,6 +181,6 @@ io.on('connection', function(socket) {
     });
 });
 
-http.listen(3000, function(){
-    console.log('listening on *:3000');
+http.listen(serverPort, function(){
+    console.log('listening on *:' + serverPort);
 });

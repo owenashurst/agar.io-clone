@@ -30,6 +30,33 @@
     var gameStart = false;
     var disconnected = false;
 
+    var foodConfig = {
+        border: 2,
+        borderColor: "#f39c12",
+        fillColor: "#f1c40f",
+        size: 5
+    };
+
+    var playerConfig = {
+        border: 3,
+        borderColor: "#c0392b",
+        fillColor: "#ea6153",
+        textColor: "#FFFFFF",
+        textBorder: "#000000",
+        textBorderSize: 3,
+        defaultSize: 10
+    };
+
+    var enemyConfig = {
+        border: 3,
+        borderColor: "#27ae60",
+        fillColor: "#2ecc71",
+        textColor: "#FFFFFF",
+        textBorder: "#000000",
+        textBorderSize: 3,
+        defaultSize: 10
+    };
+
     var player = {
         playerID: -1,
         x: gameWidth / 2, y: gameHeight / 2,
@@ -74,12 +101,12 @@
 
     socket.on("playerDisconnect", function(players) {
         enemies = players;
-        document.getElementById("status").innerHTML = "Total Player: " + enemies.length;
+        document.getElementById("status").innerHTML = "Players: " + enemies.length;
     });
 
     socket.on("playerJoin", function(players) {
         enemies = players;
-        document.getElementById("status").innerHTML = "Total Player: " + enemies.length;
+        document.getElementById("status").innerHTML = "Players: " + enemies.length;
     });
 
 
@@ -111,58 +138,59 @@
 
 
     function drawFood(food) {
-        graph.strokeStyle = "#f39c12";
-        graph.fillStyle = "#f1c40f";
-        graph.lineWidth = 2;
+        graph.strokeStyle = foodConfig.borderColor;
+        graph.fillStyle = foodConfig.fillColor;
+        graph.lineWidth = foodConfig.border;
         graph.beginPath();
-        graph.arc(food.x, food.y, 5, 0, 2 * Math.PI);
+        graph.arc(food.x, food.y, foodConfig.size, 0, 2 * Math.PI);
         graph.stroke();
         graph.fill();
     }
 
     function drawPlayer() {
-        graph.strokeStyle = "#c0392b";
-        graph.fillStyle = "#ea6153";
-        graph.lineWidth = 3;
+        graph.strokeStyle = playerConfig.borderColor;
+        graph.fillStyle = playerConfig.fillColor;
+        graph.lineWidth = playerConfig.border;
         graph.beginPath();
-        graph.arc(player.x, player.y, 10 + player.mass, 0, 2 * Math.PI);
+        graph.arc(player.x, player.y, playerConfig.defaultSize + player.mass, 0, 2 * Math.PI);
         graph.stroke();
         graph.fill();
 
-        var fontSize = (player.mass / 2) + 10;
-        graph.lineWidth = "3"
+        var fontSize = (player.mass / 2) + playerConfig.defaultSize;
+        graph.lineWidth = playerConfig.textBorderSize;
         graph.textAlign = "center";
-        graph.fillStyle = "#FFFFFF";
+        graph.fillStyle = playerConfig.textColor;
         graph.textBaseline = 'middle';
-        graph.strokeStyle = "#000000";
+        graph.strokeStyle = playerConfig.textBorder;
         graph.font = "bold " + fontSize + "px sans-serif";
         graph.strokeText(player.name, player.x, player.y);
         graph.fillText(player.name, player.x, player.y);
     }
 
     function drawEnemy(enemy) {
-        graph.strokeStyle = "#27ae60";
-        graph.fillStyle = "#2ecc71";
-        graph.lineWidth = 3;
+        graph.strokeStyle = enemyConfig.borderColor;
+        graph.fillStyle = enemyConfig.fillColor;
+        graph.lineWidth = enemyConfig.border;
         graph.beginPath();
-        graph.arc(enemy.x, enemy.y, 10 + enemy.mass, 0, 2 * Math.PI);
+        graph.arc(enemy.x, enemy.y, enemyConfig.defaultSize + enemy.mass, 0, 2 * Math.PI);
         graph.fill();
         graph.stroke();
 
-        var fontSize = (enemy.mass / 2) + 10;
+        var fontSize = (enemy.mass / 2) + enemyConfig.defaultSize;
 
-        graph.lineWidth = "3"
+        graph.lineWidth = enemyConfig.textBorderSize;
         graph.textAlign = "center";
-        graph.fillStyle = "#FFFFFF";
+        graph.fillStyle = enemyConfig.textColor;
         graph.textBaseline = 'middle';
-        graph.strokeStyle = "#000000";
+        graph.strokeStyle = enemyConfig.textBorder;
         graph.font = "bold " + fontSize + "px sans-serif";
         graph.strokeText(enemy.name, enemy.x, enemy.y);
         graph.fillText(enemy.name, enemy.x, enemy.y);
     }   
 
-    function gameInput(e) {
-        target.x = e.clientX; target.y = e.clientY;
+    function gameInput(mouse) {
+        target.x = mouse.clientX; 
+        target.y = mouse.clientY;
     }
 
     window.requestAnimFrame = (function(){
@@ -197,8 +225,6 @@
 
                 drawPlayer();
                 socket.emit("playerSendTarget", target);
-
-                //processGameEvent();
             } else {
                 graph.fillStyle = "#333333";
                 graph.fillRect(0, 0, gameWidth, gameHeight);
