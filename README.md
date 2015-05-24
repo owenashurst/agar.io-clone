@@ -10,24 +10,24 @@ A simple Agar.io clone built with socket.io and HTML5 Canvas on top of NodeJS.
 
 ![Image](http://i.imgur.com/igXo4xh.jpg)
 
-## <a name="live-demo">Live demo</a>
-- OpenShift Server: [![OpenShift](https://img.shields.io/badge/openshift-server-green.svg)](https://pillo-nibro.rhcloud.com/)
-- Singapore Server: [![Singapore](https://img.shields.io/badge/singapore-server-green.svg)](http://codedaily.vn:3000/)
+## Live demo
+- [![OpenShift](https://img.shields.io/badge/openshift-server-green.svg)](https://pillo-nibro.rhcloud.com/)
+- [![Singapore](https://img.shields.io/badge/singapore-server-green.svg)](http://codedaily.vn:3000/)
 
-## <a name="latest-changes">Latest Changes</a>
+## Latest Changes
 - Game logic handled by server
 - Client side is for rendering only
 - Display player name
 - Now supporting chat 
 - Type`-ping` in the chatbox to check your ping
 
-## <a name="requirements">Requirements</a>
+## Requirements
 To run the game, you'll need: 
 - NodeJS with NPM installed
 - socket.io 
 - Express
 
-## <a name="installation">Installation</a>
+## Installation
 #### Downloading the Dependencies
 After cloning the source code from Github, you need to run the following command to download all the dependencies (socket.io, express, etc.).
 
@@ -44,7 +44,7 @@ node server.js
 
 The game will then be accessible at `http://localhost:3000`.
 
-## <a name="how-to-play">How to Play</a>
+## How to Play
 You are the red circle.
 
 Move your mouse on the screen to move yourself.
@@ -53,7 +53,7 @@ Eat all yellow food to grow. (Food respawns every time player eat).
 
 Try to get fat and eat other players.
 
-## <a name="gameplay-rules">Gameplay Rules</a>
+## Gameplay Rules
 - Player's **mass** is the number of food eaten
 - Players who haven't eaten yet can't be eaten.
 - Everytime a player joins the game, **3** foods will be spawned
