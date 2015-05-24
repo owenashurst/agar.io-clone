@@ -3,7 +3,7 @@ Agar.io Clone
 
 [![GitHub Stars](https://img.shields.io/github/stars/huytd/agar.io-clone.svg)](https://github.com/huytd/agar.io-clone/stargazers)
 [![GitHub Issues](https://img.shields.io/github/issues/huytd/agar.io-clone.svg)](https://github.com/huytd/agar.io-clone/issues)
-[![Live Demo](https://img.shields.io/badge/demo-online-green.svg)](#live-demo)
+[![Live Demo](https://img.shields.io/badge/demo-online-green.svg)](#live-demo)&nbsp;&nbsp;&nbsp;
 [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/huytd/agar.io-clone?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 A simple Agar.io clone built with socket.io and HTML5 Canvas on top of NodeJS.
@@ -11,9 +11,9 @@ A simple Agar.io clone built with socket.io and HTML5 Canvas on top of NodeJS.
 ![Image](http://i.imgur.com/igXo4xh.jpg)
 
 ## Live Demo
-[![OpenShift](https://img.shields.io/badge/openshift-online-green.svg)](https://pillo-nibro.rhcloud.com/)
-[![Singapore](https://img.shields.io/badge/singapore-online-green.svg)](http://codedaily.vn:3000/)
-[![Heroku EU](https://img.shields.io/badge/heroku-eu-green.svg)](https://agar-clone.herokuapp.com/)
+[![OpenShift](https://img.shields.io/badge/openshift-online-green.svg)](https://pillo-nibro.rhcloud.com/)&nbsp;&nbsp;
+[![Singapore](https://img.shields.io/badge/singapore-online-green.svg)](http://codedaily.vn:3000/)&nbsp;&nbsp;
+[![Heroku EU](https://img.shields.io/badge/heroku-eu-green.svg)](https://agar-clone.herokuapp.com/)&nbsp;&nbsp;
 [![Heroku US](https://img.shields.io/badge/heroku-us-green.svg)](https://agar-clone-us.herokuapp.com/)
 
 ## How to Play
