@@ -1,6 +1,25 @@
-var app = require('express')();
-var http = require('http').Server(app);
-var io = require('socket.io')(http);
+var express = require('express'),
+  http = require('http'),
+  logger = require('morgan');
+
+// Set up application.
+var app = express();
+var port = process.env.PORT || 3000;
+
+app.use(logger('dev'));
+
+app.get('/', function(req, res){
+    res.sendFile(__dirname + '/public/index.html');
+});
+
+app.use("/", express.static(__dirname + "/public/"));
+
+// Fire this bitch up!
+var server = http.createServer(app).listen(port, function() {
+    console.log('Listening on port ' + port);
+});
+
+var io = require('socket.io').listen(server);
 
 var users = [];
 var foods = [];
@@ -28,10 +47,6 @@ var defaultPlayerSize = 10;
 
 var eatableMassDistance = 5;
 
-
-app.get('/', function(req, res){
-    res.sendFile(__dirname + '/index.html');
-});
 
 function genPos(from, to) {
     return Math.floor(Math.random() * to) + from;
@@ -200,8 +215,4 @@ io.on('connection', function(socket) {
             socket.broadcast.emit("serverUpdateAllFoods", foods);
         }
     });
-});
-
-http.listen(serverPort, function(){
-    console.log('listening on *:' + serverPort);
 });
