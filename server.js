@@ -6,7 +6,6 @@ var users = [];
 var foods = [];
 var sockets = [];
 
-var serverPort = process.env.PORT || 3000;
 
 var maxSizeMass = 50;
 var maxMoveSpeed = 100;
@@ -202,6 +201,9 @@ io.on('connection', function(socket) {
     });
 });
 
-http.listen(serverPort, function(){
-    console.log('listening on *:' + serverPort);
+// Don't touch on ip
+var ipaddress = process.env.OPENSHIFT_NODEJS_IP || process.env.IP || "127.0.0.1";
+var serverport = process.env.OPENSHIFT_NODEJS_PORT || process.env.PORT || 3000;
+http.listen( serverport, ipaddress, function() {
+    console.log('listening on *:' + serverport);
 });
