@@ -6,12 +6,12 @@ Agar.io Clone
 [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/huytd/agar.io-clone?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 ## Live demo
-- Server #1: [![Live Demo](https://img.shields.io/badge/demo-online-green.svg)](https://pillo-nibro.rhcloud.com/)
-- Singapore Server: [![Singapore](https://img.shields.io/badge/demo-online-green.svg)](http://codedaily.vn:3000/)
+- [![Live Demo](https://img.shields.io/badge/demo-online-green.svg)](https://pillo-nibro.rhcloud.com/) (Server #1)
+- [![Singapore](https://img.shields.io/badge/demo-online-green.svg)](http://codedaily.vn:3000/) (Singapore Server)
 
 A simple Agar.io clone built with socket.io and HTML5 Canvas on top of NodeJS.
 
-![Image](http://i.imgur.com/yJ96Lyi.jpg)
+![Image](http://i.imgur.com/igXo4xh.jpg)
 
 ## Latest Changes
 - Game logic handled by server
