@@ -14,6 +14,22 @@ A simple Agar.io clone built with socket.io and HTML5 Canvas on top of NodeJS.
 [![OpenShift](https://img.shields.io/badge/openshift-online-green.svg)](https://pillo-nibro.rhcloud.com/) "
 [![Singapore](https://img.shields.io/badge/singapore-online-green.svg)](http://codedaily.vn:3000/)
 
+## How to Play
+You are the red circle.
+
+Move your mouse on the screen to move yourself.
+
+Eat all yellow food to grow. (Food respawns every time player eat).
+
+Try to get fat and eat other players.
+
+## Gameplay Rules
+- Player's **mass** is the number of food eaten
+- Players who haven't eaten yet can't be eaten.
+- Everytime a player joins the game, **3** foods will be spawned
+- Everytime a food is eaten by a player, **1** new food will be respawned
+- The more food you eat, the slower you move
+
 ## Latest Changes
 - Game logic handled by server
 - Client side is for rendering only
@@ -43,19 +59,3 @@ node server.js
 ```
 
 The game will then be accessible at `http://localhost:3000`.
-
-## How to Play
-You are the red circle.
-
-Move your mouse on the screen to move yourself.
-
-Eat all yellow food to grow. (Food respawns every time player eat).
-
-Try to get fat and eat other players.
-
-## Gameplay Rules
-- Player's **mass** is the number of food eaten
-- Players who haven't eaten yet can't be eaten.
-- Everytime a player joins the game, **3** foods will be spawned
-- Everytime a food is eaten by a player, **1** new food will be respawned
-- You get slower as you get fatter
