@@ -11,8 +11,8 @@ A simple Agar.io clone built with socket.io and HTML5 Canvas on top of NodeJS.
 ![Image](http://i.imgur.com/igXo4xh.jpg)
 
 ## Live demo
-- [![OpenShift](https://img.shields.io/badge/openshift-online-green.svg)](https://pillo-nibro.rhcloud.com/) "
-- [![Singapore](https://img.shields.io/badge/singapore-online-green.svg)](http://codedaily.vn:3000/)
+[![OpenShift](https://img.shields.io/badge/openshift-online-green.svg)](https://pillo-nibro.rhcloud.com/) "
+[![Singapore](https://img.shields.io/badge/singapore-online-green.svg)](http://codedaily.vn:3000/)
 
 ## Latest Changes
 - Game logic handled by server
