@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>SESA Agar Clone</title>
+  <link rel="stylesheet" type="text/css" href="css/style.css">
+</head>
+<body>
+    <div id="status">Players: 0</div>
+    <div class="chatbox">
+        <ul id="chatList" class="chat-list">
+        </ul>
+        <input id="chatInput" type="text" class="chat-input" placeholder="Chat here..." />
+    </div>
+    <canvas tabindex="1" id="cvs"></canvas>
+</body>
+<footer>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="js/app.js"></script>
+</footer>
+</html>
