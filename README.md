@@ -12,7 +12,9 @@ A simple Agar.io clone built with socket.io and HTML5 Canvas on top of NodeJS.
 
 ## Live Demo
 [![OpenShift](https://img.shields.io/badge/openshift-online-green.svg)](https://pillo-nibro.rhcloud.com/) "
-[![Singapore](https://img.shields.io/badge/singapore-online-green.svg)](http://codedaily.vn:3000/)
+[![Singapore](https://img.shields.io/badge/singapore-online-green.svg)](http://codedaily.vn:3000/) "
+[![Heroku EU](https://img.shields.io/badge/heroku-eu-green.svg)](https://agar-clone.herokuapp.com/) "
+[![Heroku US](https://img.shields.io/badge/heroku-us-green.svg)](https://agar-clone-us.herokuapp.com/)
 
 ## How to Play
 You are the red circle.
