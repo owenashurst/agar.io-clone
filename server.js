@@ -6,7 +6,7 @@ var users = [];
 var foods = [];
 var sockets = [];
 
-var serverPort = 3000;
+var serverPort = process.env.PORT || 3000;
 
 var maxSizeMass = 50;
 var maxMoveSpeed = 100;
