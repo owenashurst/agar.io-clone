@@ -5,13 +5,13 @@ Agar.io Clone
 [![GitHub Issues](https://img.shields.io/github/issues/huytd/agar.io-clone.svg)](https://github.com/huytd/agar.io-clone/issues)
 [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/huytd/agar.io-clone?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-## Live demo
-- [![Live Demo](https://img.shields.io/badge/demo-online-green.svg)](https://pillo-nibro.rhcloud.com/) (Server #1)
-- [![Singapore](https://img.shields.io/badge/demo-online-green.svg)](http://codedaily.vn:3000/) (Singapore Server)
-
 A simple Agar.io clone built with socket.io and HTML5 Canvas on top of NodeJS.
 
 ![Image](http://i.imgur.com/igXo4xh.jpg)
+
+## Live demo
+- OpenShift Server: [![OpenShift](https://img.shields.io/badge/demo-online-green.svg)](https://pillo-nibro.rhcloud.com/)
+- Singapore Server: [![Singapore](https://img.shields.io/badge/demo-online-green.svg)](http://codedaily.vn:3000/)
 
 ## Latest Changes
 - Game logic handled by server
@@ -57,7 +57,7 @@ Try to get fat and eat other players.
 
 ## Gameplay rules
 - Player's **mass** is the number of food eaten
-- You can't eat a newbie (who has no mass)
-- Everytime a player joined the game, **3** new food will be spawn
-- Everytime a food be eaten by a player, **1** new food will be respawn
-- The more food you eat, the more slow you will move
+- Players who haven't eaten yet can't be eaten.
+- Everytime a player joins the game, **3** foods will be spawned
+- Everytime a food is eaten by a player, **1** new food will be respawned
+- You get slower as you get fatter
