@@ -14,7 +14,6 @@ app.get('/', function(req, res){
 
 app.use("/", express.static(__dirname + "/public/"));
 
-// Fire this bitch up!
 var server = http.createServer(app).listen(port, function() {
     console.log('Listening on port ' + port);
 });
