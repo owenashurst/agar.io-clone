@@ -58,6 +58,6 @@ Try to get fat and eat other players.
 ## Gameplay rules
 - Player's **mass** is the number of food eaten
 - You can't eat a newbie (who has no mass)
-- Everytime a player joined the game, **3** new food will be spawn
-- Everytime a food be eaten by a player, **1** new food will be respawn
-- The more food you eat, the more slow you will move
+- Everytime a player joins the game, **3** new food will be spawn
+- Everytime a food is eaten by a player, **1** new food will be respawn
+- The more food you eat, the slower you move
