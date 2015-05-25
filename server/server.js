@@ -39,7 +39,7 @@ function addFoods(target) {
     var rx = genPos(0, target.screenWidth);
     var ry = genPos(0, target.screenHeight);
     var food = {
-        foodID: (new Date()).getTime(),
+        ID: (new Date()).getTime(),
         x: rx, y: ry
     };
 
@@ -52,34 +52,24 @@ function generateFood(target) {
     }
 }
 
+// arr is for example users or foods
+function findIndex(arr, id) {
+    var len = arr.length;
+
+    while (len--) {
+        if (arr[len].id === id) {
+            return len;
+        }
+    }
+
+    return -1;
+
+}
+
 function findPlayer(id) {
-    for (var i = 0; i < users.length; i++) {
-        if (users[i].playerID == id) {
-            return users[i];
-        }
-    }
+    var index = findIndex(users, id);
 
-    return null;
-}
-
-function findPlayerIndex(id) {
-    for (var i = 0; i < users.length; i++) {
-        if (users[i].playerID == id) {
-            return i;
-        }
-    }
-
-    return -1;
-}
-
-function findFoodIndex(id) {
-    for (var i = 0; i < foods.length; i++) {
-        if (foods[i].foodID == id) {
-            return i;
-        }
-    }
-
-    return -1;
+    return index !== -1 ? users[index] : null;
 }
 
 function hitTest(start, end, min) {
@@ -96,11 +86,11 @@ io.on('connection', function (socket) {
     socket.emit("welcome", userID);
 
     socket.on("gotit", function (player) {
-        player.playerID = userID;
-        sockets[player.playerID] = socket;
+        player.id = userID;
+        sockets[player.id] = socket;
 
-        if (findPlayer(player.playerID) == null) {
-            console.log("Player " + player.playerID + " connected!");
+        if (findPlayer(player.id) == null) {
+            console.log("Player " + player.id + " connected!");
             users.push(player);
             currentPlayer = player;
         }
@@ -120,7 +110,7 @@ io.on('connection', function (socket) {
     });
 
     socket.on('disconnect', function () {
-        var playerIndex = findPlayerIndex(userID);
+        var playerIndex = findIndex(users, userID);
         var playerName = users[playerIndex].name;
         users.splice(playerIndex, 1);
         console.log('User #' + userID + ' disconnected');
@@ -138,8 +128,6 @@ io.on('connection', function (socket) {
         if (target.x != currentPlayer.x && target.y != currentPlayer.y) {
             currentPlayer.x += (target.x - currentPlayer.x) / currentPlayer.speed;
             currentPlayer.y += (target.y - currentPlayer.y) / currentPlayer.speed;
-
-            users[findPlayerIndex(currentPlayer.playerID)] = currentPlayer;
 
             for (var f = 0; f < foods.length; f++) {
                 if (hitTest(
@@ -183,8 +171,8 @@ io.on('connection', function (socket) {
                             currentPlayer.speed += currentPlayer.mass / massDecreaseRatio;
                         }
 
-                        sockets[users[e].playerID].emit("RIP");
-                        sockets[users[e].playerID].disconnect();
+                        sockets[users[e].id].emit("RIP");
+                        sockets[users[e].id].disconnect();
                         users.splice(e, 1);
                         break;
                     }
