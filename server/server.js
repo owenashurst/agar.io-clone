@@ -39,7 +39,7 @@ function addFoods(target) {
     var rx = genPos(0, target.screenWidth);
     var ry = genPos(0, target.screenHeight);
     var food = {
-        ID: (new Date()).getTime(),
+        id: (new Date()).getTime(),
         x: rx, y: ry
     };
 
