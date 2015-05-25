@@ -95,8 +95,7 @@ io.on('connection', function (socket) {
             currentPlayer = player;
         }
 
-        socket.emit("playerJoin", {playersList: users, connectedName: player.name});
-        socket.broadcast.emit("playerJoin", {playersList: users, connectedName: player.name});
+        io.emit('playerJoin', {playersList: users, connectedName: player.name});
         console.log("Total player: " + users.length);
 
         // Add new food when player connected
