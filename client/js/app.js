@@ -119,7 +119,7 @@ socket.on("disconnect", function() {
 
 // Handle connection
 socket.on("welcome", function(userID) {
-  player.ID = userID;
+  player.id = userID;
   player.name = playerName;
   socket.emit("gotit", player);
   gameStart = true;
@@ -253,7 +253,7 @@ function gameLoop() {
       }
 
       for (var i = 0; i < enemies.length; i++) {
-        if (enemies[i].ID != player.ID) {
+        if (enemies[i].id != player.id) {
           drawEnemy(enemies[i]);
         }
       }

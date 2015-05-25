@@ -57,7 +57,7 @@ function findIndex(arr, id) {
     var len = arr.length;
 
     while (len--) {
-        if (arr[len].ID === id) {
+        if (arr[len].id === id) {
             return len;
         }
     }
@@ -86,11 +86,11 @@ io.on('connection', function (socket) {
     socket.emit("welcome", userID);
 
     socket.on("gotit", function (player) {
-        player.ID = userID;
-        sockets[player.ID] = socket;
+        player.id = userID;
+        sockets[player.id] = socket;
 
-        if (findPlayer(player.ID) == null) {
-            console.log("Player " + player.ID + " connected!");
+        if (findPlayer(player.id) == null) {
+            console.log("Player " + player.id + " connected!");
             users.push(player);
             currentPlayer = player;
         }
@@ -171,8 +171,8 @@ io.on('connection', function (socket) {
                             currentPlayer.speed += currentPlayer.mass / massDecreaseRatio;
                         }
 
-                        sockets[users[e].ID].emit("RIP");
-                        sockets[users[e].ID].disconnect();
+                        sockets[users[e].id].emit("RIP");
+                        sockets[users[e].id].disconnect();
                         users.splice(e, 1);
                         break;
                     }
