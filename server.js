@@ -53,7 +53,9 @@ Game.prototype.addFoods = function(target) {
     var ry = this.genPos(0, target.screenHeight);
     var food = {
         foodID: (new Date()).getTime(),
-        x: rx, y: ry
+        x: rx,
+        y: ry,
+        color: this.randomColor()
     };
 
     game.foods[game.foods.length] = food;
@@ -97,6 +99,30 @@ Game.prototype.findFoodIndex = function(id) {
 Game.prototype.hitTest = function(start, end, min) {
     var distance = Math.sqrt((start.x - end.x) * (start.x - end.x) + (start.y - end.y) * (start.y - end.y));
     return (distance <= min);
+}
+
+Game.prototype.randomColor = function() {
+    var color = '#' + ('00000'+(Math.random()*(1<<24)|0).toString(16)).slice(-6),
+        difference = 32,
+        c = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(color),
+        r = parseInt(c[1], 16) - difference,
+        g = parseInt(c[2], 16) - difference,
+        b = parseInt(c[3], 16) - difference;
+
+    if (r < 0) {
+        r = 0;
+    }
+    if (g < 0) {
+        g = 0;
+    }
+    if (b < 0) {
+        b = 0;
+    }
+
+    return {
+        fill: color,
+        border: '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)
+    }
 }
 
 var game = new Game();

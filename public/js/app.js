@@ -177,8 +177,8 @@ socket.on("RIP", function(){
 
 
 function drawFood(food) {
-  graph.strokeStyle = foodConfig.borderColor;
-  graph.fillStyle = foodConfig.fillColor;
+  graph.strokeStyle = food.color.border || foodConfig.borderColor;
+  graph.fillStyle = food.color.fill || foodConfig.fillColor;
   graph.lineWidth = foodConfig.border;
   graph.beginPath();
   graph.arc(food.x, food.y, foodConfig.size, 0, 2 * Math.PI);
