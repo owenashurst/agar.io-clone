@@ -1,4 +1,6 @@
-var app = require('express')();
+var path = require('path');
+var express = require('express');
+var app = express();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
 
@@ -27,10 +29,7 @@ var defaultPlayerSize = 10;
 
 var eatableMassDistance = 5;
 
-
-app.get('/', function(req, res){
-    res.sendFile(__dirname + '/index.html');
-});
+app.use(express.static(__dirname + '/../client'));
 
 function genPos(from, to) {
     return Math.floor(Math.random() * to) + from;
@@ -80,7 +79,7 @@ function findFoodIndex(id) {
         }
     }
 
-  return -1;
+    return -1;
 }
 
 function hitTest(start, end, min) {
@@ -88,7 +87,7 @@ function hitTest(start, end, min) {
     return (distance <= min);
 }
 
-io.on('connection', function(socket) {  
+io.on('connection', function (socket) {
     console.log('A user connected. Assigning UserID...');
 
     var userID = socket.id;
@@ -96,7 +95,7 @@ io.on('connection', function(socket) {
 
     socket.emit("welcome", userID);
 
-    socket.on("gotit", function(player) {
+    socket.on("gotit", function (player) {
         player.playerID = userID;
         sockets[player.playerID] = socket;
 
@@ -106,8 +105,8 @@ io.on('connection', function(socket) {
             currentPlayer = player;
         }
 
-        socket.emit("playerJoin", { playersList: users, connectedName: player.name });
-        socket.broadcast.emit("playerJoin", { playersList: users, connectedName: player.name });
+        socket.emit("playerJoin", {playersList: users, connectedName: player.name});
+        socket.broadcast.emit("playerJoin", {playersList: users, connectedName: player.name});
         console.log("Total player: " + users.length);
 
         // Add new food when player connected
@@ -116,38 +115,38 @@ io.on('connection', function(socket) {
         }
     });
 
-    socket.on("ping", function(){
+    socket.on("ping", function () {
         socket.emit("pong");
     });
 
-    socket.on('disconnect', function() {
+    socket.on('disconnect', function () {
         var playerIndex = findPlayerIndex(userID);
         var playerName = users[playerIndex].name;
         users.splice(playerIndex, 1);
         console.log('User #' + userID + ' disconnected');
-        socket.broadcast.emit("playerDisconnect", { playersList: users, disconnectName: playerName });
+        socket.broadcast.emit("playerDisconnect", {playersList: users, disconnectName: playerName});
     });
 
-    socket.on("playerChat", function(data){
-        var _sender = data.sender.replace(/(<([^>]+)>)/ig,"");
-        var _message = data.message.replace(/(<([^>]+)>)/ig,"");
-        socket.broadcast.emit("serverSendPlayerChat", { sender: _sender, message: _message });
+    socket.on("playerChat", function (data) {
+        var _sender = data.sender.replace(/(<([^>]+)>)/ig, "");
+        var _message = data.message.replace(/(<([^>]+)>)/ig, "");
+        socket.broadcast.emit("serverSendPlayerChat", {sender: _sender, message: _message});
     });
 
     // Heartbeat function, update everytime
-    socket.on("playerSendTarget", function(target) {
+    socket.on("playerSendTarget", function (target) {
         if (target.x != currentPlayer.x && target.y != currentPlayer.y) {
             currentPlayer.x += (target.x - currentPlayer.x) / currentPlayer.speed;
             currentPlayer.y += (target.y - currentPlayer.y) / currentPlayer.speed;
 
             users[findPlayerIndex(currentPlayer.playerID)] = currentPlayer;
-      
+
             for (var f = 0; f < foods.length; f++) {
                 if (hitTest(
-                    { x: foods[f].x, y: foods[f].y },
-                    { x: currentPlayer.x, y: currentPlayer.y },
-                    currentPlayer.mass + defaultPlayerSize
-                )) {
+                        {x: foods[f].x, y: foods[f].y},
+                        {x: currentPlayer.x, y: currentPlayer.y},
+                        currentPlayer.mass + defaultPlayerSize
+                    )) {
                     foods[f] = {};
                     foods.splice(f, 1);
 
@@ -171,11 +170,11 @@ io.on('connection', function(socket) {
 
             for (var e = 0; e < users.length; e++) {
                 if (hitTest(
-                    { x: users[e].x, y: users[e].y },
-                    { x: currentPlayer.x, y: currentPlayer.y },
-                    currentPlayer.mass + defaultPlayerSize
-                )) {
-                    if (users[e].mass != 0 && users[e].mass < currentPlayer.mass - eatableMassDistance) {           
+                        {x: users[e].x, y: users[e].y},
+                        {x: currentPlayer.x, y: currentPlayer.y},
+                        currentPlayer.mass + defaultPlayerSize
+                    )) {
+                    if (users[e].mass != 0 && users[e].mass < currentPlayer.mass - eatableMassDistance) {
                         if (currentPlayer.mass < maxSizeMass) {
                             currentPlayer.mass += users[e].mass;
                         }
