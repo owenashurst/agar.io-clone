@@ -1,4 +1,6 @@
-var app = require('express')();
+var path = require('path');
+var express = require('express');
+var app = express();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
 
@@ -6,7 +8,6 @@ var users = [];
 var foods = [];
 var sockets = [];
 
-var serverPort = process.env.PORT || 3000;
 
 var maxSizeMass = 50;
 var maxMoveSpeed = 100;
@@ -28,10 +29,7 @@ var defaultPlayerSize = 10;
 
 var eatableMassDistance = 5;
 
-
-app.get('/', function(req, res){
-    res.sendFile(__dirname + '/index.html');
-});
+app.use(express.static(__dirname + '/../client'));
 
 function genPos(from, to) {
     return Math.floor(Math.random() * to) + from;
@@ -41,7 +39,7 @@ function addFoods(target) {
     var rx = genPos(0, target.screenWidth);
     var ry = genPos(0, target.screenHeight);
     var food = {
-        foodID: (new Date()).getTime(),
+        ID: (new Date()).getTime(),
         x: rx, y: ry
     };
 
@@ -54,34 +52,24 @@ function generateFood(target) {
     }
 }
 
-function findPlayer(id) {
-    for (var i = 0; i < users.length; i++) {
-        if (users[i].playerID == id) {
-            return users[i];
-        }
-    }
+// arr is for example users or foods
+function findIndex(arr, id) {
+    var len = arr.length;
 
-    return null;
-}
-
-function findPlayerIndex(id) {
-    for (var i = 0; i < users.length; i++) {
-        if (users[i].playerID == id) {
-            return i;
+    while (len--) {
+        if (arr[len].id === id) {
+            return len;
         }
     }
 
     return -1;
+
 }
 
-function findFoodIndex(id) {
-    for (var i = 0; i < foods.length; i++) {
-        if (foods[i].foodID == id) {
-            return i;
-        }
-    }
+function findPlayer(id) {
+    var index = findIndex(users, id);
 
-  return -1;
+    return index !== -1 ? users[index] : null;
 }
 
 function hitTest(start, end, min) {
@@ -89,7 +77,7 @@ function hitTest(start, end, min) {
     return (distance <= min);
 }
 
-io.on('connection', function(socket) {  
+io.on('connection', function (socket) {
     console.log('A user connected. Assigning UserID...');
 
     var userID = socket.id;
@@ -97,18 +85,18 @@ io.on('connection', function(socket) {
 
     socket.emit("welcome", userID);
 
-    socket.on("gotit", function(player) {
-        player.playerID = userID;
-        sockets[player.playerID] = socket;
+    socket.on("gotit", function (player) {
+        player.id = userID;
+        sockets[player.id] = socket;
 
-        if (findPlayer(player.playerID) == null) {
-            console.log("Player " + player.playerID + " connected!");
+        if (findPlayer(player.id) == null) {
+            console.log("Player " + player.id + " connected!");
             users.push(player);
             currentPlayer = player;
         }
 
-        socket.emit("playerJoin", { playersList: users, connectedName: player.name });
-        socket.broadcast.emit("playerJoin", { playersList: users, connectedName: player.name });
+        socket.emit("playerJoin", {playersList: users, connectedName: player.name});
+        socket.broadcast.emit("playerJoin", {playersList: users, connectedName: player.name});
         console.log("Total player: " + users.length);
 
         // Add new food when player connected
@@ -117,38 +105,36 @@ io.on('connection', function(socket) {
         }
     });
 
-    socket.on("ping", function(){
+    socket.on("ping", function () {
         socket.emit("pong");
     });
 
-    socket.on('disconnect', function() {
-        var playerIndex = findPlayerIndex(userID);
+    socket.on('disconnect', function () {
+        var playerIndex = findIndex(users, userID);
         var playerName = users[playerIndex].name;
         users.splice(playerIndex, 1);
         console.log('User #' + userID + ' disconnected');
-        socket.broadcast.emit("playerDisconnect", { playersList: users, disconnectName: playerName });
+        socket.broadcast.emit("playerDisconnect", {playersList: users, disconnectName: playerName});
     });
 
-    socket.on("playerChat", function(data){
-        var _sender = data.sender.replace(/(<([^>]+)>)/ig,"");
-        var _message = data.message.replace(/(<([^>]+)>)/ig,"");
-        socket.broadcast.emit("serverSendPlayerChat", { sender: _sender, message: _message });
+    socket.on("playerChat", function (data) {
+        var _sender = data.sender.replace(/(<([^>]+)>)/ig, "");
+        var _message = data.message.replace(/(<([^>]+)>)/ig, "");
+        socket.broadcast.emit("serverSendPlayerChat", {sender: _sender, message: _message});
     });
 
     // Heartbeat function, update everytime
-    socket.on("playerSendTarget", function(target) {
+    socket.on("playerSendTarget", function (target) {
         if (target.x != currentPlayer.x && target.y != currentPlayer.y) {
             currentPlayer.x += (target.x - currentPlayer.x) / currentPlayer.speed;
             currentPlayer.y += (target.y - currentPlayer.y) / currentPlayer.speed;
 
-            users[findPlayerIndex(currentPlayer.playerID)] = currentPlayer;
-      
             for (var f = 0; f < foods.length; f++) {
                 if (hitTest(
-                    { x: foods[f].x, y: foods[f].y },
-                    { x: currentPlayer.x, y: currentPlayer.y },
-                    currentPlayer.mass + defaultPlayerSize
-                )) {
+                        {x: foods[f].x, y: foods[f].y},
+                        {x: currentPlayer.x, y: currentPlayer.y},
+                        currentPlayer.mass + defaultPlayerSize
+                    )) {
                     foods[f] = {};
                     foods.splice(f, 1);
 
@@ -172,11 +158,11 @@ io.on('connection', function(socket) {
 
             for (var e = 0; e < users.length; e++) {
                 if (hitTest(
-                    { x: users[e].x, y: users[e].y },
-                    { x: currentPlayer.x, y: currentPlayer.y },
-                    currentPlayer.mass + defaultPlayerSize
-                )) {
-                    if (users[e].mass != 0 && users[e].mass < currentPlayer.mass - eatableMassDistance) {           
+                        {x: users[e].x, y: users[e].y},
+                        {x: currentPlayer.x, y: currentPlayer.y},
+                        currentPlayer.mass + defaultPlayerSize
+                    )) {
+                    if (users[e].mass != 0 && users[e].mass < currentPlayer.mass - eatableMassDistance) {
                         if (currentPlayer.mass < maxSizeMass) {
                             currentPlayer.mass += users[e].mass;
                         }
@@ -185,8 +171,8 @@ io.on('connection', function(socket) {
                             currentPlayer.speed += currentPlayer.mass / massDecreaseRatio;
                         }
 
-                        sockets[users[e].playerID].emit("RIP");
-                        sockets[users[e].playerID].disconnect();
+                        sockets[users[e].id].emit("RIP");
+                        sockets[users[e].id].disconnect();
                         users.splice(e, 1);
                         break;
                     }
@@ -202,6 +188,9 @@ io.on('connection', function(socket) {
     });
 });
 
-http.listen(serverPort, function(){
-    console.log('listening on *:' + serverPort);
+// Don't touch on ip
+var ipaddress = process.env.OPENSHIFT_NODEJS_IP || process.env.IP || "127.0.0.1";
+var serverport = process.env.OPENSHIFT_NODEJS_PORT || process.env.PORT || 3000;
+http.listen( serverport, ipaddress, function() {
+    console.log('listening on *:' + serverport);
 });
