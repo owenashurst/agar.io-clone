@@ -20,67 +20,63 @@ var server = http.createServer(app).listen(port, function() {
 
 var io = require('socket.io').listen(server);
 
-var users = [];
-var foods = [];
 var sockets = [];
 
 var serverPort = 3000;
 
-var maxSizeMass = 50;
-var maxMoveSpeed = 100;
 
-var massDecreaseRatio = 1000;
+function Game(){
 
-var foodMass = 1;
-
-var newFoodPerPlayer = 3;
-var respawnFoodPerPlayer = 1;
-
-var foodRandomWidth = 500;
-var foodRandomHeight = 500;
-var maxFoodCount = 50;
-
-var noPlayer = 0;
-
-var defaultPlayerSize = 10;
-
-var eatableMassDistance = 5;
-
-
-function genPos(from, to) {
-    return Math.floor(Math.random() * to) + from;
+    this.maxSizeMass = 50;
+    this.maxMoveSpeed = 10;
+    this.massDecreaseRatio = 1000;
+    this.foodMass = 1;
+    this.newFoodPerPlayer = 3;
+    this.respawnFoodPerPlayer = 1;
+    this.foodRandomWidth = 500;
+    this.foodRandomHeight = 500;
+    this.maxFoodCount = 50;
+    this.noPlayer = 0;
+    this.defaultPlayerSize = 10;
+    this.eatableMassDistance = 5;
+    
+    this.users = [];
+    this.foods = [];
 }
 
-function addFoods(target) {
-    var rx = genPos(0, target.screenWidth);
-    var ry = genPos(0, target.screenHeight);
+Game.prototype.genPos = function(from, to) {
+    return Math.floor(Math.random() * to) + from;
+};
+
+Game.prototype.addFoods = function(target) {
+    var rx = this.genPos(0, target.screenWidth);
+    var ry = this.genPos(0, target.screenHeight);
     var food = {
         foodID: (new Date()).getTime(),
         x: rx, y: ry
     };
 
-    foods[foods.length] = food;
-}
+    game.foods[game.foods.length] = food;
+};
 
-function generateFood(target) {
-    if (foods.length < maxFoodCount) {
-        addFoods(target);
+Game.prototype.generateFood = function(target) {
+    if (this.foods.length < this.maxFoodCount) {
+        this.addFoods(target);
     }
-}
+};
 
-function findPlayer(id) {
-    for (var i = 0; i < users.length; i++) {
-        if (users[i].playerID == id) {
-            return users[i];
+Game.prototype.findPlayer = function(id) {
+    for (var i = 0; i < this.users.length; i++) {
+        if (this.users[i].playerID == id) {
+            return this.users[i];
         }
     }
-
     return null;
 }
 
-function findPlayerIndex(id) {
-    for (var i = 0; i < users.length; i++) {
-        if (users[i].playerID == id) {
+Game.prototype.findPlayerIndex = function(id) {
+    for (var i = 0; i < this.users.length; i++) {
+        if (this.users[i].playerID == id) {
             return i;
         }
     }
@@ -88,9 +84,9 @@ function findPlayerIndex(id) {
     return -1;
 }
 
-function findFoodIndex(id) {
-    for (var i = 0; i < foods.length; i++) {
-        if (foods[i].foodID == id) {
+Game.prototype.findFoodIndex = function(id) {
+    for (var i = 0; i < this.foods.length; i++) {
+        if (this.foods[i].foodID == id) {
             return i;
         }
     }
@@ -98,10 +94,12 @@ function findFoodIndex(id) {
   return -1;
 }
 
-function hitTest(start, end, min) {
+Game.prototype.hitTest = function(start, end, min) {
     var distance = Math.sqrt((start.x - end.x) * (start.x - end.x) + (start.y - end.y) * (start.y - end.y));
     return (distance <= min);
 }
+
+var game = new Game();
 
 io.on('connection', function(socket) {  
     console.log('A user connected. Assigning UserID...');
@@ -115,19 +113,20 @@ io.on('connection', function(socket) {
         player.playerID = userID;
         sockets[player.playerID] = socket;
 
-        if (findPlayer(player.playerID) == null) {
+        if (game.findPlayer(player.playerID) == null) {
             console.log("Player " + player.playerID + " connected!");
-            users.push(player);
+            game.users.push(player);
             currentPlayer = player;
         }
 
-        socket.emit("playerJoin", { playersList: users, connectedName: player.name });
-        socket.broadcast.emit("playerJoin", { playersList: users, connectedName: player.name });
-        console.log("Total player: " + users.length);
+        socket.emit("playerJoin", { playersList: game.users, connectedName: player.name });
+        socket.broadcast.emit("playerJoin", { playersList: game.users, connectedName: player.name });
+        console.log("Total player: " + game.users.length);
+        
 
         // Add new food when player connected
-        for (var i = 0; i < newFoodPerPlayer; i++) {
-            generateFood(player);
+        for (var i = 0; i < game.newFoodPerPlayer; i++) {
+            game.generateFood(player);
         }
     });
 
@@ -136,11 +135,11 @@ io.on('connection', function(socket) {
     });
 
     socket.on('disconnect', function() {
-        var playerIndex = findPlayerIndex(userID);
-        var playerName = users[playerIndex].name;
-        users.splice(playerIndex, 1);
+        var playerIndex = game.findPlayerIndex(userID);
+        var playerName = game.users[playerIndex].name;
+        game.users.splice(playerIndex, 1);
         console.log('User #' + userID + ' disconnected');
-        socket.broadcast.emit("playerDisconnect", { playersList: users, disconnectName: playerName });
+        socket.broadcast.emit("playerDisconnect", { playersList: game.users, disconnectName: playerName });
     });
 
     socket.on("playerChat", function(data){
@@ -155,53 +154,52 @@ io.on('connection', function(socket) {
             currentPlayer.x += (target.x - currentPlayer.x) / currentPlayer.speed;
             currentPlayer.y += (target.y - currentPlayer.y) / currentPlayer.speed;
 
-            users[findPlayerIndex(currentPlayer.playerID)] = currentPlayer;
+            game.users[game.findPlayerIndex(currentPlayer.playerID)] = currentPlayer;
       
-            for (var f = 0; f < foods.length; f++) {
-                if (hitTest(
-                    { x: foods[f].x, y: foods[f].y },
+            for (var f = 0; f < game.foods.length; f++) {
+                if (game.hitTest(
+                    { x: game.foods[f].x, y: game.foods[f].y },
                     { x: currentPlayer.x, y: currentPlayer.y },
-                    currentPlayer.mass + defaultPlayerSize
+                    currentPlayer.mass + game.defaultPlayerSize
                 )) {
-                    foods[f] = {};
-                    foods.splice(f, 1);
+                    game.foods[f] = {};
+                    game.foods.splice(f, 1);
 
-                    if (currentPlayer.mass < maxSizeMass) {
-                        currentPlayer.mass += foodMass;
+                    if (currentPlayer.mass < game.maxSizeMass) {
+                        currentPlayer.mass += game.foodMass;
                     }
 
-                    if (currentPlayer.speed < maxMoveSpeed) {
-                        currentPlayer.speed += currentPlayer.mass / massDecreaseRatio;
+                    if (currentPlayer.speed < game.maxMoveSpeed) {
+                        currentPlayer.speed += currentPlayer.mass / game.massDecreaseRatio;
                     }
 
                     console.log("Food eaten");
 
                     // Respawn food
-                    for (var r = 0; r < respawnFoodPerPlayer; r++) {
-                        generateFood(currentPlayer);
+                    for (var r = 0; r < game.respawnFoodPerPlayer; r++) {
+                        game.generateFood(currentPlayer);
                     }
                     break;
                 }
             }
 
-            for (var e = 0; e < users.length; e++) {
-                if (hitTest(
-                    { x: users[e].x, y: users[e].y },
+            for (var e = 0; e < game.users.length; e++) {
+                if (game.hitTest(
+                    { x: game.users[e].x, y: game.users[e].y },
                     { x: currentPlayer.x, y: currentPlayer.y },
-                    currentPlayer.mass + defaultPlayerSize
+                    currentPlayer.mass + game.defaultPlayerSize
                 )) {
-                    if (users[e].mass != 0 && users[e].mass < currentPlayer.mass - eatableMassDistance) {           
+                    if (game.users[e].mass != 0 && game.users[e].mass < currentPlayer.mass - game.eatableMassDistance) {           
                         if (currentPlayer.mass < maxSizeMass) {
-                            currentPlayer.mass += users[e].mass;
+                            currentPlayer.mass += game.users[e].mass;
                         }
 
                         if (currentPlayer.speed < maxMoveSpeed) {
-                            currentPlayer.speed += currentPlayer.mass / massDecreaseRatio;
+                            currentPlayer.speed += currentPlayer.mass / game.massDecreaseRatio;
                         }
-
-                        sockets[users[e].playerID].emit("RIP");
-                        sockets[users[e].playerID].disconnect();
-                        users.splice(e, 1);
+                        sockets[game.users[e].playerID].emit("RIP");
+                        sockets[game.users[e].playerID].disconnect();
+                        game.users.splice(e, 1);
                         break;
                     }
                 }
@@ -209,9 +207,9 @@ io.on('connection', function(socket) {
 
             // Do some continuos emit
             socket.emit("serverTellPlayerMove", currentPlayer);
-            socket.emit("serverTellPlayerUpdateFoods", foods);
-            socket.broadcast.emit("serverUpdateAllPlayers", users);
-            socket.broadcast.emit("serverUpdateAllFoods", foods);
+            socket.emit("serverTellPlayerUpdateFoods", game.foods);
+            socket.broadcast.emit("serverUpdateAllPlayers", game.users);
+            socket.broadcast.emit("serverUpdateAllFoods", game.foods);
         }
     });
 });
