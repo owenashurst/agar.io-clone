@@ -14,6 +14,8 @@ var disconnected = false;
 
 var startPingTime = 0;
 
+var backgroundColor = '#EEEEEE';
+
 var KEY_ENTER = 13;
 
 var foodConfig = {
@@ -87,17 +89,38 @@ function checkLatency() {
   socket.emit("ping");
 }
 
+function toggleDarkmode() {
+  var LIGHT = '#EEEEEE',
+      DARK = '#181818';
+  if (backgroundColor === LIGHT) {
+    backgroundColor = DARK;
+    addSystemLine('Dark mode enabled');
+  } else {
+    backgroundColor = LIGHT;
+    addSystemLine('Dark mode disabled');
+  }
+}
+
 function sendChat(key) {
   var key = key.which || key.keyCode;
   if (key == KEY_ENTER) {
     var text = chatInput.value.replace(/(<([^>]+)>)/ig,"");
     if (text != "") {
-      if (text != "-ping") {
-        socket.emit("playerChat", { sender: player.name, message: text });
-        addChatLine(player.name, text);
-      } else {
-        checkLatency();
-      }
+      if (text.indexOf('-') === 0) {
+        switch (text) {
+          case '-ping':
+            checkLatency();
+            break;
+          case '-dark':
+            toggleDarkmode();
+            break;
+          default:
+            addSystemLine('Unrecoginised Command: ' + text);
+          }
+        } else {
+          socket.emit("playerChat", { sender: player.name, message: text });
+          addChatLine(player.name, text);
+        }
       chatInput.value = "";
     }
   }
@@ -249,7 +272,7 @@ window.requestAnimFrame = (function(){
 function gameLoop() {
   if (!disconnected) {
     if (gameStart) {
-      graph.fillStyle = "#EEEEEE";
+      graph.fillStyle = backgroundColor;
       graph.fillRect(0, 0, gameWidth, gameHeight);
 
       for (var i = 0; i < foods.length; i++) {
