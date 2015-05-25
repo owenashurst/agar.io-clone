@@ -10,7 +10,8 @@
   },
   "author": "Huy Tran",
   "contributors": [
-    "Igor Antun <igorantunc@hotmail.com> (https://github.com/IgorAntun)"
+    "Igor Antun <igorantunc@hotmail.com> (https://github.com/IgorAntun)",
+    "Bjarne Oeverli <bjarne.oeverli@gmail.com> (https://github.com/bjarneo)"
   ],
   "dependencies": {
     "socket.io": "1.3.5",
