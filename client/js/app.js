@@ -40,7 +40,7 @@ var enemyConfig = {
 };
 
 var player = {
-  playerID: -1,
+  id: -1,
   x: gameWidth / 2, y: gameHeight / 2,
   mass: 0, speed: 80,
   screenWidth: gameWidth,
@@ -119,7 +119,7 @@ socket.on("disconnect", function() {
 
 // Handle connection
 socket.on("welcome", function(userID) {
-  player.playerID = userID;
+  player.id = userID;
   player.name = playerName;
   socket.emit("gotit", player);
   gameStart = true;
@@ -253,7 +253,7 @@ function gameLoop() {
       }
 
       for (var i = 0; i < enemies.length; i++) {
-        if (enemies[i].playerID != player.playerID) {
+        if (enemies[i].id != player.id) {
           drawEnemy(enemies[i]);
         }
       }

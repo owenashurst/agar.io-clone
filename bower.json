@@ -2,6 +2,7 @@
   "name": "agar.io-clone",
   "version": "1.0.0",
   "ignore": [
+    ".idea",
     "**/.*",
     "node_modules",
     "bower_components",
