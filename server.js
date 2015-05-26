@@ -127,6 +127,17 @@ Game.prototype.randomColor = function() {
 
 var game = new Game();
 
+function movePlayer(player, target) {
+    var xVelocity = target.x - player.x,
+        yVelocity = target.y - player.y,
+        vMag = Math.sqrt(xVelocity * xVelocity + yVelocity * yVelocity),
+        normalisedX = xVelocity/vMag,
+        normalisedY = yVelocity/vMag;
+
+    player.x += normalisedX * 250 / player.speed;
+    player.y += normalisedY * 250 / player.speed;
+}
+
 io.on('connection', function(socket) {  
     console.log('A user connected. Assigning UserID...');
 
@@ -177,11 +188,10 @@ io.on('connection', function(socket) {
     // Heartbeat function, update everytime
     socket.on("playerSendTarget", function(target) {
         if (target.x != currentPlayer.x && target.y != currentPlayer.y) {
-            currentPlayer.x += (target.x - currentPlayer.x) / currentPlayer.speed;
-            currentPlayer.y += (target.y - currentPlayer.y) / currentPlayer.speed;
+            movePlayer(currentPlayer, target);
 
             game.users[game.findPlayerIndex(currentPlayer.playerID)] = currentPlayer;
-      
+
             for (var f = 0; f < game.foods.length; f++) {
                 if (game.hitTest(
                     { x: game.foods[f].x, y: game.foods[f].y },
