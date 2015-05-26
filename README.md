@@ -62,3 +62,7 @@ node server.js
 ```
 
 The game will then be accessible at `http://localhost:3000`.
+
+
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/huytd/agar.io-clone/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
+
