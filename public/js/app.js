@@ -101,6 +101,11 @@ function toggleDarkMode() {
   }
 }
 
+function printHelp() {
+  addSystemLine('-dark: toggle dark mode')
+  addSystemLine('-ping: check your latency')
+}
+
 function sendChat(key) {
   var key = key.which || key.keyCode;
   if (key == KEY_ENTER) {
@@ -114,8 +119,11 @@ function sendChat(key) {
           case '-dark':
             toggleDarkMode();
             break;
+          case '-help':
+            printHelp();
+            break;
           default:
-            addSystemLine('Unrecoginised Command: ' + text);
+            addSystemLine('Unrecoginised Command: ' + text + ', type -help for more info');
           }
         } else {
           socket.emit("playerChat", { sender: player.name, message: text });
@@ -152,6 +160,7 @@ socket.on("welcome", function(userID) {
   gameStart = true;
   console.log("Game is started: " + gameStart);
   addSystemLine("Connected to the game!");
+  addSystemLine("Type -help for chat commands");
 });
 
 socket.on("playerDisconnect", function(data) {
