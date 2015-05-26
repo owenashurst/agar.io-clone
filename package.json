@@ -11,10 +11,15 @@
   "author": "Huy Tran",
   "contributors": [
     "Igor Antun <igorantunc@hotmail.com> (https://github.com/IgorAntun)",
-    "Bjarne Oeverli <bjarne.oeverli@gmail.com> (https://github.com/bjarneo)"
+    "Bjarne Oeverli <bjarne.oeverli@gmail.com> (https://github.com/bjarneo)",
+    "Chris Morgan <chris.j.r.morgan@gmail.com> (https://github.com/drpotato)",
+    "PET Computação UFPR <pet@inf.ufpr.br> (http://pet.inf.ufpr.br)"
   ],
   "dependencies": {
-    "socket.io": "1.3.5",
-    "express": "4.12.4"
-  }
+    "express": "^4.12.4",
+    "socket.io": "^1.3.5"
+  },
+  "devDependencies": {
+    "nodemon": "^1.2.1"
+   }
 }
