@@ -36,14 +36,11 @@ function genPos(from, to) {
 }
 
 function addFoods(target) {
-    var rx = genPos(0, target.screenWidth);
-    var ry = genPos(0, target.screenHeight);
-    var food = {
+    foods.push({
         id: (new Date()).getTime(),
-        x: rx, y: ry
-    };
-
-    foods[foods.length] = food;
+        x: genPos(0, target.screenWidth),
+        y: genPos(0, target.screenHeight)
+    });
 }
 
 function generateFood(target) {
