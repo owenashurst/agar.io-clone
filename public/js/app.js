@@ -89,7 +89,7 @@ function checkLatency() {
   socket.emit("ping");
 }
 
-function toggleDarkmode() {
+function toggleDarkMode() {
   var LIGHT = '#EEEEEE',
       DARK = '#181818';
   if (backgroundColor === LIGHT) {
@@ -112,7 +112,7 @@ function sendChat(key) {
             checkLatency();
             break;
           case '-dark':
-            toggleDarkmode();
+            toggleDarkMode();
             break;
           default:
             addSystemLine('Unrecoginised Command: ' + text);
