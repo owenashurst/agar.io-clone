@@ -125,9 +125,7 @@ Game.prototype.randomColor = function() {
     }
 }
 
-var game = new Game();
-
-function movePlayer(player, target) {
+Game.prototype.movePlayer = function(player, target) {
     var xVelocity = target.x - player.x,
         yVelocity = target.y - player.y,
         vMag = Math.sqrt(xVelocity * xVelocity + yVelocity * yVelocity),
@@ -137,6 +135,8 @@ function movePlayer(player, target) {
     player.x += normalisedX * 250 / player.speed;
     player.y += normalisedY * 250 / player.speed;
 }
+
+var game = new Game();
 
 io.on('connection', function(socket) {  
     console.log('A user connected. Assigning UserID...');
@@ -188,7 +188,7 @@ io.on('connection', function(socket) {
     // Heartbeat function, update everytime
     socket.on("playerSendTarget", function(target) {
         if (target.x != currentPlayer.x && target.y != currentPlayer.y) {
-            movePlayer(currentPlayer, target);
+            game.movePlayer(currentPlayer, target);
 
             game.users[game.findPlayerIndex(currentPlayer.playerID)] = currentPlayer;
 
