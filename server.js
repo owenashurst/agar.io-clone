@@ -130,10 +130,12 @@ Game.prototype.movePlayer = function(player, target) {
         yVelocity = target.y - player.y,
         vMag = Math.sqrt(xVelocity * xVelocity + yVelocity * yVelocity),
         normalisedX = xVelocity/vMag,
-        normalisedY = yVelocity/vMag;
+        normalisedY = yVelocity/vMag,
+        finalX = vMag > 25 ? normalisedX * 250 / player.speed : xVelocity * 10 / player.speed,
+        finalY = vMag > 25 ? normalisedY * 250 / player.speed : yVelocity * 10 / player.speed;
 
-    player.x += normalisedX * 250 / player.speed;
-    player.y += normalisedY * 250 / player.speed;
+    player.x += finalX;
+    player.y += finalY;
 }
 
 var game = new Game();
