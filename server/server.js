@@ -10,7 +10,7 @@ var sockets = [];
 
 
 var maxSizeMass = 50;
-var maxMoveSpeed = 100;
+var maxMoveSpeed = 10;
 
 var massDecreaseRatio = 1000;
 
@@ -77,6 +77,20 @@ function hitTest(start, end, min) {
     return (distance <= min);
 }
 
+// From SarenCurrie/agar.io-clone
+function movePlayer(player, target) {
+    var xVelocity = target.x - player.x,
+        yVelocity = target.y - player.y,
+        vMag = Math.sqrt(xVelocity * xVelocity + yVelocity * yVelocity),
+        normalisedX = xVelocity/vMag,
+        normalisedY = yVelocity/vMag,
+        finalX = vMag > 25 ? normalisedX * 250 / player.speed : xVelocity * 10 / player.speed,
+        finalY = vMag > 25 ? normalisedY * 250 / player.speed : yVelocity * 10 / player.speed;
+
+    player.x += finalX;
+    player.y += finalY;
+}
+
 io.on('connection', function (socket) {
     console.log('A user connected. Assigning UserID...');
 
@@ -125,8 +139,7 @@ io.on('connection', function (socket) {
     // Heartbeat function, update everytime
     socket.on("playerSendTarget", function (target) {
         if (target.x != currentPlayer.x && target.y != currentPlayer.y) {
-            currentPlayer.x += (target.x - currentPlayer.x) / currentPlayer.speed;
-            currentPlayer.y += (target.y - currentPlayer.y) / currentPlayer.speed;
+            movePlayer(currentPlayer, target);
 
             for (var f = 0; f < foods.length; f++) {
                 if (hitTest(
