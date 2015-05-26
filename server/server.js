@@ -80,20 +80,20 @@ io.on('connection', function (socket) {
     var userID = socket.id;
     var currentPlayer = {};
 
-    socket.emit("welcome", userID);
+    socket.emit('welcome', userID);
 
-    socket.on("gotit", function (player) {
+    socket.on('gotit', function (player) {
         player.id = userID;
         sockets[player.id] = socket;
 
         if (findPlayer(player.id) == null) {
-            console.log("Player " + player.id + " connected!");
+            console.log('Player ' + player.id + ' connected!');
             users.push(player);
             currentPlayer = player;
         }
 
         io.emit('playerJoin', {playersList: users, connectedName: player.name});
-        console.log("Total player: " + users.length);
+        console.log('Total player: ' + users.length);
 
         // Add new food when player connected
         for (var i = 0; i < newFoodPerPlayer; i++) {
@@ -101,8 +101,8 @@ io.on('connection', function (socket) {
         }
     });
 
-    socket.on("ping", function () {
-        socket.emit("pong");
+    socket.on('ping', function () {
+        socket.emit('pong');
     });
 
     socket.on('disconnect', function () {
@@ -110,17 +110,17 @@ io.on('connection', function (socket) {
         var playerName = users[playerIndex].name;
         users.splice(playerIndex, 1);
         console.log('User #' + userID + ' disconnected');
-        socket.broadcast.emit("playerDisconnect", {playersList: users, disconnectName: playerName});
+        socket.broadcast.emit('playerDisconnect', {playersList: users, disconnectName: playerName});
     });
 
-    socket.on("playerChat", function (data) {
-        var _sender = data.sender.replace(/(<([^>]+)>)/ig, "");
-        var _message = data.message.replace(/(<([^>]+)>)/ig, "");
-        socket.broadcast.emit("serverSendPlayerChat", {sender: _sender, message: _message});
+    socket.on('playerChat', function (data) {
+        var _sender = data.sender.replace(/(<([^>]+)>)/ig, '');
+        var _message = data.message.replace(/(<([^>]+)>)/ig, '');
+        socket.broadcast.emit('serverSendPlayerChat', {sender: _sender, message: _message});
     });
 
     // Heartbeat function, update everytime
-    socket.on("playerSendTarget", function (target) {
+    socket.on('playerSendTarget', function (target) {
         if (target.x != currentPlayer.x && target.y != currentPlayer.y) {
             currentPlayer.x += (target.x - currentPlayer.x) / currentPlayer.speed;
             currentPlayer.y += (target.y - currentPlayer.y) / currentPlayer.speed;
@@ -142,7 +142,7 @@ io.on('connection', function (socket) {
                         currentPlayer.speed += currentPlayer.mass / massDecreaseRatio;
                     }
 
-                    console.log("Food eaten");
+                    console.log('Food eaten');
 
                     // Respawn food
                     for (var r = 0; r < respawnFoodPerPlayer; r++) {
@@ -167,7 +167,7 @@ io.on('connection', function (socket) {
                             currentPlayer.speed += currentPlayer.mass / massDecreaseRatio;
                         }
 
-                        sockets[users[e].id].emit("RIP");
+                        sockets[users[e].id].emit('RIP');
                         sockets[users[e].id].disconnect();
                         users.splice(e, 1);
                         break;
@@ -176,16 +176,16 @@ io.on('connection', function (socket) {
             }
 
             // Do some continuos emit
-            socket.emit("serverTellPlayerMove", currentPlayer);
-            socket.emit("serverTellPlayerUpdateFoods", foods);
-            socket.broadcast.emit("serverUpdateAllPlayers", users);
-            socket.broadcast.emit("serverUpdateAllFoods", foods);
+            socket.emit('serverTellPlayerMove', currentPlayer);
+            socket.emit('serverTellPlayerUpdateFoods', foods);
+            socket.broadcast.emit('serverUpdateAllPlayers', users);
+            socket.broadcast.emit('serverUpdateAllFoods', foods);
         }
     });
 });
 
 // Don't touch on ip
-var ipaddress = process.env.OPENSHIFT_NODEJS_IP || process.env.IP || "127.0.0.1";
+var ipaddress = process.env.OPENSHIFT_NODEJS_IP || process.env.IP || '127.0.0.1';
 var serverport = process.env.OPENSHIFT_NODEJS_PORT || process.env.PORT || 3000;
 http.listen( serverport, ipaddress, function() {
     console.log('listening on *:' + serverport);
