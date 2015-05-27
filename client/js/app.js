@@ -1,7 +1,3 @@
-/**
- * Created by chris on 24/05/15.
- */
-
 var playerName = prompt("Your name please:").replace(/(<([^>]+)>)/ig,"");
 
 // Canvas
@@ -13,8 +9,6 @@ var gameStart = false;
 var disconnected = false;
 
 var startPingTime = 0;
-
-var backgroundColor = '#EEEEEE';
 
 var KEY_ENTER = 13;
 
@@ -46,7 +40,7 @@ var enemyConfig = {
 };
 
 var player = {
-  playerID: -1,
+  id: -1,
   x: gameWidth / 2, y: gameHeight / 2,
   mass: 0, speed: 80,
   screenWidth: gameWidth,
@@ -89,46 +83,17 @@ function checkLatency() {
   socket.emit("ping");
 }
 
-function toggleDarkMode() {
-  var LIGHT = '#EEEEEE',
-      DARK = '#181818';
-  if (backgroundColor === LIGHT) {
-    backgroundColor = DARK;
-    addSystemLine('Dark mode enabled');
-  } else {
-    backgroundColor = LIGHT;
-    addSystemLine('Dark mode disabled');
-  }
-}
-
-function printHelp() {
-  addSystemLine('-dark: toggle dark mode')
-  addSystemLine('-ping: check your latency')
-}
-
 function sendChat(key) {
   var key = key.which || key.keyCode;
   if (key == KEY_ENTER) {
     var text = chatInput.value.replace(/(<([^>]+)>)/ig,"");
     if (text != "") {
-      if (text.indexOf('-') === 0) {
-        switch (text) {
-          case '-ping':
-            checkLatency();
-            break;
-          case '-dark':
-            toggleDarkMode();
-            break;
-          case '-help':
-            printHelp();
-            break;
-          default:
-            addSystemLine('Unrecoginised Command: ' + text + ', type -help for more info');
-          }
-        } else {
-          socket.emit("playerChat", { sender: player.name, message: text });
-          addChatLine(player.name, text);
-        }
+      if (text != "-ping") {
+        socket.emit("playerChat", { sender: player.name, message: text });
+        addChatLine(player.name, text);
+      } else {
+        checkLatency();
+      }
       chatInput.value = "";
     }
   }
@@ -154,13 +119,12 @@ socket.on("disconnect", function() {
 
 // Handle connection
 socket.on("welcome", function(userID) {
-  player.playerID = userID;
+  player.id = userID;
   player.name = playerName;
   socket.emit("gotit", player);
   gameStart = true;
   console.log("Game is started: " + gameStart);
   addSystemLine("Connected to the game!");
-  addSystemLine("Type -help for chat commands");
 });
 
 socket.on("playerDisconnect", function(data) {
@@ -209,8 +173,8 @@ socket.on("RIP", function(){
 
 
 function drawFood(food) {
-  graph.strokeStyle = food.color.border || foodConfig.borderColor;
-  graph.fillStyle = food.color.fill || foodConfig.fillColor;
+  graph.strokeStyle = foodConfig.borderColor;
+  graph.fillStyle = foodConfig.fillColor;
   graph.lineWidth = foodConfig.border;
   graph.beginPath();
   graph.arc(food.x, food.y, foodConfig.size, 0, 2 * Math.PI);
@@ -266,11 +230,11 @@ function gameInput(mouse) {
 
 window.requestAnimFrame = (function(){
   return  window.requestAnimationFrame       ||
-    window.webkitRequestAnimationFrame ||
-    window.mozRequestAnimationFrame    ||
-    function( callback ){
-      window.setTimeout(callback, 1000 / 60);
-    };
+          window.webkitRequestAnimationFrame ||
+          window.mozRequestAnimationFrame    ||
+          function( callback ){
+            window.setTimeout(callback, 1000 / 60);
+          };
 })();
 
 (function animloop(){
@@ -281,7 +245,7 @@ window.requestAnimFrame = (function(){
 function gameLoop() {
   if (!disconnected) {
     if (gameStart) {
-      graph.fillStyle = backgroundColor;
+      graph.fillStyle = "#EEEEEE";
       graph.fillRect(0, 0, gameWidth, gameHeight);
 
       for (var i = 0; i < foods.length; i++) {
@@ -289,7 +253,7 @@ function gameLoop() {
       }
 
       for (var i = 0; i < enemies.length; i++) {
-        if (enemies[i].playerID != player.playerID) {
+        if (enemies[i].id != player.id) {
           drawEnemy(enemies[i]);
         }
       }
