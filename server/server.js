@@ -82,7 +82,7 @@ function movePlayer(player, target) {
     // This code is for moving in a screen
     // deltaY = deltaY > 0 ? deltaY = Math.min(deltaY, target.y - player.y) : deltaY = Math.max(deltaY, target.y - player.y)
     // deltaX = deltaX > 0 ? deltaX = Math.min(deltaX, target.x - player.x) : deltaX = Math.max(deltaX, target.x - player.x)
-
+    
     player.y += deltaY;
     player.x += deltaX;
 }
@@ -100,7 +100,7 @@ io.on('connection', function (socket) {
         player.id = userID;
         sockets[player.id] = socket;
 
-        if (findPlayer(player.id) === null) {
+        if (findPlayer(player.id) == null) {
             console.log('Player ' + player.id + ' connected!');
             users.push(player);
             currentPlayer = player;
@@ -135,7 +135,8 @@ io.on('connection', function (socket) {
 
     // Heartbeat function, update everytime
     socket.on('playerSendTarget', function (target) {
-        console.log(currentPlayer.x + " " + currentPlayer.y);
+     // if you want to use uncomment the line below
+    //    console.log(currentPlayer.x + " " + currentPlayer.y);
         if (target.x != currentPlayer.x || target.y != currentPlayer.y) {
             movePlayer(currentPlayer, target);
 
@@ -172,7 +173,7 @@ io.on('connection', function (socket) {
                         {x: currentPlayer.x, y: currentPlayer.y},
                         currentPlayer.mass + defaultPlayerSize
                     )) {
-                    if (users[e].mass !== 0 && users[e].mass < currentPlayer.mass - eatableMassDistance) {
+                    if (users[e].mass != 0 && users[e].mass < currentPlayer.mass - eatableMassDistance) {
                         if (currentPlayer.mass < maxSizeMass) {
                             currentPlayer.mass += users[e].mass;
                         }
