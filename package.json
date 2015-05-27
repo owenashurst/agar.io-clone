@@ -14,7 +14,9 @@
     "Bjarne Oeverli <bjarne.oeverli@gmail.com> (https://github.com/bjarneo)",
     "Chris Morgan <chris.j.r.morgan@gmail.com> (https://github.com/drpotato)",
     "PET Computação UFPR <pet@inf.ufpr.br> (http://pet.inf.ufpr.br)",
-    "Saren Currie <saren@sarencurrie.com> (https://github.com/SarenCurrie)"
+    "Saren Currie <saren@sarencurrie.com> (https://github.com/SarenCurrie)",
+    "Nguyen Huu Thanh <giongto35@yahoo.com> (https://github.com/giongto35)",
+    "Ariamiro <dossantosgusmaosavio@gmail.com> (https://github.com/Ariamiro)"
   ],
   "dependencies": {
     "express": "^4.12.4",
