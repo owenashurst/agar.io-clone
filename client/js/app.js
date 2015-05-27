@@ -42,7 +42,7 @@ var enemyConfig = {
 var player = {
   id: -1,
   x: gameWidth / 2, y: gameHeight / 2,
-  mass: 0, speed: 80,
+  mass: 0, speed: 5,
   screenWidth: gameWidth,
   screenHeight: gameHeight
 };

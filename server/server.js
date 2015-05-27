@@ -88,6 +88,18 @@ function movePlayer(player, target) {
     player.y += finalY;
 }
 
+// From giongto35/agar.io-clone
+function movePlayer(player, target) {
+    var deg = Math.atan2(target.y - player.y, target.x - player.x),
+        deltaY = player.speed * Math.sin(deg),
+        deltaX = player.speed * Math.cos(deg);
+    deltaY = deltaY > 0 ? deltaY = Math.min(deltaY, target.y - player.y) : deltaY = Math.max(deltaY, target.y - player.y)
+    deltaX = deltaX > 0 ? deltaX = Math.min(deltaX, target.x - player.x) : deltaX = Math.max(deltaX, target.x - player.x)
+    player.y += deltaY;
+    player.x += deltaX;
+}
+
+
 io.on('connection', function (socket) {
     console.log('A user connected. Assigning UserID...');
 
@@ -135,7 +147,7 @@ io.on('connection', function (socket) {
 
     // Heartbeat function, update everytime
     socket.on('playerSendTarget', function (target) {
-        if (target.x != currentPlayer.x && target.y != currentPlayer.y) {
+        if (target.x != currentPlayer.x || target.y != currentPlayer.y) {
             movePlayer(currentPlayer, target);
 
             for (var f = 0; f < foods.length; f++) {
