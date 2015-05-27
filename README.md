@@ -18,7 +18,7 @@ A simple Agar.io clone built with socket.io and HTML5 Canvas on top of NodeJS.
 
 ## Coming Features
 Things to be done
-[![GitHub Wiki](https://img.shields.io/badge/todo-list-blue.svg)](https://github.com/huytd/agar.io-clone/wiki/Coming-Features)
+[![GitHub Wiki](https://img.shields.io/badge/coming-features-blue.svg)](https://github.com/huytd/agar.io-clone/wiki/Coming-Features)
 
 ## How to Play
 You are the red circle.
