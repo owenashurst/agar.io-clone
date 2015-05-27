@@ -76,9 +76,10 @@ function hitTest(start, end, min) {
 
 // From giongto35/agar.io-clone
 function movePlayer(player, target) {
-    var deg = Math.atan2(target.y - player.screenHeight / 2, target.x - player.screenWidth / 2),
-        deltaY = player.speed * Math.sin(deg),
-        deltaX = player.speed * Math.cos(deg);
+    var dist = Math.sqrt((target.y - player.screenHeight / 2) * (target.y - player.screenHeight / 2) + (target.x - player.screenWidth / 2) * (target.x - player.screenWidth / 2))
+        deg = Math.atan2(target.y - player.screenHeight / 2, target.x - player.screenWidth / 2),
+        deltaY = player.speed * Math.min(1, dist / (defaultPlayerSize + player.mass)) * Math.sin(deg),
+        deltaX = player.speed * Math.min(1, dist / (defaultPlayerSize + player.mass)) * Math.cos(deg);
     // This code is for moving in a screen
     // deltaY = deltaY > 0 ? deltaY = Math.min(deltaY, target.y - player.y) : deltaY = Math.max(deltaY, target.y - player.y)
     // deltaX = deltaX > 0 ? deltaX = Math.min(deltaX, target.x - player.x) : deltaX = Math.max(deltaX, target.x - player.x)
