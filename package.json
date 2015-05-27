@@ -7,7 +7,7 @@
   "contributors": [
     "Igor Antun <igorantunc@hotmail.com> (https://github.com/IgorAntun)",
     "Chris Morgan <chris.j.r.morgan@gmail.com> (https://github.com/drpotato)",
-    "Saren Currie <saren@sarencurrie.com> (https://github.com/SarenCurrie"
+    "Saren Currie <saren@sarencurrie.com> (https://github.com/SarenCurrie)"
   ],
   "dependencies": {
     "express": "^4.12.4",
