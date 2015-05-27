@@ -17,7 +17,6 @@ A simple Agar.io clone built with socket.io and HTML5 Canvas on top of NodeJS.
 [![Cloud9](https://img.shields.io/badge/cloud9-online-green.svg)](https://agar-io-clone-d3vont3ch.c9.io/)
 
 ## Coming Features
-Things to be done
 [![GitHub Wiki](https://img.shields.io/badge/coming-features-blue.svg)](https://github.com/huytd/agar.io-clone/wiki/Coming-Features)
 
 ## [How to Play](https://github.com/huytd/agar.io-clone/wiki/How-to-Play)
