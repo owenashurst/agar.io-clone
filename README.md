@@ -20,14 +20,8 @@ A simple Agar.io clone built with socket.io and HTML5 Canvas on top of NodeJS.
 Things to be done
 [![GitHub Wiki](https://img.shields.io/badge/coming-features-blue.svg)](https://github.com/huytd/agar.io-clone/wiki/Coming-Features)
 
-## How to Play
-You are the red circle.
+## [How to Play](https://github.com/huytd/agar.io-clone/wiki/How-to-Play)
 
-Move your mouse on the screen to move yourself.
-
-Eat all yellow food to grow. (Food respawns every time player eat).
-
-Try to get fat and eat other players.
 
 ## Gameplay Rules
 - Player's **mass** is the number of food eaten
