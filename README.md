@@ -3,6 +3,7 @@ Agar.io Clone
 
 [![GitHub Stars](https://img.shields.io/github/stars/huytd/agar.io-clone.svg)](https://github.com/huytd/agar.io-clone/stargazers)
 [![GitHub Issues](https://img.shields.io/github/issues/huytd/agar.io-clone.svg)](https://github.com/huytd/agar.io-clone/issues)
+[![GitHub Wiki](https://img.shields.io/badge/coming-features-blue.svg)](https://github.com/huytd/agar.io-clone/wiki/Coming-Features)
 [![Live Demo](https://img.shields.io/badge/demo-online-green.svg)](#live-demo) "
 [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/huytd/agar.io-clone?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
@@ -16,14 +17,9 @@ A simple Agar.io clone built with socket.io and HTML5 Canvas on top of NodeJS.
 [![Heroku US](https://img.shields.io/badge/heroku us-online-green.svg)](https://agar-clone-us.herokuapp.com/) "
 [![Cloud9](https://img.shields.io/badge/cloud9-online-green.svg)](https://agar-io-clone-d3vont3ch.c9.io/)
 
-## How to Play
-You are the red circle.
 
-Move your mouse on the screen to move yourself.
+## [How to Play](https://github.com/huytd/agar.io-clone/wiki/How-to-Play)
 
-Eat all yellow food to grow. (Food respawns every time player eat).
-
-Try to get fat and eat other players.
 
 ## Gameplay Rules
 - Player's **mass** is the number of food eaten
