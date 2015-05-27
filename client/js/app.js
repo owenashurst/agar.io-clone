@@ -13,6 +13,7 @@ var startPingTime = 0;
 var KEY_ENTER = 13;
 
 var chatCommands = {};
+var backgroundColor = "#EEEEEE";
 
 var foodConfig = {
   border: 2,
@@ -79,16 +80,31 @@ function addSystemLine(text) {
   chatList.insertBefore(chatLine, chatList.childNodes[0]);
 }
 
+function registerChatCommand(name, description, callback) {
+  chatCommands[name] = {
+    description: description,
+    callback: callback
+  }
+}
+
 function checkLatency() {
   // Ping
   startPingTime = Date.now();
   socket.emit("ping");
 }
 
-function registerChatCommand(name, description, callback) {
-  chatCommands[name] = {
-    description: description,
-    callback: callback
+function toggleDarkMode(args) {
+  var LIGHT = '#EEEEEE';
+  var DARK = '#181818';
+  var on = args[0] === 'on';
+  var off = args[0] === 'off';
+
+  if (on || (!off && backgroundColor === LIGHT)) {
+    backgroundColor = DARK;
+    addSystemLine('Dark mode enabled');
+  } else {
+    backgroundColor = LIGHT;
+    addSystemLine('Dark mode disabled');
   }
 }
 
@@ -102,6 +118,10 @@ function printHelp() {
 
 registerChatCommand('ping', 'check your latency', function () {
   checkLatency();
+});
+
+registerChatCommand('dark', 'toggle dark mode', function (args) {
+  toggleDarkMode(args);
 });
 
 registerChatCommand('help', 'show information about chat commands', function () {
@@ -275,7 +295,7 @@ window.requestAnimFrame = (function(){
 function gameLoop() {
   if (!disconnected) {
     if (gameStart) {
-      graph.fillStyle = "#EEEEEE";
+      graph.fillStyle = backgroundColor;
       graph.fillRect(0, 0, gameWidth, gameHeight);
 
       for (var i = 0; i < foods.length; i++) {
