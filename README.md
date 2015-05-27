@@ -16,9 +16,9 @@ A simple Agar.io clone built with socket.io and HTML5 Canvas on top of NodeJS.
 [![Heroku US](https://img.shields.io/badge/heroku us-online-green.svg)](https://agar-clone-us.herokuapp.com/) "
 [![Cloud9](https://img.shields.io/badge/cloud9-online-green.svg)](https://agar-io-clone-d3vont3ch.c9.io/)
 
-## TODO List
+## Coming Features
 Things to be done
-[![GitHub Wiki](https://img.shields.io/badge/todo-list-blue.svg)](https://github.com/huytd/agar.io-clone/wiki/TODO-List)
+[![GitHub Wiki](https://img.shields.io/badge/todo-list-blue.svg)](https://github.com/huytd/agar.io-clone/wiki/Coming-Features)
 
 ## How to Play
 You are the red circle.
