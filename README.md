@@ -17,6 +17,7 @@ A simple Agar.io clone built with socket.io and HTML5 Canvas on top of NodeJS.
 [![Heroku US](https://img.shields.io/badge/heroku us-offline-red.svg)](https://agar-clone-us.herokuapp.com/) "
 [![Cloud9](https://img.shields.io/badge/cloud9-online-green.svg)](https://agar-io-clone-d3vont3ch.c9.io/)
 
+---
 
 ## How to Play
 >You can check out a more elaborated how to play on our [wiki](https://github.com/huytd/agar.io-clone/wiki/How-to-Play)
@@ -33,12 +34,16 @@ A simple Agar.io clone built with socket.io and HTML5 Canvas on top of NodeJS.
 - Everytime a food is eaten by a player, **1** new food will be respawned
 - The more food you eat, the slower you move
 
+---
+
 ## Latest Changes
 - Game logic handled by server
 - Client side is for rendering only
 - Display player name
 - Now supporting chat 
 - Type`-ping` in the chatbox to check your ping
+
+---
 
 ## Installation
 >You can check out a more detailed setup tutorial on our [wiki](https://github.com/huytd/agar.io-clone/wiki/Setup)
