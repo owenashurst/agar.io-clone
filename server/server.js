@@ -16,7 +16,7 @@ var massDecreaseRatio = 1000;
 
 var foodMass = 1;
 
-var newFoodPerPlayer = 3;
+var newFoodPerPlayer = 30;
 var respawnFoodPerPlayer = 1;
 
 var foodRandomWidth = 500;
@@ -38,8 +38,8 @@ function genPos(from, to) {
 function addFoods(target) {
     foods.push({
         id: (new Date()).getTime(),
-        x: genPos(0, target.screenWidth),
-        y: genPos(0, target.screenHeight)
+        x: genPos(0, target.gameWidth),
+        y: genPos(0, target.gameHeight)
     });
 }
 
@@ -74,19 +74,19 @@ function hitTest(start, end, min) {
     return (distance <= min);
 }
 
-// From SarenCurrie/agar.io-clone
+// From giongto35/agar.io-clone
 function movePlayer(player, target) {
-    var xVelocity = target.x - player.x,
-        yVelocity = target.y - player.y,
-        vMag = Math.sqrt(xVelocity * xVelocity + yVelocity * yVelocity),
-        normalisedX = xVelocity/vMag,
-        normalisedY = yVelocity/vMag,
-        finalX = vMag > 25 ? normalisedX * 250 / player.speed : xVelocity * 10 / player.speed,
-        finalY = vMag > 25 ? normalisedY * 250 / player.speed : yVelocity * 10 / player.speed;
-
-    player.x += finalX;
-    player.y += finalY;
+    var deg = Math.atan2(target.y - player.screenHeight / 2, target.x - player.screenWidth / 2),
+        deltaY = player.speed * Math.sin(deg),
+        deltaX = player.speed * Math.cos(deg);
+    // This code is for moving in a screen
+    // deltaY = deltaY > 0 ? deltaY = Math.min(deltaY, target.y - player.y) : deltaY = Math.max(deltaY, target.y - player.y)
+    // deltaX = deltaX > 0 ? deltaX = Math.min(deltaX, target.x - player.x) : deltaX = Math.max(deltaX, target.x - player.x)
+    
+    player.y += deltaY;
+    player.x += deltaX;
 }
+
 
 io.on('connection', function (socket) {
     console.log('A user connected. Assigning UserID...');
@@ -135,7 +135,8 @@ io.on('connection', function (socket) {
 
     // Heartbeat function, update everytime
     socket.on('playerSendTarget', function (target) {
-        if (target.x != currentPlayer.x && target.y != currentPlayer.y) {
+        console.log(currentPlayer.x + " " + currentPlayer.y);
+        if (target.x != currentPlayer.x || target.y != currentPlayer.y) {
             movePlayer(currentPlayer, target);
 
             for (var f = 0; f < foods.length; f++) {

@@ -1,8 +1,10 @@
 var playerName = prompt("Your name please:").replace(/(<([^>]+)>)/ig,"");
 
 // Canvas
-var gameWidth = window.innerWidth;
-var gameHeight = window.innerHeight;
+var screenWidth = window.innerWidth;
+var screenHeight = window.innerHeight;
+var gameWidth = screenWidth * 3;
+var gameHeight = screenHeight * 3;
 
 var socket = io();
 var gameStart = false;
@@ -45,9 +47,12 @@ var enemyConfig = {
 var player = {
   id: -1,
   x: gameWidth / 2, y: gameHeight / 2,
-  mass: 0, speed: 80,
-  screenWidth: gameWidth,
-  screenHeight: gameHeight
+  mass: 0, speed: 5,
+  //TODO: exclude width and height out of player package
+  screenWidth: screenWidth,
+  screenHeight: screenHeight,
+  gameWidth: gameWidth,
+  gameHeight: gameHeight
 };
 
 var foods = [];
@@ -56,7 +61,7 @@ var target = {x: player.x, y: player.y};
 
 var c = document.getElementById("cvs");
 c.addEventListener("mousemove", gameInput, false);
-c.width = gameWidth; c.height = gameHeight;
+c.width = screenWidth; c.height = screenHeight;
 
 var graph = c.getContext("2d");
 
@@ -227,7 +232,7 @@ function drawFood(food) {
   graph.fillStyle = foodConfig.fillColor;
   graph.lineWidth = foodConfig.border;
   graph.beginPath();
-  graph.arc(food.x, food.y, foodConfig.size, 0, 2 * Math.PI);
+  graph.arc(food.x - player.x + screenWidth / 2, food.y - player.y + screenHeight / 2, foodConfig.size, 0, 2 * Math.PI);
   graph.stroke();
   graph.fill();
 }
@@ -237,7 +242,7 @@ function drawPlayer() {
   graph.fillStyle = playerConfig.fillColor;
   graph.lineWidth = playerConfig.border;
   graph.beginPath();
-  graph.arc(player.x, player.y, playerConfig.defaultSize + player.mass, 0, 2 * Math.PI);
+  graph.arc(screenWidth / 2, screenHeight / 2, playerConfig.defaultSize + player.mass, 0, 2 * Math.PI);
   graph.stroke();
   graph.fill();
 
@@ -248,8 +253,8 @@ function drawPlayer() {
   graph.textBaseline = 'middle';
   graph.strokeStyle = playerConfig.textBorder;
   graph.font = "bold " + fontSize + "px sans-serif";
-  graph.strokeText(player.name, player.x, player.y);
-  graph.fillText(player.name, player.x, player.y);
+  graph.strokeText(player.name, screenWidth / 2, screenHeight / 2);
+  graph.fillText(player.name, screenWidth / 2, screenHeight / 2);
 }
 
 function drawEnemy(enemy) {
@@ -257,7 +262,7 @@ function drawEnemy(enemy) {
   graph.fillStyle = enemyConfig.fillColor;
   graph.lineWidth = enemyConfig.border;
   graph.beginPath();
-  graph.arc(enemy.x, enemy.y, enemyConfig.defaultSize + enemy.mass, 0, 2 * Math.PI);
+  graph.arc(enemy.x - player.x + screenWidth / 2, enemy.y - player.y + screenHeight / 2, enemyConfig.defaultSize + enemy.mass, 0, 2 * Math.PI);
   graph.fill();
   graph.stroke();
 
@@ -269,8 +274,8 @@ function drawEnemy(enemy) {
   graph.textBaseline = 'middle';
   graph.strokeStyle = enemyConfig.textBorder;
   graph.font = "bold " + fontSize + "px sans-serif";
-  graph.strokeText(enemy.name, enemy.x, enemy.y);
-  graph.fillText(enemy.name, enemy.x, enemy.y);
+  graph.strokeText(enemy.name, enemy.x - player.x + screenWidth / 2, enemy.y - player.y + screenHeight / 2);
+  graph.fillText(enemy.name, enemy.x - player.x + screenWidth / 2, enemy.y - player.y + screenHeight / 2);
 }
 
 function gameInput(mouse) {
@@ -296,8 +301,7 @@ function gameLoop() {
   if (!disconnected) {
     if (gameStart) {
       graph.fillStyle = backgroundColor;
-      graph.fillRect(0, 0, gameWidth, gameHeight);
-
+      graph.fillRect(0, 0, screenWidth, screenHeight);
       for (var i = 0; i < foods.length; i++) {
         drawFood(foods[i]);
       }
@@ -312,20 +316,20 @@ function gameLoop() {
       socket.emit("playerSendTarget", target);
     } else {
       graph.fillStyle = "#333333";
-      graph.fillRect(0, 0, gameWidth, gameHeight);
+      graph.fillRect(0, 0, screenWidth, screenHeight);
 
       graph.textAlign = "center";
       graph.fillStyle = "#FFFFFF";
       graph.font = "bold 30px sans-serif";
-      graph.fillText("Game Over!", gameWidth / 2, gameHeight / 2);
+      graph.fillText("Game Over!", screenWidth / 2, screenHeight / 2);
     }
   } else {
     graph.fillStyle = "#333333";
-    graph.fillRect(0, 0, gameWidth, gameHeight);
+    graph.fillRect(0, 0, screenWidth, screenHeight);
 
     graph.textAlign = "center";
     graph.fillStyle = "#FFFFFF";
     graph.font = "bold 30px sans-serif";
-    graph.fillText("Disconnected!", gameWidth / 2, gameHeight / 2);
+    graph.fillText("Disconnected!", screenWidth / 2, screenHeight / 2);
   }
 }
