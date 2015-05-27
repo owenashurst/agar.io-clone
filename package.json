@@ -13,7 +13,8 @@
     "Igor Antun <igorantunc@hotmail.com> (https://github.com/IgorAntun)",
     "Bjarne Oeverli <bjarne.oeverli@gmail.com> (https://github.com/bjarneo)",
     "Chris Morgan <chris.j.r.morgan@gmail.com> (https://github.com/drpotato)",
-    "PET Computação UFPR <pet@inf.ufpr.br> (http://pet.inf.ufpr.br)"
+    "PET Computação UFPR <pet@inf.ufpr.br> (http://pet.inf.ufpr.br)",
+    "Saren Currie <saren@sarencurrie.com> (https://github.com/SarenCurrie)"
   ],
   "dependencies": {
     "express": "^4.12.4",
