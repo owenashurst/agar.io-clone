@@ -89,7 +89,7 @@ function registerChatCommand(name, description, callback) {
   chatCommands[name] = {
     description: description,
     callback: callback
-  }
+  };
 }
 
 function checkLatency() {
@@ -114,7 +114,7 @@ function toggleDarkMode(args) {
 }
 
 function printHelp() {
-  for (command in chatCommands) {
+  for (var command in chatCommands) {
     if (chatCommands.hasOwnProperty(command)) {
       addSystemLine('-' + command + ': ' + chatCommands[command].description);
     }
@@ -134,10 +134,10 @@ registerChatCommand('help', 'show information about chat commands', function () 
 });
 
 function sendChat(key) {
-  var key = key.which || key.keyCode;
+  key = key.which || key.keyCode;
   if (key == KEY_ENTER) {
     var text = chatInput.value.replace(/(<([^>]+)>)/ig,"");
-    if (text != "") {
+    if (text !== "") {
       if (text.indexOf('-') === 0) {
         var args = text.substring(1).split(' ');
         if (chatCommands[args[0]]) {
@@ -306,7 +306,7 @@ function gameLoop() {
         drawFood(foods[i]);
       }
 
-      for (var i = 0; i < enemies.length; i++) {
+      for (i = 0; i < enemies.length; i++) {
         if (enemies[i].id != player.id) {
           drawEnemy(enemies[i]);
         }
