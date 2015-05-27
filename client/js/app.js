@@ -12,6 +12,8 @@ var startPingTime = 0;
 
 var KEY_ENTER = 13;
 
+var chatCommands = {};
+
 var foodConfig = {
   border: 2,
   borderColor: "#f39c12",
@@ -83,16 +85,44 @@ function checkLatency() {
   socket.emit("ping");
 }
 
+function registerChatCommand(name, description, callback) {
+  chatCommands[name] = {
+    description: description,
+    callback: callback
+  }
+}
+
+function printHelp() {
+  for (command in chatCommands) {
+    if (chatCommands.hasOwnProperty(command)) {
+      addSystemLine('-' + command + ': ' + chatCommands[command].description);
+    }
+  }
+}
+
+registerChatCommand('ping', 'check your latency', function () {
+  checkLatency();
+});
+
+registerChatCommand('help', 'show information about chat commands', function () {
+  printHelp();
+});
+
 function sendChat(key) {
   var key = key.which || key.keyCode;
   if (key == KEY_ENTER) {
     var text = chatInput.value.replace(/(<([^>]+)>)/ig,"");
     if (text != "") {
-      if (text != "-ping") {
+      if (text.indexOf('-') === 0) {
+        var args = text.substring(1).split(' ');
+        if (chatCommands[args[0]]) {
+          chatCommands[args[0]].callback(args.slice(1));
+        } else {
+          addSystemLine('Unrecoginised Command: ' + text + ', type -help for more info');
+        }
+      } else {
         socket.emit("playerChat", { sender: player.name, message: text });
         addChatLine(player.name, text);
-      } else {
-        checkLatency();
       }
       chatInput.value = "";
     }
