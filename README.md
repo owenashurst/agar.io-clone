@@ -66,10 +66,13 @@ npm install
 After download all the dependencies, you can run the server with the following command to run the server.
 
 ```
-node server.js
+node server/server.js
+```
+
+or
+
+```
+npm start
 ```
 
 The game will then be accessible at `http://localhost:3000`.
-
-
-[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/huytd/agar.io-clone/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
