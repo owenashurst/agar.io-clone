@@ -39,7 +39,8 @@ function addFoods(target) {
     foods.push({
         id: (new Date()).getTime(),
         x: genPos(0, target.gameWidth),
-        y: genPos(0, target.gameHeight)
+        y: genPos(0, target.gameHeight),
+        color: randomColor()
     });
 }
 
@@ -61,6 +62,30 @@ function findIndex(arr, id) {
 
     return -1;
 
+}
+
+function randomColor() {
+    var color = '#' + ('00000'+(Math.random()*(1<<24)|0).toString(16)).slice(-6),
+        difference = 32,
+        c = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(color),
+        r = parseInt(c[1], 16) - difference,
+        g = parseInt(c[2], 16) - difference,
+        b = parseInt(c[3], 16) - difference;
+
+    if (r < 0) {
+        r = 0;
+    }
+    if (g < 0) {
+        g = 0;
+    }
+    if (b < 0) {
+        b = 0;
+    }
+
+    return {
+        fill: color,
+        border: '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)
+    }
 }
 
 function findPlayer(id) {
