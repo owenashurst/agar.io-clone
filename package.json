@@ -4,7 +4,7 @@
   "description": "A simple Agar.io clone",
   "main": "server.js",
   "scripts": {
-    "post:install": "bower install",
+    "postinstall": "./node_modules/bower/bin/bower install",
     "start": "node server/server.js",
     "test": "jshint ."
   },
@@ -19,6 +19,7 @@
     "Ariamiro <dossantosgusmaosavio@gmail.com> (https://github.com/Ariamiro)"
   ],
   "dependencies": {
+    "bower": "^1.4.1",
     "express": "^4.12.4",
     "socket.io": "^1.3.5"
   },
