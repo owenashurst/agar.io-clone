@@ -228,8 +228,8 @@ socket.on("RIP", function(){
 
 
 function drawFood(food) {
-  graph.strokeStyle = foodConfig.borderColor;
-  graph.fillStyle = foodConfig.fillColor;
+  graph.strokeStyle = food.color.border || foodConfig.borderColor;
+  graph.fillStyle = food.color.fill || foodConfig.fillColor;
   graph.lineWidth = foodConfig.border;
   graph.beginPath();
   graph.arc(food.x - player.x + screenWidth / 2, food.y - player.y + screenHeight / 2, foodConfig.size, 0, 2 * Math.PI);
