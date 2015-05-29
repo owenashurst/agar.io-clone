@@ -161,8 +161,6 @@ io.on('connection', function (socket) {
 
     // Heartbeat function, update everytime
     socket.on('playerSendTarget', function (target) {
-     // if you want to use uncomment the line below
-    //    console.log(currentPlayer.x + " " + currentPlayer.y);
         if (target.x != currentPlayer.x || target.y != currentPlayer.y) {
             movePlayer(currentPlayer, target);
 
