@@ -2,11 +2,11 @@
   "name": "agar-clone",
   "version": "1.0.0",
   "description": "A simple Agar.io clone",
-  "main": "server.js",
+  "main": "server/server.js",
   "scripts": {
-    "post:install": "bower install",
+    "postinstall": "./node_modules/bower/bin/bower install",
     "start": "node server/server.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jshint ."
   },
   "author": "Huy Tran",
   "contributors": [
@@ -14,13 +14,18 @@
     "Bjarne Oeverli <bjarne.oeverli@gmail.com> (https://github.com/bjarneo)",
     "Chris Morgan <chris.j.r.morgan@gmail.com> (https://github.com/drpotato)",
     "PET Computação UFPR <pet@inf.ufpr.br> (http://pet.inf.ufpr.br)",
-    "Nguyen Huu Thanh <giongto35@yahoo.com> (http://github.com/giongto35)"
+    "Saren Currie <saren@sarencurrie.com> (https://github.com/SarenCurrie)",
+    "Nguyen Huu Thanh <giongto35@yahoo.com> (https://github.com/giongto35)",
+    "Ariamiro <dossantosgusmaosavio@gmail.com> (https://github.com/Ariamiro)",
+    "VILLERS Mickaël <mickael.villers@epitech.eu> (https://github.com/villers)"
   ],
   "dependencies": {
+    "bower": "^1.4.1",
     "express": "^4.12.4",
     "socket.io": "^1.3.5"
   },
   "devDependencies": {
+    "jshint": "^2.7.0",
     "nodemon": "^1.2.1"
-   }
+  }
 }

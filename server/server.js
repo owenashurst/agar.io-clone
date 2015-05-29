@@ -39,7 +39,8 @@ function addFoods(target) {
     foods.push({
         id: (new Date()).getTime(),
         x: genPos(0, target.gameWidth),
-        y: genPos(0, target.gameHeight)
+        y: genPos(0, target.gameHeight),
+        color: randomColor()
     });
 }
 
@@ -63,6 +64,30 @@ function findIndex(arr, id) {
 
 }
 
+function randomColor() {
+    var color = '#' + ('00000'+(Math.random()*(1<<24)|0).toString(16)).slice(-6),
+        difference = 32,
+        c = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(color),
+        r = parseInt(c[1], 16) - difference,
+        g = parseInt(c[2], 16) - difference,
+        b = parseInt(c[3], 16) - difference;
+
+    if (r < 0) {
+        r = 0;
+    }
+    if (g < 0) {
+        g = 0;
+    }
+    if (b < 0) {
+        b = 0;
+    }
+
+    return {
+        fill: color,
+        border: '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)
+    }
+}
+
 function findPlayer(id) {
     var index = findIndex(users, id);
 
@@ -84,8 +109,8 @@ function movePlayer(player, target) {
     // deltaY = deltaY > 0 ? deltaY = Math.min(deltaY, target.y - player.y) : deltaY = Math.max(deltaY, target.y - player.y)
     // deltaX = deltaX > 0 ? deltaX = Math.min(deltaX, target.x - player.x) : deltaX = Math.max(deltaX, target.x - player.x)
     
-    player.y += deltaY;
-    player.x += deltaX;
+    player.y += ((player.y > 0 || player.y < 0 && deltaY > 0) && (player.y < player.gameHeight || player.y > player.gameHeight && deltaY < 0)) ? deltaY : 0;
+    player.x += ((player.x > 0 || player.x < 0 && deltaX > 0) && (player.x < player.gameWidth || player.x > player.gameWidth && deltaX < 0)) ? deltaX : 0;
 }
 
 
@@ -201,6 +226,12 @@ io.on('connection', function (socket) {
 // Don't touch on ip
 var ipaddress = process.env.OPENSHIFT_NODEJS_IP || process.env.IP || '127.0.0.1';
 var serverport = process.env.OPENSHIFT_NODEJS_PORT || process.env.PORT || 3000;
-http.listen( serverport, ipaddress, function() {
-    console.log('listening on *:' + serverport);
-});
+if (process.env.OPENSHIFT_NODEJS_IP != undefined) {
+    http.listen( serverport, ipaddress, function() {
+        console.log('listening on *:' + serverport);
+    });
+} else {
+    http.listen( serverport, function() {
+        console.log('listening on *:' + serverport);
+    });
+}
