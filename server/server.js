@@ -99,18 +99,14 @@ function hitTest(start, end, min) {
     return (distance <= min);
 }
 
-// From giongto35/agar.io-clone
 function movePlayer(player, target) {
     var dist = Math.sqrt((target.y - player.screenHeight / 2) * (target.y - player.screenHeight / 2) + (target.x - player.screenWidth / 2) * (target.x - player.screenWidth / 2)),
         deg = Math.atan2(target.y - player.screenHeight / 2, target.x - player.screenWidth / 2),
         deltaY = player.speed * Math.min(1, dist / (defaultPlayerSize + player.mass)) * Math.sin(deg),
         deltaX = player.speed * Math.min(1, dist / (defaultPlayerSize + player.mass)) * Math.cos(deg);
-    // This code is for moving in a screen
-    // deltaY = deltaY > 0 ? deltaY = Math.min(deltaY, target.y - player.y) : deltaY = Math.max(deltaY, target.y - player.y)
-    // deltaX = deltaX > 0 ? deltaX = Math.min(deltaX, target.x - player.x) : deltaX = Math.max(deltaX, target.x - player.x)
 
-    player.y += ((player.y > 0 || player.y < 0 && deltaY > 0) && (player.y < player.gameHeight || player.y > player.gameHeight && deltaY < 0)) ? deltaY : 0;
-    player.x += ((player.x > 0 || player.x < 0 && deltaX > 0) && (player.x < player.gameWidth || player.x > player.gameWidth && deltaX < 0)) ? deltaX : 0;
+    player.y += (player.y + deltaY >= 0 && player.y + deltaY <= player.gameHeight) ? deltaY : 0;
+    player.x += (player.x + deltaX >= 0 && player.x + deltaX <= player.gameWidth) ? deltaX : 0;
 }
 
 
