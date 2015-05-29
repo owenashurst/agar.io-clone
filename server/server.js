@@ -194,6 +194,10 @@ io.on('connection', function (socket) {
                         {x: users[e].x, y: users[e].y},
                         {x: currentPlayer.x, y: currentPlayer.y},
                         currentPlayer.mass + defaultPlayerSize
+                    ) || hitTest(
+                        {x: currentPlayer.x, y: currentPlayer.y},
+                        {x: users[e].x, y: users[e].y},
+                        users[e].mass + defaultPlayerSize
                     )) {
                     if (users[e].mass != 0 && users[e].mass < currentPlayer.mass - eatableMassDistance) {
                         if (currentPlayer.mass < maxSizeMass) {
@@ -207,6 +211,20 @@ io.on('connection', function (socket) {
                         sockets[users[e].id].emit('RIP');
                         sockets[users[e].id].disconnect();
                         users.splice(e, 1);
+                        break;
+                    }
+                    if (currentPlayer.mass != 0 && currentPlayer.mass < users[e].mass - eatableMassDistance) {
+                        if (users[e].mass < maxSizeMass) {
+                            users[e].mass += currentPlayer.mass;
+                        }
+
+                        if (users[e].speed < maxMoveSpeed) {
+                            users[e].speed += users[e].mass / massDecreaseRatio;
+                        }
+
+                        sockets[currentPlayer.id].emit('RIP');
+                        sockets[currentPlayer.id].disconnect();
+                        users.splice(currentPlayer, 1);
                         break;
                     }
                 }
