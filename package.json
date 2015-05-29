@@ -2,7 +2,7 @@
   "name": "agar-clone",
   "version": "1.0.0",
   "description": "A simple Agar.io clone",
-  "main": "server.js",
+  "main": "server/server.js",
   "scripts": {
     "postinstall": "./node_modules/bower/bin/bower install",
     "start": "node server/server.js",

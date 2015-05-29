@@ -5,6 +5,8 @@ var screenWidth = window.innerWidth;
 var screenHeight = window.innerHeight;
 var gameWidth = screenWidth * 3;
 var gameHeight = screenHeight * 3;
+var xoffset = -gameWidth;
+var yoffset = -gameHeight;
 
 var socket = io();
 var gameStart = false;
@@ -202,6 +204,8 @@ socket.on("serverSendPlayerChat", function(data){
 
 // Handle movement
 socket.on("serverTellPlayerMove", function(playerData) {
+  xoffset += (player.x - playerData.x);
+  yoffset += (player.y - playerData.y);
   player = playerData;
 });
 
@@ -278,6 +282,21 @@ function drawEnemy(enemy) {
   graph.fillText(enemy.name, enemy.x - player.x + screenWidth / 2, enemy.y - player.y + screenHeight / 2);
 }
 
+function drawgrid(){
+  for (var x = xoffset; x < screenWidth; x += screenHeight/20) {
+  graph.moveTo(x, 0);
+  graph.lineTo(x, screenHeight);
+  }
+
+  for (var y = yoffset ; y < screenHeight; y += screenHeight/20) {
+  graph.moveTo(0, y);
+  graph.lineTo(screenWidth, y);
+  }
+
+  graph.strokeStyle = "#ddd";
+  graph.stroke();
+}
+
 function gameInput(mouse) {
   target.x = mouse.clientX;
   target.y = mouse.clientY;
@@ -302,6 +321,7 @@ function gameLoop() {
     if (gameStart) {
       graph.fillStyle = backgroundColor;
       graph.fillRect(0, 0, screenWidth, screenHeight);
+      drawgrid();
       for (var i = 0; i < foods.length; i++) {
         drawFood(foods[i]);
       }
