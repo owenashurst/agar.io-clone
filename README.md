@@ -76,3 +76,6 @@ npm start
 ```
 
 The game will then be accessible at `http://localhost:3000`.
+
+## For Developers
+- [Game Architecture](https://github.com/huytd/agar.io-clone/wiki/Game-Architecture)
