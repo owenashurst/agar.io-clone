@@ -79,3 +79,24 @@ The game will then be accessible at `http://localhost:3000`.
 
 ## For Developers
 - [Game Architecture](https://github.com/huytd/agar.io-clone/wiki/Game-Architecture)
+
+## FAQ
+1. **What is this game?**
+
+  This is the clone of AgarIO game ([http://agar.io](http://agar.io)). Somebody said that AgarIO is the clone of the game named Osmos on iPad, I have no idea because I'm not played Osmos yet. (Hey! Cloneception =]] )
+2. **Why you clone this game?**
+
+  Well. The original game is still online, but it's closed source. And sometime, it's damn lag. I can play very well at my company (don't tell my boss!) but can't even connect when I'm at home. That's why me and the contributors want to make an open source version of this game, for learning purpose, and to let the community add some awesome features as they want, self-host on their own server to have fun with friends,...
+3. **Any plan for an online server to compete with AgarIO or making some money?**
+
+  Actually no! This game is belong to the community, and I have no plan to making money or compete with any product with this. And I won't have enough time to run my own server. But if you want, you can do it.
+4. **Can I deploy this game to my own server?**
+
+  Yes you can! This game was made for that!
+5. **I don't like HTML5 Canvas. Can I write my own game client with this server?**
+
+  Yes for sure. As long as your client support WebSocket, you can write your game client in any language/technology, even with Unity3D (there is an open source library for Unity to communicate with WebSocket).
+6. **Can I use some code in this project to my own project?**
+
+  Yes you can.
+
