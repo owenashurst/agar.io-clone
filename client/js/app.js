@@ -1,4 +1,18 @@
-var playerName = prompt("Your name please:").replace(/(<([^>]+)>)/ig,"");
+var playerName;
+var socket;
+
+window.onload = function () {
+	document.getElementById("startButton").onclick = function () {
+		var tmpName = document.getElementById("playerNameInput").value;
+		playerName = tmpName.replace(/(<([^>]+)>)/ig, "");
+		document.getElementById("gameAreaWrapper").style.display = "block";
+		document.getElementById("startMenuWrapper").style.display = "none";
+		socket = io();
+		SetupSocket(socket);
+		animloop();
+	}
+}
+
 
 // Canvas
 var screenWidth = window.innerWidth;
@@ -8,7 +22,6 @@ var gameHeight = screenHeight * 3;
 var xoffset = -gameWidth;
 var yoffset = -gameHeight;
 
-var socket = io();
 var gameStart = false;
 var disconnected = false;
 
@@ -156,81 +169,82 @@ function sendChat(key) {
   }
 }
 
-// Handle ping
-socket.on("pong", function(){
-  var latency = Date.now() - startPingTime;
-  console.log("Latency: " + latency + "ms");
-  addSystemLine("Ping: " + latency + "ms");
-});
+function SetupSocket(socket) {
+	// Handle ping
+	socket.on("pong", function () {
+		var latency = Date.now() - startPingTime;
+		console.log("Latency: " + latency + "ms");
+		addSystemLine("Ping: " + latency + "ms");
+	});
 
-// Handle error
-socket.on("connect_failed", function() {
-  socket.close();
-  disconnected = true;
-});
+	// Handle error
+	socket.on("connect_failed", function () {
+		socket.close();
+		disconnected = true;
+	});
 
-socket.on("disconnect", function() {
-  socket.close();
-  disconnected = true;
-});
+	socket.on("disconnect", function () {
+		socket.close();
+		disconnected = true;
+	});
 
-// Handle connection
-socket.on("welcome", function(userID) {
-  player.id = userID;
-  player.name = playerName;
-  socket.emit("gotit", player);
-  gameStart = true;
-  console.log("Game is started: " + gameStart);
-  addSystemLine("Connected to the game!");
-});
+	// Handle connection
+	socket.on("welcome", function (userID) {
+		player.id = userID;
+		player.name = playerName;
+		socket.emit("gotit", player);
+		gameStart = true;
+		console.log("Game is started: " + gameStart);
+		addSystemLine("Connected to the game!");
+	});
 
-socket.on("playerDisconnect", function(data) {
-  enemies = data.playersList;
-  document.getElementById("status").innerHTML = "Players: " + enemies.length;
-  addSystemLine("Player <b>" + data.disconnectName + "</b> disconnected!");
-});
+	socket.on("playerDisconnect", function (data) {
+		enemies = data.playersList;
+		document.getElementById("status").innerHTML = "Players: " + enemies.length;
+		addSystemLine("Player <b>" + data.disconnectName + "</b> disconnected!");
+	});
 
-socket.on("playerJoin", function(data) {
-  console.log(data);
-  enemies = data.playersList;
-  document.getElementById("status").innerHTML = "Players: " + enemies.length;
-  addSystemLine("Player <b>" + data.connectedName + "</b> joined!");
-});
+	socket.on("playerJoin", function (data) {
+		console.log(data);
+		enemies = data.playersList;
+		document.getElementById("status").innerHTML = "Players: " + enemies.length;
+		addSystemLine("Player <b>" + data.connectedName + "</b> joined!");
+	});
 
-// Chat
-socket.on("serverSendPlayerChat", function(data){
-  addChatLine(data.sender, data.message);
-});
+	// Chat
+	socket.on("serverSendPlayerChat", function (data) {
+		addChatLine(data.sender, data.message);
+	});
 
-// Handle movement
-socket.on("serverTellPlayerMove", function(playerData) {
-  xoffset += (player.x - playerData.x);
-  yoffset += (player.y - playerData.y);
-  player = playerData;
-});
+	// Handle movement
+	socket.on("serverTellPlayerMove", function (playerData) {
+		xoffset += (player.x - playerData.x);
+		yoffset += (player.y - playerData.y);
+		player = playerData;
+	});
 
-socket.on("serverUpdateAllPlayers", function(players) {
-  enemies = players;
-});
-
-
-// Update others
-socket.on("serverTellPlayerUpdateFoods", function(foodsList) {
-  foods = foodsList;
-});
-
-socket.on("serverUpdateAllFoods", function(foodsList) {
-  foods = foodsList;
-});
+	socket.on("serverUpdateAllPlayers", function (players) {
+		enemies = players;
+	});
 
 
-// Die
-socket.on("RIP", function(){
-  gameStart = false;
-  socket.close();
-});
+	// Update others
+	socket.on("serverTellPlayerUpdateFoods", function (foodsList) {
+		foods = foodsList;
+	});
+
+	socket.on("serverUpdateAllFoods", function (foodsList) {
+		foods = foodsList;
+	});
 
 
+	// Die
+	socket.on("RIP", function () {
+		gameStart = false;
+		socket.close();
+	});
+
+}
 function drawFood(food) {
   graph.strokeStyle = food.color.border || foodConfig.borderColor;
   graph.fillStyle = food.color.fill || foodConfig.fillColor;
@@ -311,10 +325,10 @@ window.requestAnimFrame = (function(){
           };
 })();
 
-(function animloop(){
+function animloop(){
   requestAnimFrame(animloop);
   gameLoop();
-})();
+};
 
 function gameLoop() {
   if (!disconnected) {

@@ -1,21 +1,28 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Agar.IO Clone</title>
+    <meta charset="UTF-8">
+    <title>Agar.IO Clone</title>
 
-  <link rel="stylesheet" href="/css/main.css"/>
+    <link rel="stylesheet" href="/css/main.css" />
 </head>
 <body>
-  <div id="status">Players: 0</div>
-  <div class="chatbox">
-    <ul id="chatList" class="chat-list">
-    </ul>
-    <input id="chatInput" type="text" class="chat-input" placeholder="Chat here..."/>
-  </div>
-  <canvas tabindex="1" id="cvs"></canvas>
-
-  <script src="/socket.io/socket.io.js"></script>
-  <script src="./js/app.js"></script>
+    <div id="gameAreaWrapper" style="display:none;">
+        <div id="status">Players: 0</div>
+        <div class="chatbox">
+            <ul id="chatList" class="chat-list"></ul>
+            <input id="chatInput" type="text" class="chat-input" placeholder="Chat here..." />
+        </div>
+        <canvas tabindex="1" id="cvs"></canvas>
+    </div>
+    <div id="startMenuWrapper">
+        <div id="startMenu">
+            <p> Agar.io-clone </p>
+            Nick: <input type="text" id="playerNameInput" />
+            <button id="startButton">Play</button>
+        </div>
+    </div>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="./js/app.js"></script>
 </body>
 </html>
