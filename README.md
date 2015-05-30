@@ -83,7 +83,7 @@ The game will then be accessible at `http://localhost:3000`.
 ## FAQ
 1. **What is this game?**
 
-  This is the clone of AgarIO game ([http://agar.io](http://agar.io)). Somebody said that AgarIO is the clone of the game named Osmos on iPad, I have no idea because I'm not played Osmos yet. (Hey! Cloneception =]] )
+  This is a clone of AgarIO game ([http://agar.io](http://agar.io)). Somebody said that AgarIO is a clone of Osmos game on iPad, I have no idea because I'm not played Osmos yet. (Hey! Cloneception =]] )
 2. **Why you clone this game?**
 
   Well. The original game is still online, but it's closed source. And sometime, it's damn lag. I can play very well at my company (don't tell my boss!) but can't even connect when I'm at home. That's why me and the contributors want to make an open source version of this game, for learning purpose, and to let the community add some awesome features as they want, self-host on their own server to have fun with friends,...
