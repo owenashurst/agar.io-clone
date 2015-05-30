@@ -29,9 +29,7 @@
     "css-loader": "^0.10.1",
     "express": "^4.12.3",
     "style-loader": "^0.10.2",
-    "webpack": "^1.8.5"
-  },
-  "devDependencies": {
+    "webpack": "^1.8.5",
     "http-proxy": "^1.10.1",
     "webpack-dev-server": "^1.8.0"
   }
