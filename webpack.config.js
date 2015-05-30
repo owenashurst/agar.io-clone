@@ -6,7 +6,7 @@ var buildPath = path.resolve(__dirname, 'public', 'build');
 
 var config = {
   context: __dirname,
-  devtool: 'eval',
+  devtool: 'eval-source-map',
   entry: [
     'webpack-dev-server/client?http://localhost:8080', 
     'webpack/hot/dev-server', 
