@@ -75,11 +75,25 @@ canvas {
     width: 300px;
     height: 400px;
     border-radius: 15px;
-    box-shadow: #000000 0px 0px 10px;
-    border:solid 1px black;
+    box-shadow: #0094ff 0px 0px 8px;
+    
 }
 
 #startMenu p {
+    padding-top:20px;
     text-align:center;
-    font-size: large;
+    font-size: x-large;
+}
+
+#playerNameInput {
+    margin-left: 50px;
+    width: 195px;
+}
+
+#startButton {
+    text-align: center;
+    margin: auto;
+    width:200px;
+    margin-top:10px; 
+    margin-left: 50px;
 }
