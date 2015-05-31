@@ -89,7 +89,10 @@ function addChatLine(name, text) {
   chatLine.className = (name == player.name)?"me":"friend";
   chatLine.innerHTML = "<b>" + name + "</b>: " + text;
   var chatList = document.getElementById("chatList");
-  chatList.insertBefore(chatLine, chatList.childNodes[0]);
+  if (chatList.childNodes.length >=5) {
+    chatList.removeChild(chatList.childNodes[0]);
+  }
+  chatList.appendChild(chatLine);
 }
 
 function addSystemLine(text) {
@@ -97,7 +100,10 @@ function addSystemLine(text) {
   chatLine.className = "system";
   chatLine.innerHTML = text;
   var chatList = document.getElementById("chatList");
-  chatList.insertBefore(chatLine, chatList.childNodes[0]);
+  if (chatList.childNodes.length >=5) {
+    chatList.removeChild(chatList.childNodes[0]);
+  }
+  chatList.appendChild(chatLine, chatList.childNodes[0]);
 }
 
 function registerChatCommand(name, description, callback) {
