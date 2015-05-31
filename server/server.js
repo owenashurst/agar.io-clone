@@ -32,7 +32,7 @@ var eatableMassDistance = 5;
 app.use(express.static(__dirname + '/../client'));
 
 function genPos(from, to) {
-    return Math.floor(Math.random() * to) + from;
+    return Math.floor(Math.random() * (to - from)) + from;
 }
 
 function addFoods(target) {
