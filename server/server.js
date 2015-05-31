@@ -100,11 +100,17 @@ function hitTest(start, end, min) {
 }
 
 function movePlayer(player, target) {
-    var dist = Math.sqrt((target.y - player.screenHeight / 2) * (target.y - player.screenHeight / 2) + (target.x - player.screenWidth / 2) * (target.x - player.screenWidth / 2)),
-        deg = Math.atan2(target.y - player.screenHeight / 2, target.x - player.screenWidth / 2),
-        deltaY = player.speed * Math.min(1, dist / (defaultPlayerSize + player.mass)) * Math.sin(deg),
-        deltaX = player.speed * Math.min(1, dist / (defaultPlayerSize + player.mass)) * Math.cos(deg);
+	var dist = Math.sqrt(Math.pow(target.y - player.screenHeight / 2, 2) + Math.pow(target.x - player.screenWidth / 2, 2)),
+	deg = Math.atan2(target.y - player.screenHeight / 2, target.x - player.screenWidth / 2);
+	
+	var deltaY = player.speed * Math.sin(deg);
+	var deltaX = player.speed * Math.cos(deg);
 
+	if (dist < (100 + defaultPlayerSize + player.mass)) {
+		deltaY *= dist / (100 + defaultPlayerSize + player.mass);
+		deltaX *= dist / (100 + defaultPlayerSize + player.mass);
+	} 
+	
     player.y += (player.y + deltaY >= 0 && player.y + deltaY <= player.gameHeight) ? deltaY : 0;
     player.x += (player.x + deltaX >= 0 && player.x + deltaX <= player.gameWidth) ? deltaX : 0;
 }
