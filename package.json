@@ -4,7 +4,7 @@
   "description": "A simple Agar.io clone",
   "main": "server/server.js",
   "scripts": {
-    "postinstall": "./node_modules/bower/bin/bower install",
+    "postinstall": "./node_modules/bower/bin/bower install && cp server/config.dist.yml server/config.yml",
     "start": "node server/server.js",
     "test": "jshint ."
   },
@@ -22,7 +22,8 @@
   "dependencies": {
     "bower": "^1.4.1",
     "express": "^4.12.4",
-    "socket.io": "^1.3.5"
+    "socket.io": "^1.3.5",
+    "js-yaml": "~3.3.1"
   },
   "devDependencies": {
     "jshint": "^2.7.0",
