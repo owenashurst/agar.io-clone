@@ -25,7 +25,7 @@ A simple Agar.io clone built with socket.io and HTML5 Canvas on top of NodeJS.
 #### Game Basics
 - Move your mouse on the screen to move your character
 - Eat food and other players in order to grow your character (food respawns every time a player eats it)
-- A player's **mass** is the amount of food eaten
+- A player's **mass** is the number of food particles eaten
 - **Objective**: Try to get fat and eat other players
 
 #### Gameplay Rules
