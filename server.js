@@ -1,8 +1,10 @@
 var express = require('express');
 var path = require('path');
 var httpProxy = require('http-proxy');
+var http = require('http');
 var proxy = httpProxy.createProxyServer({
-  changeOrigin: true
+  changeOrigin: true,
+  ws: true
 }); 
 var app = express();
 var isProduction = process.env.NODE_ENV === 'production';
@@ -27,13 +29,30 @@ if (!isProduction) {
     });
   });
 
+  proxy.on('error', function(e) {
+    // Just catch it
+  });
+
+  // We need to use basic HTTP service to proxy
+  // websocket requests from webpack
+  var server = http.createServer(app);
+
+  server.on('upgrade', function (req, socket, head) {
+    proxy.ws(req, socket, head);
+  });
+
+  server.listen(port, function () {
+    console.log('Server running on port ' + port);
+  }); 
+
+} else {
+
+  // And run the server
+  app.listen(port, function () {
+    console.log('Server running on port ' + port);
+  });
+
 }
 
-proxy.on('error', function(e) {
-  console.log('Could not connect to proxy, please try again...');
-});
 
-// And run the server
-app.listen(port, function () {
-  console.log('Server running on port ' + port);
-});
+
