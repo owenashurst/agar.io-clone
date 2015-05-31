@@ -25,9 +25,15 @@ if (!isProduction) {
   bundle();
   app.all('/build/*', function (req, res) {
     proxy.web(req, res, {
-        target: 'http://localhost:8080'
+        target: 'http://127.0.0.1:3001'
     });
   });
+  app.all('/socket.io*', function (req, res) {
+    proxy.web(req, res, {
+      target: 'http://127.0.0.1:3001'
+    });
+  });
+
 
   proxy.on('error', function(e) {
     // Just catch it

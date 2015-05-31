@@ -8,7 +8,7 @@ var config = {
   context: __dirname,
   devtool: 'eval-source-map',
   entry: [
-    'webpack-dev-server/client?http://localhost:8080', 
+    'webpack-dev-server/client?http://localhost:3000', 
     'webpack/hot/dev-server', 
     path.resolve(appPath, 'main.js')],
   output: {
