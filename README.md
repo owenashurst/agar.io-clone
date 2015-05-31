@@ -23,15 +23,15 @@ A simple Agar.io clone built with socket.io and HTML5 Canvas on top of NodeJS.
 >You can check out a more elaborated how to play on our [wiki](https://github.com/huytd/agar.io-clone/wiki/How-to-Play)
 
 #### Game Basics
-- Move your mouse on the screen to move yourself
-- Eat food and other players in order to grow yourself (food respawns every time a player eats it)
-- Player's **mass** is the number of food eaten
-- Try to get fat and eat other players
+- Move your mouse on the screen to move your character
+- Eat food and other players in order to grow your character (food respawns every time a player eats it)
+- A player's **mass** is the number of food particles eaten
+- **Objective**: Try to get fat and eat other players
 
 #### Gameplay Rules
-- Players who haven't eaten yet can't be eaten
-- Everytime a player joins the game, **3** foods will be spawned
-- Everytime a food is eaten by a player, **1** new food will be respawned
+- Players who haven't eaten yet cannot be eaten
+- Everytime a player joins the game, **3** food particles will spawn
+- Everytime a food particle is eaten by a player, **1** new food particle will respawn
 - The more food you eat, the slower you move
 
 ---
@@ -63,7 +63,7 @@ npm install
 ```
 
 #### Running the Server
-After download all the dependencies, you can run the server with the following command to run the server.
+After downloading all the dependencies, you can run the server with the following command:
 
 ```
 node server/server.js
@@ -83,19 +83,19 @@ The game will then be accessible at `http://localhost:3000`.
 ## FAQ
 1. **What is this game?**
 
-  This is a clone of AgarIO game ([http://agar.io](http://agar.io)). Somebody said that AgarIO is a clone of Osmos game on iPad, I have no idea because I'm not played Osmos yet. (Hey! Cloneception =]] )
+  This is a clone of the AgarIO game ([http://agar.io](http://agar.io)). Somebody said that AgarIO is a clone of the game Osmos on the iPad, I have no idea because I have not played Osmos yet. (Hey! Cloneception =]] )
 2. **Why you clone this game?**
 
-  Well. The original game is still online, but it's closed source. And sometime, it's damn lag. I can play very well at my company (don't tell my boss!) but can't even connect when I'm at home. That's why me and the contributors want to make an open source version of this game, for learning purpose, and to let the community add some awesome features as they want, self-host on their own server to have fun with friends,...
-3. **Any plan for an online server to compete with AgarIO or making some money?**
+  Well. The original game is still online, but it's closed source. And sometimes, it's subject to damn lag. I can play very well at my company (don't tell my boss!) but can't even connect when I'm at home. That's why me and the contributors want to make an open source version of this game, for learning purposes, and to let the community add some awesome features as they want, self-host on their own server to have fun with friends,...
+3. **Any plan for an online server to compete with AgarIO or make some money?**
 
-  Actually no! This game is belong to the community, and I have no plan to making money or compete with any product with this. And I won't have enough time to run my own server. But if you want, you can do it.
+  Actually no! This game belongs to the community, and I have no plan to make money or compete with any product with this. And I won't have enough time to run my own server. But if you want, you can do it.
 4. **Can I deploy this game to my own server?**
 
   Yes you can! This game was made for that!
 5. **I don't like HTML5 Canvas. Can I write my own game client with this server?**
 
-  Yes for sure. As long as your client support WebSocket, you can write your game client in any language/technology, even with Unity3D (there is an open source library for Unity to communicate with WebSocket).
+  Yes for sure. As long as your client supports WebSockets, you can write your game client in any language/technology, even with Unity3D (there is an open source library for Unity to communicate with WebSockets).
 6. **Can I use some code in this project to my own project?**
 
   Yes you can.
