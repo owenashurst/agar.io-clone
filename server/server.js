@@ -3,36 +3,47 @@ var express = require('express');
 var app = express();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
+var fs = require('fs');
+var yaml = require('js-yaml');
+
+var configFilePath = 'server/config.yml'
+
+if (!fs.existsSync(configFilePath)) {
+    console.log("Config file not found!");
+    return;
+}
+
+var config = yaml.safeLoad(fs.readFileSync(configFilePath));
 
 var users = [];
 var foods = [];
 var sockets = [];
 
 
-var maxSizeMass = 50;
-var maxMoveSpeed = 10;
+var maxSizeMass = config.maxSizeMass;
+var maxMoveSpeed = config.maxMoveSpeed;
 
-var massDecreaseRatio = 1000;
+var massDecreaseRatio = config.massDecreaseRatio;
 
-var foodMass = 1;
+var foodMass = config.foodMass;
 
-var newFoodPerPlayer = 30;
-var respawnFoodPerPlayer = 1;
+var newFoodPerPlayer = config.newFoodPerPlayer;
+var respawnFoodPerPlayer = config.respawnFoodPerPlayer;
 
-var foodRandomWidth = 500;
-var foodRandomHeight = 500;
-var maxFoodCount = 50;
+var foodRandomWidth = config.foodRandomWidth;
+var foodRandomHeight = config.foodRandomHeight;
+var maxFoodCount = config.maxFoodCount;
 
-var noPlayer = 0;
+var noPlayer = config.noPlayer;
 
-var defaultPlayerSize = 10;
+var defaultPlayerSize = config.defaultPlayerSize;
 
-var eatableMassDistance = 5;
+var eatableMassDistance = config.eatableMassDistance;
 
 app.use(express.static(__dirname + '/../client'));
 
 function genPos(from, to) {
-    return Math.floor(Math.random() * to) + from;
+    return Math.floor(Math.random() * (to - from)) + from;
 }
 
 function addFoods(target) {
@@ -120,9 +131,13 @@ io.on('connection', function (socket) {
     console.log('A user connected. Assigning UserID...');
 
     var userID = socket.id;
+    var playerSettings = {
+      id: userID,
+      hue: Math.round(Math.random() * 360)
+    };
     var currentPlayer = {};
 
-    socket.emit('welcome', userID);
+    socket.emit('welcome', playerSettings);
 
     socket.on('gotit', function (player) {
         player.id = userID;
@@ -247,13 +262,13 @@ io.on('connection', function (socket) {
 
 // Don't touch on ip
 var ipaddress = process.env.OPENSHIFT_NODEJS_IP || process.env.IP || '127.0.0.1';
-var serverport = process.env.OPENSHIFT_NODEJS_PORT || process.env.PORT || 3000;
+var serverport = process.env.OPENSHIFT_NODEJS_PORT || process.env.PORT || config.port;
 if (process.env.OPENSHIFT_NODEJS_IP !== undefined) {
     http.listen( serverport, ipaddress, function() {
         console.log('listening on *:' + serverport);
     });
 } else {
     http.listen( serverport, function() {
-        console.log('listening on *:' + serverport);
+        console.log('listening on *:' + config.port);
     });
 }

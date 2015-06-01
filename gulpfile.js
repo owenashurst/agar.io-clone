@@ -18,11 +18,16 @@ gulp.task('move-client', function () {
 		.pipe(gulp.dest('./bin/client/'));
 });
 
-gulp.task('build-server', function () {
+gulp.task('build-server', ['move-server'], function () {
 	return gulp.src('server/*.js')
 		.pipe(jshint())
 		.pipe(jshint.reporter('default', { verbose: true }))
 		.pipe(gulp.dest('bin/server/'));
+});
+
+gulp.task('move-server', function () {
+	return gulp.src(['server/**/*.*', '!server/**/*.js'])
+		.pipe(gulp.dest('./bin/server/'));
 });
 
 gulp.task('watch', ["build"], function () {
@@ -36,6 +41,7 @@ gulp.task('run', ["build"], function () {
 		delay: 10,
 		script: 'server/server.js',
 		cwd: "./bin/",
+		args: ["/server/config.yml"],
 		ext: 'html js css'
 	})
 	  .on('restart', function () {
