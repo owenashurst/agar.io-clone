@@ -51,7 +51,8 @@ function addFoods(target) {
         id: (new Date()).getTime(),
         x: genPos(0, target.gameWidth),
         y: genPos(0, target.gameHeight),
-        color: randomColor()
+        color: randomColor(),
+        rotation: Math.random() * (Math.PI * 2)
     });
 }
 
