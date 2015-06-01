@@ -264,10 +264,8 @@ io.on('connection', function (socket) {
             }
 
             // Do some continuos emit
-            socket.emit('serverTellPlayerMove', currentPlayer);
-            socket.emit('serverTellPlayerUpdateFoods', foods);
-            socket.broadcast.emit('serverUpdateAllPlayers', users);
-            socket.broadcast.emit('serverUpdateAllFoods', foods);
+            socket.emit('serverTellPlayer', currentPlayer, foods);
+            socket.broadcast.emit('serverUpdateAll', users, foods);
         }
     });
 });
