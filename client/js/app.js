@@ -274,7 +274,6 @@ function drawFood(food) {
   graph.fillStyle = food.color.fill || foodConfig.fillColor;
   graph.lineWidth = foodConfig.border;
   drawCircle(food.x - player.x + screenWidth / 2, food.y - player.y + screenHeight / 2, foodConfig.size);
-  graph.fill();
 }
 
 function drawPlayer() {
