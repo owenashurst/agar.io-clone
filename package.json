@@ -28,11 +28,14 @@
     "js-yaml": "~3.3.1"
   },
   "devDependencies": {
+    "babelify": "^6.1.2",
+    "browserify": "^10.2.3",
     "gulp": "^3.8.11",
     "gulp-babel": "^5.1.0",
     "gulp-jshint": "^1.11.0",
     "gulp-nodemon": "^2.0.3",
     "jshint": "^2.7.0",
-    "nodemon": "^1.2.1"
+    "nodemon": "^1.2.1",
+    "vinyl-source-stream": "^1.1.0"
   }
 }
