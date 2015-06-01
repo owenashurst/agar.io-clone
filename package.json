@@ -4,9 +4,10 @@
   "description": "A simple Agar.io clone",
   "main": "server/server.js",
   "scripts": {
-    "postinstall": "./node_modules/bower/bin/bower install",
-    "start": "node server/server.js",
-    "test": "jshint ."
+    "postinstall": "node ./node_modules/bower/bin/bower install && node ./node_modules/gulp/bin/gulp.js build",
+    "start": "node ./node_modules/gulp/bin/gulp.js run",
+    "watch": "node ./node_modules/gulp/bin/gulp.js watch",
+    "test": "node ./node_modules/jshint/bin/jshint ."
   },
   "author": "Huy Tran",
   "contributors": [
@@ -27,6 +28,10 @@
     "js-yaml": "~3.3.1"
   },
   "devDependencies": {
+    "gulp": "^3.8.11",
+    "gulp-babel": "^5.1.0",
+    "gulp-jshint": "^1.11.0",
+    "gulp-nodemon": "^2.0.3",
     "jshint": "^2.7.0",
     "nodemon": "^1.2.1"
   }
