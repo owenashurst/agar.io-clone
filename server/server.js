@@ -6,12 +6,8 @@ var io = require('socket.io')(http);
 var fs = require('fs');
 var yaml = require('js-yaml');
 
-var configFilePath = 'server/config.yml'
+var configFilePath = 'config/config.yml'
 
-if (!fs.existsSync(configFilePath)) {
-    console.log("Config file not found!");
-    return;
-}
 
 var config = yaml.safeLoad(fs.readFileSync(configFilePath));
 
@@ -105,6 +101,10 @@ function findPlayer(id) {
     return index !== -1 ? users[index] : null;
 }
 
+function removePlayer(id) {
+    users.splice(findIndex(users, id), 1);
+}
+
 function hitTest(start, end, min) {
     var distance = Math.sqrt((start.x - end.x) * (start.x - end.x) + (start.y - end.y) * (start.y - end.y));
     return (distance <= min);
@@ -113,15 +113,15 @@ function hitTest(start, end, min) {
 function movePlayer(player, target) {
 	var dist = Math.sqrt(Math.pow(target.y - player.screenHeight / 2, 2) + Math.pow(target.x - player.screenWidth / 2, 2)),
 	deg = Math.atan2(target.y - player.screenHeight / 2, target.x - player.screenWidth / 2);
-	
+
 	var deltaY = player.speed * Math.sin(deg);
 	var deltaX = player.speed * Math.cos(deg);
 
 	if (dist < (100 + defaultPlayerSize + player.mass)) {
 		deltaY *= dist / (100 + defaultPlayerSize + player.mass);
 		deltaX *= dist / (100 + defaultPlayerSize + player.mass);
-	} 
-	
+	}
+
     player.y += (player.y + deltaY >= 0 && player.y + deltaY <= player.gameHeight) ? deltaY : 0;
     player.x += (player.x + deltaX >= 0 && player.x + deltaX <= player.gameWidth) ? deltaX : 0;
 }
@@ -163,11 +163,19 @@ io.on('connection', function (socket) {
     });
 
     socket.on('disconnect', function () {
-        var playerIndex = findIndex(users, userID);
-        var playerName = users[playerIndex].name;
-        users.splice(playerIndex, 1);
+        var playerName = findPlayer(userID).name;
+
+        removePlayer(userID);
+
         console.log('User #' + userID + ' disconnected');
-        socket.broadcast.emit('playerDisconnect', {playersList: users, disconnectName: playerName});
+
+        socket.broadcast.emit(
+            'playerDisconnect',
+            {
+                playersList: users,
+                disconnectName: playerName
+            }
+        );
     });
 
     socket.on('playerChat', function (data) {

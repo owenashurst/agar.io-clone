@@ -4,7 +4,7 @@
   "description": "A simple Agar.io clone",
   "main": "server/server.js",
   "scripts": {
-    "postinstall": "./node_modules/bower/bin/bower install && cp server/config.dist.yml server/config.yml",
+    "postinstall": "./node_modules/bower/bin/bower install && cp server/config/config.dist.yml server/config/config.yml",
     "start": "node server/server.js",
     "test": "jshint ."
   },
