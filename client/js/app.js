@@ -10,8 +10,8 @@ window.onload = function () {
 		socket = io();
 		SetupSocket(socket);
 		animloop();
-	}
-}
+	};
+};
 
 
 // Canvas
@@ -40,23 +40,23 @@ var foodConfig = {
 };
 
 var playerConfig = {
-  border: 3,
+  border: 5,
   borderColor: "#c0392b",
   fillColor: "#ea6153",
   textColor: "#FFFFFF",
   textBorder: "#000000",
   textBorderSize: 3,
-  defaultSize: 10
+  defaultSize: 8
 };
 
 var enemyConfig = {
-  border: 3,
+  border: 5,
   borderColor: "#27ae60",
   fillColor: "#2ecc71",
   textColor: "#FFFFFF",
   textBorder: "#000000",
   textBorderSize: 3,
-  defaultSize: 10
+  defaultSize: 8
 };
 
 var player = {
@@ -195,9 +195,10 @@ function SetupSocket(socket) {
 	});
 
 	// Handle connection
-	socket.on("welcome", function (userID) {
-		player.id = userID;
+	socket.on("welcome", function (playerSettings) {
 		player.name = playerName;
+		player.id = playerSettings.id;
+		player.hue = playerSettings.hue;
 		socket.emit("gotit", player);
 		gameStart = true;
 		console.log("Game is started: " + gameStart);
@@ -211,7 +212,6 @@ function SetupSocket(socket) {
 	});
 
 	socket.on("playerJoin", function (data) {
-		console.log(data);
 		enemies = data.playersList;
 		document.getElementById("status").innerHTML = "Players: " + enemies.length;
 		addSystemLine("Player <b>" + data.connectedName + "</b> joined!");
@@ -251,24 +251,40 @@ function SetupSocket(socket) {
 	});
 
 }
-function drawFood(food) {
-  graph.strokeStyle = food.color.border || foodConfig.borderColor;
-  graph.fillStyle = food.color.fill || foodConfig.fillColor;
-  graph.lineWidth = foodConfig.border;
+
+function drawCircle(centerX, centerY, size) {
+  var theta = 0,
+      x = 0,
+      y = 0,
+      radius = size * 1.5;
+
   graph.beginPath();
-  graph.arc(food.x - player.x + screenWidth / 2, food.y - player.y + screenHeight / 2, foodConfig.size, 0, 2 * Math.PI);
+
+  for(var i = 0; i < size; i++) {
+    theta = (i / size) * 2 * Math.PI;
+    x = centerX + radius * Math.sin(theta);
+    y = centerY + radius * Math.cos(theta);
+    graph.lineTo(x, y);
+  }
+
+  graph.closePath();
   graph.stroke();
   graph.fill();
 }
 
-function drawPlayer() {
-  graph.strokeStyle = playerConfig.borderColor;
-  graph.fillStyle = playerConfig.fillColor;
-  graph.lineWidth = playerConfig.border;
-  graph.beginPath();
-  graph.arc(screenWidth / 2, screenHeight / 2, playerConfig.defaultSize + player.mass, 0, 2 * Math.PI);
-  graph.stroke();
+function drawFood(food) {
+  graph.strokeStyle = food.color.border || foodConfig.borderColor;
+  graph.fillStyle = food.color.fill || foodConfig.fillColor;
+  graph.lineWidth = foodConfig.border;
+  drawCircle(food.x - player.x + screenWidth / 2, food.y - player.y + screenHeight / 2, foodConfig.size);
   graph.fill();
+}
+
+function drawPlayer() {
+  graph.strokeStyle = 'hsl(' + player.hue + ', 80%, 40%)';
+  graph.fillStyle = 'hsl(' + player.hue + ', 70%, 50%)';
+  graph.lineWidth = playerConfig.border;
+  drawCircle(screenWidth / 2, screenHeight / 2, playerConfig.defaultSize + player.mass);
 
   var fontSize = (player.mass / 2) + playerConfig.defaultSize;
   graph.lineWidth = playerConfig.textBorderSize;
@@ -282,13 +298,10 @@ function drawPlayer() {
 }
 
 function drawEnemy(enemy) {
-  graph.strokeStyle = enemyConfig.borderColor;
-  graph.fillStyle = enemyConfig.fillColor;
+  graph.strokeStyle = 'hsl(' + enemy.hue + ', 80%, 60%)';
+  graph.fillStyle = 'hsl(' + enemy.hue + ', 80%, 70%)';
   graph.lineWidth = enemyConfig.border;
-  graph.beginPath();
-  graph.arc(enemy.x - player.x + screenWidth / 2, enemy.y - player.y + screenHeight / 2, enemyConfig.defaultSize + enemy.mass, 0, 2 * Math.PI);
-  graph.fill();
-  graph.stroke();
+  drawCircle(enemy.x - player.x + screenWidth / 2, enemy.y - player.y + screenHeight / 2, enemyConfig.defaultSize + enemy.mass);
 
   var fontSize = (enemy.mass / 2) + enemyConfig.defaultSize;
 
@@ -304,16 +317,17 @@ function drawEnemy(enemy) {
 
 function drawgrid(){
   for (var x = xoffset; x < screenWidth; x += screenHeight/20) {
-  graph.moveTo(x, 0);
-  graph.lineTo(x, screenHeight);
+    graph.moveTo(x, 0);
+    graph.lineTo(x, screenHeight);
   }
 
   for (var y = yoffset ; y < screenHeight; y += screenHeight/20) {
-  graph.moveTo(0, y);
-  graph.lineTo(screenWidth, y);
+    graph.moveTo(0, y);
+    graph.lineTo(screenWidth, y);
   }
 
   graph.strokeStyle = "#ddd";
+  graph.lineWidth = 2;
   graph.stroke();
 }
 
@@ -334,7 +348,7 @@ window.requestAnimFrame = (function(){
 function animloop(){
   requestAnimFrame(animloop);
   gameLoop();
-};
+}
 
 function gameLoop() {
   if (!disconnected) {
