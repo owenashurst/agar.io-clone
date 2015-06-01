@@ -104,8 +104,8 @@ The game will then be accessible at `http://localhost:3000`.
   Yes you can.
 
 ## For Developers
-- [Game Architecture](https://github.com/huytd/agar.io-clone/wiki/Game-Architecture)
-- 
+ - [Game Architecture](https://github.com/huytd/agar.io-clone/wiki/Game-Architecture)
+
 ## License
 >You can check out the full license [here](https://github.com/huytd/agar.io-clone/blob/master/LICENSE)
 
