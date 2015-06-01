@@ -100,3 +100,5 @@ The game will then be accessible at `http://localhost:3000`.
 
   Yes you can.
 
+## License
+This project is licensed under the terms of the **MIT** license.
