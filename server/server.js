@@ -163,9 +163,11 @@ io.on('connection', function (socket) {
     });
 
     socket.on('disconnect', function () {
-        var playerName = findPlayer(userID).name;
-
-        removePlayer(userID);
+        var playerIndex = findIndex(users, userID);
+        var playerName = users[playerIndex].name;
+        users.splice(playerIndex, 1);
+        
+        
 
         console.log('User #' + userID + ' disconnected');
 
