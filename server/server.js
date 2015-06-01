@@ -6,12 +6,8 @@ var io = require('socket.io')(http);
 var fs = require('fs');
 var yaml = require('js-yaml');
 
-var configFilePath = 'server/config.yml'
+var configFilePath = 'config/config.yml'
 
-if (!fs.existsSync(configFilePath)) {
-    console.log("Config file not found!");
-    return;
-}
 
 var config = yaml.safeLoad(fs.readFileSync(configFilePath));
 
