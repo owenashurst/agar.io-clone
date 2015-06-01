@@ -73,6 +73,14 @@ var target = {x: player.x, y: player.y};
 var c = document.getElementById('cvs');
 c.addEventListener('mousemove', gameInput, false);
 c.width = screenWidth; c.height = screenHeight;
+c.addEventListener('mouseout', outOfBounds, false);
+
+// register when the mouse goes off the canvas
+function outOfBounds() {
+  target = { x : screenWidth / 2, y : screenHeight / 2 };
+}
+
+
 
 var graph = c.getContext('2d');
 
