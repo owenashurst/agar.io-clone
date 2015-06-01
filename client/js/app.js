@@ -1,18 +1,29 @@
 var playerName;
+var playerNameInput = document.getElementById('playerNameInput');
 var socket;
+var KEY_ENTER = 13;
 
-window.onload = function () {
-    document.getElementById('startButton').onclick = function () {
-        var tmpName = document.getElementById('playerNameInput').value;
-        playerName = tmpName.replace(/(<([^>]+)>)/ig, '');
-        document.getElementById('gameAreaWrapper').style.display = 'block';
-        document.getElementById('startMenuWrapper').style.display = 'none';
-        socket = io();
-        SetupSocket(socket);
-        animloop();
-    };
+
+function startGame() {
+    playerName = playerNameInput.value.replace(/(<([^>]+)>)/ig, '');
+    document.getElementById('gameAreaWrapper').style.display = 'block';
+    document.getElementById('startMenuWrapper').style.display = 'none';
+    socket = io();
+    SetupSocket(socket);
+    animloop();
+}
+
+window.onload = function() {
+    document.getElementById('startButton').onclick = startGame;
+
+    playerNameInput.addEventListener('keypress', function(e) {
+        var key = e.which || e.keyCode;
+
+        if (key === KEY_ENTER) {
+            startGame();
+        }
+    });
 };
-
 
 // Canvas
 var screenWidth = window.innerWidth;
@@ -26,8 +37,6 @@ var gameStart = false;
 var disconnected = false;
 
 var startPingTime = 0;
-
-var KEY_ENTER = 13;
 
 var chatCommands = {};
 var backgroundColor = '#EEEEEE';
