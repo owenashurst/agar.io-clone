@@ -10,7 +10,7 @@ Agar.io Clone
 
 A simple Agar.io clone built with socket.io and HTML5 Canvas on top of NodeJS.
 
-![Image](http://i.imgur.com/igXo4xh.jpg)
+![Image](http://i.imgur.com/35gJq4U.png)
 
 ## Live Demo
 [![Singapore](https://img.shields.io/badge/singapore-offline-red.svg)](http://codedaily.vn:3000/) "
