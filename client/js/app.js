@@ -248,13 +248,32 @@ function SetupSocket(socket) {
 	});
 
 }
+
+function drawCircle(centerX, centerY, size) {
+  var theta = 0,
+      x = 0,
+      y = 0,
+      radius = size * 1.5;
+
+  graph.beginPath();
+
+  for(var i = 0; i < size; i++) {
+    theta = (i / size) * 2 * Math.PI;
+    x = centerX + radius * Math.sin(theta);
+    y = centerY + radius * Math.cos(theta);
+    graph.lineTo(x, y);
+  }
+
+  graph.closePath();
+  graph.stroke();
+  graph.fill();
+}
+
 function drawFood(food) {
   graph.strokeStyle = food.color.border || foodConfig.borderColor;
   graph.fillStyle = food.color.fill || foodConfig.fillColor;
   graph.lineWidth = foodConfig.border;
-  graph.beginPath();
-  graph.arc(food.x - player.x + screenWidth / 2, food.y - player.y + screenHeight / 2, foodConfig.size, 0, 2 * Math.PI);
-  graph.stroke();
+  drawCircle(food.x - player.x + screenWidth / 2, food.y - player.y + screenHeight / 2, foodConfig.size);
   graph.fill();
 }
 
