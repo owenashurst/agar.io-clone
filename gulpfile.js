@@ -7,7 +7,8 @@ gulp.task('build', ['build-client', 'build-server']);
 
 gulp.task('build-client', ['move-client'], function () {
 	return gulp.src('client/js/*.js')
-		.pipe(jshint({ lookup: true }))
+		.pipe(jshint())
+		.pipe(jshint.reporter('default', { verbose: true}))
 		.pipe(babel())
 		.pipe(gulp.dest('bin/client/js/'));
 });
@@ -19,8 +20,8 @@ gulp.task('move-client', function () {
 
 gulp.task('build-server', function () {
 	return gulp.src('server/*.js')
-		.pipe(jshint({ lookup: true }))
-		.pipe(babel())
+		.pipe(jshint())
+		.pipe(jshint.reporter('default', { verbose: true }))
 		.pipe(gulp.dest('bin/server/'));
 });
 
