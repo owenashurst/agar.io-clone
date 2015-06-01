@@ -17,10 +17,18 @@
     </div>
     <div id="startMenuWrapper">
         <div id="startMenu">
-            <p> Agar.io-clone </p>
-            <input type="text" placeholder="Nick" id="playerNameInput" />
+            <p>Open Agar</p>
+            <input type="text" tabindex="0" autofocus placeholder="Enter your name here" id="playerNameInput" />
             <br />
             <button id="startButton">Play</button>
+            <br/>
+            <h3>Gameplay</h3>
+            <ul>
+                <li>Move your mouse on the screen to move your character</li>
+                <li>Eat food and other players in order to grow your character (food respawns every time a player eats it)</li>
+                <li>A player's mass is the number of food particles eaten</li>
+                <li>Objective: Try to get fat and eat other players</li>
+            </ul>
         </div>
     </div>
     <script src="/socket.io/socket.io.js"></script>
