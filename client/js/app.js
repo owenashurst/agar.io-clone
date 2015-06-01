@@ -41,8 +41,6 @@ var foodConfig = {
 
 var playerConfig = {
   border: 3,
-  borderColor: "#c0392b",
-  fillColor: "#ea6153",
   textColor: "#FFFFFF",
   textBorder: "#000000",
   textBorderSize: 3,
@@ -51,8 +49,6 @@ var playerConfig = {
 
 var enemyConfig = {
   border: 3,
-  borderColor: "#27ae60",
-  fillColor: "#2ecc71",
   textColor: "#FFFFFF",
   textBorder: "#000000",
   textBorderSize: 3,
