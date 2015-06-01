@@ -249,7 +249,9 @@ function SetupSocket(socket) {
 
 }
 
-function drawCircle(centerX, centerY, size) {
+function drawCircle(centerX, centerY, size, rotation) {
+  rotation = rotation || 0;
+
   var theta = 0,
       x = 0,
       y = 0,
@@ -258,7 +260,7 @@ function drawCircle(centerX, centerY, size) {
   graph.beginPath();
 
   for(var i = 0; i < size; i++) {
-    theta = (i / size) * 2 * Math.PI;
+    theta = rotation + (i / size) * 2 * Math.PI;
     x = centerX + radius * Math.sin(theta);
     y = centerY + radius * Math.cos(theta);
     graph.lineTo(x, y);
@@ -273,7 +275,13 @@ function drawFood(food) {
   graph.strokeStyle = food.color.border || foodConfig.borderColor;
   graph.fillStyle = food.color.fill || foodConfig.fillColor;
   graph.lineWidth = foodConfig.border;
-  drawCircle(food.x - player.x + screenWidth / 2, food.y - player.y + screenHeight / 2, foodConfig.size);
+
+  drawCircle(
+    food.x - player.x + screenWidth / 2,
+    food.y - player.y + screenHeight / 2,
+    foodConfig.size,
+    food.rotation
+  );
 }
 
 function drawPlayer() {
