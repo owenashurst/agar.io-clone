@@ -2,16 +2,16 @@ var playerName;
 var socket;
 
 window.onload = function () {
-	document.getElementById("startButton").onclick = function () {
-		var tmpName = document.getElementById("playerNameInput").value;
-		playerName = tmpName.replace(/(<([^>]+)>)/ig, "");
-		document.getElementById("gameAreaWrapper").style.display = "block";
-		document.getElementById("startMenuWrapper").style.display = "none";
-		socket = io();
-		SetupSocket(socket);
-		animloop();
-	}
-}
+    document.getElementById("startButton").onclick = function () {
+        var tmpName = document.getElementById("playerNameInput").value;
+        playerName = tmpName.replace(/(<([^>]+)>)/ig, "");
+        document.getElementById("gameAreaWrapper").style.display = "block";
+        document.getElementById("startMenuWrapper").style.display = "none";
+        socket = io();
+        SetupSocket(socket);
+        animloop();
+    };
+};
 
 
 // Canvas
@@ -349,7 +349,7 @@ window.requestAnimFrame = (function(){
 function animloop(){
   requestAnimFrame(animloop);
   gameLoop();
-};
+}
 
 function gameLoop() {
   if (!disconnected) {

@@ -37,14 +37,14 @@ gulp.task('watch', ["build"], function () {
 });
 
 gulp.task('run', ["build"], function () {
-	nodemon({
-		delay: 10,
-		script: 'server/server.js',
-		cwd: "./bin/",
-		args: ["/server/config.yml"],
-		ext: 'html js css'
-	})
+    nodemon({
+        delay: 10,
+        script: 'server/server.js',
+        cwd: "./bin/",
+        args: ["/server/config.yml"],
+        ext: 'html js css'
+    })
 	  .on('restart', function () {
-	  	console.log('restarted!')
-	  })
+	      console.log('restarted!');
+	  });
 });

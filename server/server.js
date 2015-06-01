@@ -6,7 +6,7 @@ var io = require('socket.io')(http);
 var fs = require('fs');
 var yaml = require('js-yaml');
 
-var configFilePath = 'server/config.yml'
+var configFilePath = 'server/config.yml';
 
 if (!fs.existsSync(configFilePath)) {
     console.log("Config file not found!");
@@ -246,7 +246,7 @@ io.on('connection', function (socket) {
                         users.splice(e, 1);
                         break;
                     }
-                    if (currentPlayer.mass != 0 && currentPlayer.mass < users[e].mass - eatableMassDistance) {
+                    if (currentPlayer.mass !== 0 && currentPlayer.mass < users[e].mass - eatableMassDistance) {
                         if (users[e].mass < maxSizeMass) {
                             users[e].mass += currentPlayer.mass;
                         }
