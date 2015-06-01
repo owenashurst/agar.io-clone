@@ -6,7 +6,7 @@ var io = require('socket.io')(http);
 var fs = require('fs');
 var yaml = require('js-yaml');
 
-var configFilePath = 'server/config.yml'
+var configFilePath = 'server/config.yml';
 
 if (!fs.existsSync(configFilePath)) {
     console.log("Config file not found!");
@@ -51,7 +51,8 @@ function addFoods(target) {
         id: (new Date()).getTime(),
         x: genPos(0, target.gameWidth),
         y: genPos(0, target.gameHeight),
-        color: randomColor()
+        color: randomColor(),
+        rotation: Math.random() * (Math.PI * 2)
     });
 }
 
@@ -246,7 +247,7 @@ io.on('connection', function (socket) {
                         users.splice(e, 1);
                         break;
                     }
-                    if (currentPlayer.mass != 0 && currentPlayer.mass < users[e].mass - eatableMassDistance) {
+                    if (currentPlayer.mass !== 0 && currentPlayer.mass < users[e].mass - eatableMassDistance) {
                         if (users[e].mass < maxSizeMass) {
                             users[e].mass += currentPlayer.mass;
                         }
@@ -264,10 +265,8 @@ io.on('connection', function (socket) {
             }
 
             // Do some continuos emit
-            socket.emit('serverTellPlayerMove', currentPlayer);
-            socket.emit('serverTellPlayerUpdateFoods', foods);
-            socket.broadcast.emit('serverUpdateAllPlayers', users);
-            socket.broadcast.emit('serverUpdateAllFoods', foods);
+            socket.emit('serverTellPlayer', currentPlayer, foods);
+            socket.broadcast.emit('serverUpdateAll', users, foods);
         }
     });
 });

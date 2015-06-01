@@ -4,9 +4,10 @@
   "description": "A simple Agar.io clone",
   "main": "server/server.js",
   "scripts": {
-    "postinstall": "./node_modules/bower/bin/bower install && cp server/config.dist.yml server/config.yml",
-    "start": "node server/server.js",
-    "test": "jshint ."
+    "postinstall": "node ./node_modules/bower/bin/bower install && node ./node_modules/gulp/bin/gulp.js build",
+    "start": "node ./node_modules/gulp/bin/gulp.js run",
+    "watch": "node ./node_modules/gulp/bin/gulp.js watch",
+    "test": "node ./node_modules/jshint/bin/jshint ."
   },
   "author": "Huy Tran",
   "contributors": [
@@ -17,7 +18,8 @@
     "Saren Currie <saren@sarencurrie.com> (https://github.com/SarenCurrie)",
     "Nguyen Huu Thanh <giongto35@yahoo.com> (https://github.com/giongto35)",
     "Ariamiro <dossantosgusmaosavio@gmail.com> (https://github.com/Ariamiro)",
-    "VILLERS Mickaël <mickael.villers@epitech.eu> (https://github.com/villers)"
+    "VILLERS Mickaël <mickael.villers@epitech.eu> (https://github.com/villers)",
+    "Dan Prince <dan@astrealdynamics.co.uk> (https://github.com/danprince)"
   ],
   "dependencies": {
     "bower": "^1.4.1",
@@ -26,6 +28,10 @@
     "js-yaml": "~3.3.1"
   },
   "devDependencies": {
+    "gulp": "^3.8.11",
+    "gulp-babel": "^5.1.0",
+    "gulp-jshint": "^1.11.0",
+    "gulp-nodemon": "^2.0.3",
     "jshint": "^2.7.0",
     "nodemon": "^1.2.1"
   }
