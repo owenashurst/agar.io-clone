@@ -131,9 +131,13 @@ io.on('connection', function (socket) {
     console.log('A user connected. Assigning UserID...');
 
     var userID = socket.id;
+    var playerSettings = {
+      id: userID,
+      hue: Math.round(Math.random() * 360)
+    };
     var currentPlayer = {};
 
-    socket.emit('welcome', userID);
+    socket.emit('welcome', playerSettings);
 
     socket.on('gotit', function (player) {
         player.id = userID;

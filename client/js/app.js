@@ -41,8 +41,6 @@ var foodConfig = {
 
 var playerConfig = {
   border: 3,
-  borderColor: "#c0392b",
-  fillColor: "#ea6153",
   textColor: "#FFFFFF",
   textBorder: "#000000",
   textBorderSize: 3,
@@ -51,8 +49,6 @@ var playerConfig = {
 
 var enemyConfig = {
   border: 3,
-  borderColor: "#27ae60",
-  fillColor: "#2ecc71",
   textColor: "#FFFFFF",
   textBorder: "#000000",
   textBorderSize: 3,
@@ -195,9 +191,10 @@ function SetupSocket(socket) {
 	});
 
 	// Handle connection
-	socket.on("welcome", function (userID) {
-		player.id = userID;
+	socket.on("welcome", function (playerSettings) {
 		player.name = playerName;
+		player.id = playerSettings.id;
+		player.hue = playerSettings.hue;
 		socket.emit("gotit", player);
 		gameStart = true;
 		console.log("Game is started: " + gameStart);
@@ -262,8 +259,8 @@ function drawFood(food) {
 }
 
 function drawPlayer() {
-  graph.strokeStyle = playerConfig.borderColor;
-  graph.fillStyle = playerConfig.fillColor;
+  graph.strokeStyle = 'hsl(' + player.hue + ', 80%, 40%)';
+  graph.fillStyle = 'hsl(' + player.hue + ', 70%, 50%)';
   graph.lineWidth = playerConfig.border;
   graph.beginPath();
   graph.arc(screenWidth / 2, screenHeight / 2, playerConfig.defaultSize + player.mass, 0, 2 * Math.PI);
@@ -282,8 +279,8 @@ function drawPlayer() {
 }
 
 function drawEnemy(enemy) {
-  graph.strokeStyle = enemyConfig.borderColor;
-  graph.fillStyle = enemyConfig.fillColor;
+  graph.strokeStyle = 'hsl(' + enemy.hue + ', 80%, 40%)';
+  graph.fillStyle = 'hsl(' + enemy.hue + ', 70%, 50%)';
   graph.lineWidth = enemyConfig.border;
   graph.beginPath();
   graph.arc(enemy.x - player.x + screenWidth / 2, enemy.y - player.y + screenHeight / 2, enemyConfig.defaultSize + enemy.mass, 0, 2 * Math.PI);
