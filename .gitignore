@@ -1,4 +1,6 @@
 node_modules
 npm-debug.log
 .idea
+bin
+server/config.yml
 client/bower_components
