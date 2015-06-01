@@ -277,6 +277,8 @@ function drawPlayer() {
 
     var fontSize = (player.mass / 2) + playerConfig.defaultSize;
     graph.lineWidth = playerConfig.textBorderSize;
+    graph.miterLimit = 1;
+    graph.lineJoin = 'round';
     graph.textAlign = 'center';
     graph.fillStyle = playerConfig.textColor;
     graph.textBaseline = 'middle';
