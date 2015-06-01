@@ -189,9 +189,10 @@ function SetupSocket(socket) {
 	});
 
 	// Handle connection
-	socket.on("welcome", function (userID) {
-		player.id = userID;
+	socket.on("welcome", function (playerSettings) {
 		player.name = playerName;
+		player.id = playerSettings.id;
+		player.hue = playerSettings.hue;
 		socket.emit("gotit", player);
 		gameStart = true;
 		console.log("Game is started: " + gameStart);
@@ -205,7 +206,6 @@ function SetupSocket(socket) {
 	});
 
 	socket.on("playerJoin", function (data) {
-		console.log(data);
 		enemies = data.playersList;
 		document.getElementById("status").innerHTML = "Players: " + enemies.length;
 		addSystemLine("Player <b>" + data.connectedName + "</b> joined!");
@@ -275,8 +275,8 @@ function drawFood(food) {
 }
 
 function drawPlayer() {
-  graph.strokeStyle = playerConfig.borderColor;
-  graph.fillStyle = playerConfig.fillColor;
+  graph.strokeStyle = 'hsl(' + player.hue + ', 80%, 40%)';
+  graph.fillStyle = 'hsl(' + player.hue + ', 70%, 50%)';
   graph.lineWidth = playerConfig.border;
   drawCircle(screenWidth / 2, screenHeight / 2, playerConfig.defaultSize + player.mass);
 
@@ -292,8 +292,8 @@ function drawPlayer() {
 }
 
 function drawEnemy(enemy) {
-  graph.strokeStyle = enemyConfig.borderColor;
-  graph.fillStyle = enemyConfig.fillColor;
+  graph.strokeStyle = 'hsl(' + enemy.hue + ', 80%, 60%)';
+  graph.fillStyle = 'hsl(' + enemy.hue + ', 80%, 70%)';
   graph.lineWidth = enemyConfig.border;
   drawCircle(enemy.x - player.x + screenWidth / 2, enemy.y - player.y + screenHeight / 2, enemyConfig.defaultSize + enemy.mass);
 

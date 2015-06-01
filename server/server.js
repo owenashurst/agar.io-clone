@@ -132,8 +132,12 @@ io.on('connection', function (socket) {
 
     var userID = socket.id;
     var currentPlayer = {};
+    var hue = Math.round(Math.random() * 360);
 
-    socket.emit('welcome', userID);
+    socket.emit('welcome', {
+      id: userID,
+      hue: hue
+    });
 
     socket.on('gotit', function (player) {
         player.id = userID;
@@ -141,6 +145,7 @@ io.on('connection', function (socket) {
 
         if (findPlayer(player.id) === null) {
             console.log('Player ' + player.id + ' connected!');
+            player.hue = hue;
             users.push(player);
             currentPlayer = player;
         }
