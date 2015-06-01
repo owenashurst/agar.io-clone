@@ -220,26 +220,17 @@ function SetupSocket(socket) {
 	});
 
 	// Handle movement
-	socket.on("serverTellPlayerMove", function (playerData) {
+	socket.on("serverTellPlayerMove", function (playerData, foodsList) {
 		xoffset += (player.x - playerData.x);
 		yoffset += (player.y - playerData.y);
 		player = playerData;
+		foods = foodsList;
 	});
 
-	socket.on("serverUpdateAllPlayers", function (players) {
+	socket.on("serverUpdateAll", function (players, foodsList) {
 		enemies = players;
-	});
-
-
-	// Update others
-	socket.on("serverTellPlayerUpdateFoods", function (foodsList) {
 		foods = foodsList;
 	});
-
-	socket.on("serverUpdateAllFoods", function (foodsList) {
-		foods = foodsList;
-	});
-
 
 	// Die
 	socket.on("RIP", function () {
