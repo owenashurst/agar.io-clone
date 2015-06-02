@@ -86,13 +86,13 @@ Render.ctx = Render.createContext();
  * Uses parametric equation of a circle to draw a polygonal
  * circle with a fixed number of sides.
  */
-Render.drawCircle = function(cx, cy, numberOfSides) {
+Render.drawCircle = function(cx, cy, numberOfSides, initialRotation=0) {
   let [theta, x, y] = [0, 0, 0],
       radius = numberOfSides * 1.5;
 
   Render.ctx.beginPath();
   for(let i = 0; i < numberOfSides; i++) {
-    theta = (i / numberOfSides) * 2 * Math.PI;
+    theta = initialRotation + (i / numberOfSides) * 2 * Math.PI;
     x = cx + radius * Math.sin(theta);
     y = cy + radius * Math.cos(theta);
     Render.ctx.lineTo(x, y);
@@ -118,8 +118,7 @@ Render.drawFood = function(food) {
   let x = food.x - Player.x + Render.bounds.width / 2,
       y = food.y - Player.y + Render.bounds.height / 2;
 
-  Render.drawCircle(x, y, Config.food.size);
-  //Render.ctx.fillRect(x, y, Config.food.size, Config.food.size);
+  Render.drawCircle(x, y, Config.food.size, food.rotation);
 };
 
 /**

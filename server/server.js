@@ -116,7 +116,6 @@ function hitTest(start, end, min) {
 }
 
 function movePlayer(player, target) {
-    console.log('start', player);
     var dist = Math.sqrt(Math.pow(target.y - player.screenHeight / 2, 2) + Math.pow(target.x - player.screenWidth / 2, 2)),
        deg = Math.atan2(target.y - player.screenHeight / 2, target.x - player.screenWidth / 2);
 
@@ -130,7 +129,6 @@ function movePlayer(player, target) {
 
     player.y += (player.y + deltaY >= 0 && player.y + deltaY <= player.gameHeight) ? deltaY : 0;
     player.x += (player.x + deltaX >= 0 && player.x + deltaX <= player.gameWidth) ? deltaX : 0;
-    console.log('end', player);
 }
 
 
