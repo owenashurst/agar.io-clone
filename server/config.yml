@@ -5,9 +5,7 @@ massDecreaseRatio: 1000
 foodMass: 1
 newFoodPerPlayer: 30
 respawnFoodPerPlayer: 1
-foodRandomWidth: 500
-foodRandomHeight: 500
 maxFoodCount: 50
 noPlayer: 0
-defaultPlayerSize: 10
+defaultPlayerSize: 20
 eatableMassDistance: 5
