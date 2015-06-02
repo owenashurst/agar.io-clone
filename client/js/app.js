@@ -377,7 +377,7 @@ function gameLoop() {
             }
 
             drawPlayer();
-            socket.emit('playerSendTarget', target);
+            socket.emit('0', target); // playerSendTarget Heartbeat
         } else {
             graph.fillStyle = '#333333';
             graph.fillRect(0, 0, screenWidth, screenHeight);
@@ -397,3 +397,10 @@ function gameLoop() {
         graph.fillText('Disconnected!', screenWidth / 2, screenHeight / 2);
     }
 }
+
+window.addEventListener('resize', function() {
+    screenWidth = window.innerWidth;
+    screenHeight = window.innerHeight;
+    player.screenWidth = c.width = screenWidth;
+    player.screenHeight = c.height = screenHeight;
+}, true);
