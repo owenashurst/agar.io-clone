@@ -9,12 +9,16 @@ var source = require('vinyl-source-stream');
 gulp.task('build', ['build-client', 'build-server']);
 
 gulp.task('build-client', ['move-client'], function () {
-    return browserify({
-        entries: './client/js/app.js',
-        debug: false
+    var b = browserify({
+        entries: './client/js/game.js',
+        transform: [babelify]
     })
-    .transform(babelify)
-    .bundle()
+
+    b.bundle()
+        .on("error", function (err) {
+            console.log(err.toString());
+            this.emit("end");
+        })
     .pipe(source('app.js'))
     .pipe(gulp.dest('bin/client/js/'));
 });
