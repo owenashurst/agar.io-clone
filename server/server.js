@@ -18,7 +18,7 @@ var config = yaml.safeLoad(fs.readFileSync(configFilePath));
 var users = [];
 var foods = [];
 var sockets = [];
-
+var updatereq = true;
 
 var maxSizeMass = config.maxSizeMass;
 var maxMoveSpeed = config.maxMoveSpeed;
@@ -161,6 +161,7 @@ io.on('connection', function (socket) {
         for (var i = 0; i < newFoodPerPlayer; i++) {
             generateFood(player);
         }
+updatereq = true;
     });
 
     socket.on('ping', function () {
@@ -214,11 +215,13 @@ io.on('connection', function (socket) {
                     }
 
                     console.log('Food eaten');
+                    
 
                     // Respawn food
                     for (var r = 0; r < respawnFoodPerPlayer; r++) {
                         generateFood(currentPlayer);
                     }
+                    updatereq = true;
                     break;
                 }
             }
@@ -264,9 +267,17 @@ io.on('connection', function (socket) {
                 }
             }
 
-            // Do some continuos emit
-            socket.emit('serverTellPlayerMove', currentPlayer, foods);
-            socket.broadcast.emit('serverUpdateAll', users, foods);
+            // Do some continuous emit
+               if(updatereq){
+                              socket.emit('serverTellPlayerMove', currentPlayer, foods);
+                              socket.broadcast.emit('serverUpdateAll', users, foods);
+                              updatereq = false;
+               }
+               else{
+                              socket.emit('serverTellPlayerMove', currentPlayer, 0);
+                              socket.broadcast.emit('serverUpdateAll', users, 0);
+               }
+            
         }
     });
 });
