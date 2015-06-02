@@ -10,7 +10,7 @@ Agar.io Clone
 
 A simple Agar.io clone built with socket.io and HTML5 Canvas on top of NodeJS.
 
-![Image](http://i.imgur.com/igXo4xh.jpg)
+![Image](http://i.imgur.com/O3rP7cg.png)
 
 ## Live Demo
 [![Singapore](https://img.shields.io/badge/singapore-offline-red.svg)](http://codedaily.vn:3000/) "
@@ -78,28 +78,35 @@ npm start
 
 The game will then be accessible at `http://localhost:3000`.
 
-## For Developers
-- [Game Architecture](https://github.com/huytd/agar.io-clone/wiki/Game-Architecture)
-
 ## FAQ
 1. **What is this game?**
 
-  This is a clone of the AgarIO game ([http://agar.io](http://agar.io)). Somebody said that AgarIO is a clone of the game Osmos on the iPad, I have no idea because I have not played Osmos yet. (Hey! Cloneception =]] )
-2. **Why you clone this game?**
+  This is a clone of the game [Agar.IO](http://agar.io/). Someone said that Agar.IO is a clone of an iPad game called Osmos, but we haven't tried it yet. (Cloneception? :P)
+  
+2. **Why would you make a clone of this game?**
 
-  Well. The original game is still online, but it's closed source. And sometimes, it's subject to damn lag. I can play very well at my company (don't tell my boss!) but can't even connect when I'm at home. That's why me and the contributors want to make an open source version of this game, for learning purposes, and to let the community add some awesome features as they want, self-host on their own server to have fun with friends,...
-3. **Any plan for an online server to compete with AgarIO or make some money?**
+  Well, while the original game is still online, it's closed source, and sometimes, it suffers from massive lag. That's why we want to make an open source version of it: for learning purposes, and to let the community add some awesome features that they want, self-host on their own servers to have fun with some friends.
+  
+3. **Any plans on adding an online server to compete with Agar.IO or making money out of it?**
 
-  Actually no! This game belongs to the community, and I have no plan to make money or compete with any product with this. And I won't have enough time to run my own server. But if you want, you can do it.
+  No. This game belongs to the open-source community, and we have no plans on making money out of it nor competing with anything. But you surely can create your own public server, let us know if you do so and we can add it to our Live Demos list.
+  
 4. **Can I deploy this game to my own server?**
 
-  Yes you can! This game was made for that!
+  Sure you can! That's what it's made for ;)
+  
 5. **I don't like HTML5 Canvas. Can I write my own game client with this server?**
 
-  Yes for sure. As long as your client supports WebSockets, you can write your game client in any language/technology, even with Unity3D (there is an open source library for Unity to communicate with WebSockets).
-6. **Can I use some code in this project to my own project?**
+  Sure. As long as your client supports WebSockets, you can write your game client in any language/technology, even with Unity3D if you want (there is an open source library for Unity to communicate with WebSockets).
+  
+6. **Can I use some code of this project on my own?**
 
   Yes you can.
 
+## For Developers
+ - [Game Architecture](https://github.com/huytd/agar.io-clone/wiki/Game-Architecture)
+
 ## License
+>You can check out the full license [here](https://github.com/huytd/agar.io-clone/blob/master/LICENSE)
+
 This project is licensed under the terms of the **MIT** license.
