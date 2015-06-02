@@ -63,8 +63,10 @@ Render.resize = function() {
 
     Render.bounds.width = canvas.width = window.innerWidth;
     Render.bounds.height = canvas.height = window.innerHeight;
-    Player.offset.x = -(Render.bounds.width * 3);
-    Player.offset.y = -(Render.bounds.height * 3);
+    Player.gameWidth = Render.bounds.width * 3;
+    Player.gameHeight = Render.bounds.height * 3;
+    Player.offset.x = -Player.target.gameWidth;
+    Player.offset.y = -Player.target.gameHeight;
   }
 };
 
@@ -115,7 +117,7 @@ Render.drawFood = function(food) {
   let x = food.x - Player.x + (Render.bounds.width / 2),
       y = food.y - Player.y + (Render.bounds.height / 2);
 
-  drawCircle(x, y, Config.food.size);
+  Render.drawCircle(x, y, Config.food.size);
 };
 
 /**

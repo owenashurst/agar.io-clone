@@ -14,6 +14,12 @@ let Events = {};
 
 Events.socket = __setup__(io());
 
+Events.updateFn = function() {};
+
+Events.onUpdate = function(fn) {
+  Events.updateFn = fn;
+};
+
 Events.emit = {};
 
 Events.emit.sendTarget = function(target) {
@@ -65,7 +71,7 @@ function __setup__(socket) {
 
   socket.on('player_disconnect', function(event) {
     console.log('Socket: player_disconnect');
-    Game.entities.enemies = event.enemies;
+    Events.updateFn({ enemies: event.enemies });
     // render player count
     //document.getElementById('status').innerHTML = 'Players: ' + enemies.length;
     Chat.addSystemLine(`Player ${event.disconnectName} disconnected!`);
@@ -73,7 +79,7 @@ function __setup__(socket) {
 
   socket.on('player_join', function(event) {
     console.log('Socket: player_join');
-    Game.entities.enemies = event.enemies;
+    Events.updateFn({ enemies: event.enemies });
     // render player count
     //document.getElementById('status').innerHTML = 'Players: ' + enemies.length;
     Chat.addSystemLine(`Player ${event.connectedName} connected!`);
@@ -90,16 +96,15 @@ function __setup__(socket) {
   });
 
   socket.on('server_tell_player_move', function(update, food) {
-    Game.entities.food = food;
+    Events.updateFn({ food });
 
     Player.offset.x += (Player.x - update.x);
     Player.offset.y += (Player.y - update.y);
-    Player.update(player);
+    Player.update(update);
   });
 
   socket.on('server_tell_update_all', function(enemies, food) {
-    Game.entities.enemies = enemies;
-    Game.entities.food = food;
+    Events.updateFn({ enemies, food });
   });
 
   return socket;

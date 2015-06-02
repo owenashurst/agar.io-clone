@@ -67,6 +67,14 @@ Game.init = function() {
   });
 
   Chat.bindElements();
+
+  Events.onUpdate(function(entities) {
+    for(let key in entities) {
+      if(entities[key]) {
+        Game.entities[key] = entities[key];
+      }
+    }
+  });
 };
 
 /**
@@ -76,7 +84,7 @@ Game.init = function() {
  * itself using requestAnimationFrame.
  */
 Game.loop = function() {
-  Polyfill.requestAnimationFrame(Game.loop);
+  Polyfill.requestAnimationFrame(Game.loop, 1000);
 
   if(!System.status.connected) return Render.disconnected();
   if(!System.status.started) return Render.gameOver();
@@ -107,10 +115,8 @@ Game.loop = function() {
  * player's target based on the position of the event.
  */
 Game.setTargetFromEvent = function(event) {
-  Player.target = {
-    x: event.clientX,
-    y: event.clientY
-  };
+  Player.target.x = event.clientX;
+  Player.target.y = event.clientY;
 };
 
 Game.targetOutOfBounds = function() {
