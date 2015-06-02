@@ -5,12 +5,16 @@ var nodemon = require('gulp-nodemon');
 var babelify = require('babelify');
 var browserify = require('browserify');
 var source = require('vinyl-source-stream');
+var path = require('path');
 
 gulp.task('build', ['build-client', 'build-server']);
 
 gulp.task('build-client', ['move-client'], function () {
+
+    var outputDir = path.join(__dirname, 'bin/client/js/');
     var b = browserify({
-        entries: './client/js/game.js',
+        basedir: __dirname,
+        entries: 'client/js/game.js',
         transform: [babelify]
     })
 
@@ -20,33 +24,36 @@ gulp.task('build-client', ['move-client'], function () {
             this.emit("end");
         })
     .pipe(source('app.js'))
-    .pipe(gulp.dest('bin/client/js/'));
+    .pipe(gulp.dest(outputDir));
 });
 
 gulp.task('move-client', function () {
-    return gulp.src(['client/**/*.*', '!client/js/*.js'])
-		.pipe(gulp.dest('./bin/client/'));
+    var outputDir = path.join(__dirname, 'bin/client/');
+    return gulp.src(['client/**/*.*', '!client/js/*.js', '!client/js/*.json'])
+		.pipe(gulp.dest(outputDir));
 });
 
 gulp.task('build-server', ['move-server'], function () {
+    var outputDir = path.join(__dirname, 'bin/server/');
     return gulp.src('server/*.js')
 		.pipe(jshint())
 		.pipe(jshint.reporter('default', { verbose: true }))
-		.pipe(gulp.dest('bin/server/'));
+		.pipe(gulp.dest(outputDir));
 });
 
 gulp.task('move-server', function () {
+    var outputDir = path.join(__dirname, 'bin/server/');
     return gulp.src(['server/**/*.*', '!server/**/*.js'])
-		.pipe(gulp.dest('./bin/server/'));
+		.pipe(gulp.dest(outputDir));
 });
 
-gulp.task('watch', ["build"], function () {
-    gulp.watch('client/**/*.*', ['build-client', 'move-client']);
+gulp.task('watch', function () {
+    gulp.watch('client/**/*.*', ['build-client']);
     gulp.watch('server/*.*', ['build-server']);
-    gulp.start("run");
+    gulp.start('run');
 });
 
-gulp.task('run', ["build"], function () {
+gulp.task('run', ['build'], function () {
     nodemon({
         delay: 10,
         script: 'server/server.js',
