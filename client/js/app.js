@@ -327,18 +327,56 @@ function drawEnemy(enemy) {
 }
 
 function drawgrid(){
-    for (var x = xoffset; x < screenWidth; x += screenHeight/20) {
+    for (var x = xoffset; x < screenWidth; x += screenHeight/10) {
         graph.moveTo(x, 0);
         graph.lineTo(x, screenHeight);
     }
 
-    for (var y = yoffset ; y < screenHeight; y += screenHeight/20) {
+    for (var y = yoffset ; y < screenHeight; y += screenHeight/10) {
         graph.moveTo(0, y);
         graph.lineTo(screenWidth, y);
     }
 
     graph.strokeStyle = '#ddd';
     graph.stroke();
+}
+
+function drawborder() {
+    // Left-vertical
+    if (player.x <= screenWidth/2) {
+        graph.beginPath();
+        graph.moveTo(screenWidth/2 - player.x, 0 ? player.y > screenHeight/2 : screenHeight/2 - player.y);
+        graph.lineTo(screenWidth/2 - player.x, gameHeight + screenHeight/2 - player.y);
+        graph.strokeStyle = "#000000";
+        graph.stroke();
+    }
+
+    // Top-horizontal
+    if (player.y <= screenHeight/2) {
+        graph.beginPath();
+        graph.moveTo(0 ? player.x > screenWidth/2 : screenWidth/2 - player.x, screenHeight/2 - player.y);
+        graph.lineTo(gameWidth + screenWidth/2 - player.x, screenHeight/2 - player.y);
+        graph.strokeStyle = "#000000";
+        graph.stroke();
+    }
+
+    // Right-vertical
+    if (gameWidth - player.x <= screenWidth/2) {
+        graph.beginPath();
+        graph.moveTo(gameWidth + screenWidth/2 - player.x, screenHeight/2 - player.y);
+        graph.lineTo(gameWidth + screenWidth/2 - player.x, gameHeight + screenHeight/2 - player.y);
+        graph.strokeStyle = "#000000";
+        graph.stroke();
+    }
+
+    // Bottom-horizontal
+    if (gameHeight - player.y <= screenHeight/2) {
+        graph.beginPath();
+        graph.moveTo(gameWidth + screenWidth/2 - player.x, gameHeight + screenHeight/2 - player.y);
+        graph.lineTo(screenWidth/2 - player.x, gameHeight + screenHeight/2 - player.y);
+        graph.strokeStyle = "#000000";
+        graph.stroke();
+    }
 }
 
 function gameInput(mouse) {
@@ -366,6 +404,7 @@ function gameLoop() {
             graph.fillStyle = backgroundColor;
             graph.fillRect(0, 0, screenWidth, screenHeight);
             drawgrid();
+            drawborder();
             for (var i = 0; i < foods.length; i++) {
                 drawFood(foods[i]);
             }
