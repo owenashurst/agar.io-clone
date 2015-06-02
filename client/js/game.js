@@ -9,22 +9,45 @@ let Game = {};
 
 Game.DOM = {};
 
+/**
+ * @name Game.entitites
+ * @description
+ * Things that will be rendered.
+ */
 Game.entities = {
   food: [],
   enemies: []
 };
 
+/**
+ * @name Game.start
+ * @description
+ * Function to be called when the player is ready to start.
+ */
 Game.start = function() {
   // get players name
   Player.name = Game.DOM.nameInput.value.replace(/(<([^>]+)>)/ig, '');
 
   // toggle DOM visibility
+  Game.DOM.gameArea.style.display = 'block';
+  Game.DOM.startMenu.style.display = 'none';
+
   Game.loop();
 };
 
+/**
+ * @name Game.init
+ * @description
+ * This should be called when the DOM is loaded. It attaches the
+ * appropriate event listeners to DOM elements.
+ */
 Game.init = function() {
-  Game.DOM.startButton = document.getElementById('startButton');
-  Game.DOM.nameInput = document.getElementById('playerNameInput');
+  Game.DOM = {
+    startButton: document.getElementById('startButton'),
+    nameInput:   document.getElementById('playerNameInput'),
+    gameArea:    document.getElementById('gameAreaWrapper'),
+    startMenu:   document.getElementById('startMenuWrapper')
+  };
 
   Game.DOM.startButton.addEventListener('click', Game.start);
   Game.DOM.nameInput.addEventListener('keypress', e => {
@@ -32,6 +55,12 @@ Game.init = function() {
   });
 };
 
+/**
+ * @name Game.loop
+ * @description
+ * The animation/update loop for the game. Will continuously call
+ * itself using requestAnimationFrame.
+ */
 Game.loop = function() {
   Polyfill.requestAnimationFrame(Game.loop);
 
@@ -41,17 +70,19 @@ Game.loop = function() {
   Render.clearRect();
   Render.drawGrid();
 
+  // TODO don't render offscreen things
   Game.entities.food.forEach(function(food) {
     Render.drawFood(food);
   });
 
+  // TODO don't render offscreen things
   Game.entities.enemies.forEach(function(enemy) {
     Render.drawEnemy(enemy);
   });
 
-  // draw player
+  Render.drawPlayer(Player.entity);
 
-  Events.emit.sendTarget();
+  Events.emit.sendTarget(Player.target);
 };
 
 export default Game;
