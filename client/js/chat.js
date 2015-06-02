@@ -70,7 +70,7 @@ Chat.send = function() {
     Chat.addChatLine(Player.name, text);
   }
 
-  Chat.DOM.input = '';
+  Chat.DOM.input.value = '';
 };
 
 /**

@@ -40,6 +40,9 @@ Game.start = function() {
   Game.DOM.gameArea.style.display = 'block';
   Game.DOM.startMenu.style.display = 'none';
 
+  // let
+  Events.socket.emit('gotit', Player);
+  Chat.addSystemLine('Connected to the game!');
 
   Game.loop();
 };

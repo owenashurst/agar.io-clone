@@ -56,9 +56,6 @@ function __setup__(socket) {
     Player.name = settings.name;
     Player.id = settings.id;
     Player.hue = settings.hue;
-    socket.emit('gotit', Player);
-
-    Chat.addSystemLine('Connected to the game!');
   });
 
   socket.on('player_disconnect', function(event) {
