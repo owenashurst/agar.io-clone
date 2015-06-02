@@ -377,7 +377,7 @@ function gameLoop() {
             }
 
             drawPlayer();
-            socket.emit('playerSendTarget', target);
+            socket.emit('0', target); // playerSendTarget Heartbeat
         } else {
             graph.fillStyle = '#333333';
             graph.fillRect(0, 0, screenWidth, screenHeight);
