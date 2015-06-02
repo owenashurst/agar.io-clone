@@ -41,24 +41,6 @@ Game.start = function() {
 };
 
 /**
- * @name Game.setTargetFromEvent
- * @param {Event} event
- * @description
- * Pass this as a callback to a mousemove event. It will update the
- * player's target based on the position of the event.
- */
-Game.setTargetFromEvent = function(event) {
-  Player.target = {
-    x: event.clientX,
-    y: event.clentY
-  };
-};
-
-Game.targetOutOfBounds = function() {
-  // figure this out later
-};
-
-/**
  * @name Game.init
  * @description
  * This should be called when the DOM is loaded. It attaches the
@@ -107,6 +89,27 @@ Game.loop = function() {
 
   Events.emit.sendTarget(Player.target);
 };
+
+/**
+ * @name Game.setTargetFromEvent
+ * @param {Event} event
+ * @description
+ * Pass this as a callback to a mousemove event. It will update the
+ * player's target based on the position of the event.
+ */
+Game.setTargetFromEvent = function(event) {
+  Player.target = {
+    x: event.clientX,
+    y: event.clentY
+  };
+};
+
+Game.targetOutOfBounds = function() {
+  // figure this out later
+};
+
+// start the game when DOM loads
+window.addEventListener('load', Game.init);
 
 export default Game;
 
