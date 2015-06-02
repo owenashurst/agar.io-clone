@@ -1,12 +1,8 @@
+let System = require('./system');
+
 let Events = {};
 
 Events.socket = Events.setup(io());
-
-Events.status = {
-  lastPing: Date.now(),
-  disconnected: true,
-  started: false
-};
 
 Events.emit = {};
 
@@ -15,7 +11,7 @@ Events.emit.playerSendTarget = function(target) {
 };
 
 Events.emit.ping = function() {
-  Events.status.lastPing = Date.now();
+  System.status.lastPing = Date.now();
   Events.socket.emit('ping');
 };
 
@@ -26,21 +22,21 @@ Events.emit.chat = function(message) {
 Events.setup = function(socket) {
 
   socket.on('pong', function() {
-    let latency = Date.now() - status.lastPing;
+    let latency = Date.now() - System.status.lastPing;
   });
 
   socket.on('connect_failed', function() {
     socket.close();
-    status.disconnected = true;
+    System.status.disconnected = true;
   });
 
   socket.on('disconnect', function() {
     socket.close();
-    status.disconnected = true;
+    System.status.disconnected = true;
   });
 
   socket.on('welcome', function(settings) {
-    status.started = true;
+    System.status.started = true;
 
     player.name = settings.name;
     player.id = settings.id;
@@ -64,7 +60,7 @@ Events.setup = function(socket) {
   });
 
   socket.on('player_rip', function() {
-    status.started = false;
+    System.status.started = false;
     socket.close();
   });
 
@@ -87,4 +83,4 @@ Events.setup = function(socket) {
   return socket;
 };
 
-
+export default Events;
