@@ -1,6 +1,6 @@
 let Events = require('./events'),
     Chat = require('./chat'),
-    Render = require('./chat'),
+    Render = require('./render'),
     Player = require('./player'),
     System = require('./system'),
     Polyfill = require('./polyfill');
@@ -28,14 +28,18 @@ Game.start = function() {
   // get players name
   Player.name = Game.DOM.nameInput.value.replace(/(<([^>]+)>)/ig, '');
 
-  // toggle DOM visibility
-  Game.DOM.gameArea.style.display = 'block';
-  Game.DOM.startMenu.style.display = 'none';
-
   // Listen for mouse actions
   let canvas = Render.__canvas__;
   canvas.addEventListener('mousemove', Game.setTargetFromEvent, false);
   canvas.addEventListener('mouseout', Game.targetOutOfBounds, false);
+
+  // Add canvas to DOM
+  Game.DOM.gameArea.appendChild(canvas);
+
+  // toggle DOM visibility
+  Game.DOM.gameArea.style.display = 'block';
+  Game.DOM.startMenu.style.display = 'none';
+
 
   Game.loop();
 };
@@ -58,6 +62,8 @@ Game.init = function() {
   Game.DOM.nameInput.addEventListener('keypress', e => {
     if((e.which || e.keyCode) === 13) Game.start();
   });
+
+  Chat.bindElements();
 };
 
 /**

@@ -11,11 +11,14 @@ gulp.task('build', ['build-client', 'move-client', 'build-server', 'move-server'
 gulp.task('build-client', function () {
   var b = browserify({
     entries: './client/js/game.js',
-    debug: false,
     transform: [babelify]
   });
 
   return b.bundle()
+    .on('error', function(err) {
+      console.log(err.toString());
+      this.emit('end');
+    })
     .pipe(source('build.js'))
     .pipe(gulp.dest('./bin/client/js/'));
 });
@@ -47,11 +50,11 @@ gulp.task('watch', ["build"], function () {
 
 gulp.task('run', ["build"], function () {
   nodemon({
-      delay: 10,
-      script: 'server/server.js',
-      cwd: "./bin/",
-      args: ["/server/config.yml"],
-      ext: 'html js css'
+    delay: 10,
+    script: 'server/server.js',
+    cwd: "./bin/",
+    args: ["/server/config.yml"],
+    ext: 'html js css'
   })
   .on('restart', function () {
       console.log('restarted!');

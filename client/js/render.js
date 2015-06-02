@@ -1,6 +1,7 @@
 let Config = require('./config.json'),
     Player = require('./player');
 
+console.log('Render');
 /**
  * @module Render
  * @description
@@ -229,3 +230,4 @@ Render.disconnected = function() {
 
 export default Render;
 
+console.log('Export Render');

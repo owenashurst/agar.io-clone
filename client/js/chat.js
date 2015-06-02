@@ -31,9 +31,16 @@ Chat.registerCommand = function(command, description, callback) {
  * Gets the DOM elements for the chat. Don't call before the DOM
  * is loaded.
  */
-Chat.bindToElement = function() {
+Chat.bindElements = function() {
   Chat.DOM.input = document.getElementById('chatInput');
   Chat.DOM.list = document.getElementById('chatList');
+
+  Chat.DOM.input.addEventListener('keydown', function(event) {
+    let key = event.which || event.keyCode;
+    if(key === 13) {
+      Chat.send();
+    }
+  });
 };
 
 /**
@@ -55,12 +62,12 @@ Chat.send = function() {
       Chat.addSystemLine(`Unrecognised Command: ${name}, type -help for more info`);
     }
   } else {
-    Events.emit.chat({
+    Events.default.emit.chat({
       sender: Player.name,
       message: text
     });
 
-    Chat.addChatLine(player.name, text);
+    Chat.addChatLine(Player.name, text);
   }
 
   Chat.DOM.input = '';
@@ -92,9 +99,9 @@ Chat.addChatLine = function(name, text) {
       user = document.createTextNode(name),
       message = document.createTextNode(text);
 
-  li.className = (name === player.name) ? 'me' : 'friend';
+  li.className = (name === Player.name) ? 'me' : 'friend';
+  b.appendChild(user);
   li.appendChild(b);
-  li.appendChild(user);
   li.appendChild(message);
 
   Chat.refreshList();
@@ -115,7 +122,7 @@ Chat.addSystemLine = function(text) {
   li.className = 'system';
   li.appendChild(message);
 
-  Create.refreshList();
+  Chat.refreshList();
 
   Chat.DOM.list.appendChild(li);
 };

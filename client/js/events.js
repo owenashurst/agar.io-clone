@@ -26,27 +26,31 @@ Events.emit.ping = function() {
 };
 
 Events.emit.chat = function(message) {
-  Events.socket.emit('player-chat', { message, player });
+  Events.socket.emit('player-chat', { message, player: Player });
 };
 
 function __setup__(socket) {
 
   socket.on('pong', function() {
+    console.log('Socket: pong');
     let latency = Date.now() - System.status.lastPing;
     Chat.addSystemLine(`Ping: ${latency} ms`);
   });
 
   socket.on('connect_failed', function() {
+    console.log('Socket: failed');
     socket.close();
     System.status.disconnected = true;
   });
 
   socket.on('disconnect', function() {
+    console.log('Socket: disconnect');
     socket.close();
     System.status.disconnected = true;
   });
 
   socket.on('welcome', function(settings) {
+    console.log('Socket: welcome');
     System.status.started = true;
 
     Player.name = settings.name;
@@ -58,6 +62,7 @@ function __setup__(socket) {
   });
 
   socket.on('player_disconnect', function(event) {
+    console.log('Socket: player_disconnect');
     Game.entities.enemies = event.enemies;
     // render player count
     //document.getElementById('status').innerHTML = 'Players: ' + enemies.length;
@@ -65,6 +70,7 @@ function __setup__(socket) {
   });
 
   socket.on('player_join', function(event) {
+    console.log('Socket: player_join');
     Game.entities.enemies = event.enemies;
     // render player count
     //document.getElementById('status').innerHTML = 'Players: ' + enemies.length;
@@ -72,6 +78,7 @@ function __setup__(socket) {
   });
 
   socket.on('player_rip', function() {
+    console.log('Socket: player_rip');
     System.status.started = false;
     socket.close();
   });
@@ -94,6 +101,6 @@ function __setup__(socket) {
   });
 
   return socket;
-};
+}
 
 export default Events;
