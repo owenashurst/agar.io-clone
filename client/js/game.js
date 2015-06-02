@@ -34,7 +34,7 @@ Game.start = function() {
   canvas.addEventListener('mouseout', Game.targetOutOfBounds, false);
 
   // Add canvas to DOM
-  Game.DOM.gameArea.appendChild(canvas);
+  Render.injectCanvas(Game.DOM.gameArea);
 
   // toggle DOM visibility
   Game.DOM.gameArea.style.display = 'block';
@@ -94,7 +94,7 @@ Game.loop = function() {
     Render.drawEnemy(enemy);
   });
 
-  Render.drawPlayer(Player.entity);
+  Render.drawPlayer(Player);
 
   Events.emit.sendTarget(Player.target);
 };
@@ -109,7 +109,7 @@ Game.loop = function() {
 Game.setTargetFromEvent = function(event) {
   Player.target = {
     x: event.clientX,
-    y: event.clentY
+    y: event.clientY
   };
 };
 

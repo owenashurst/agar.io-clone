@@ -1,7 +1,7 @@
 let Config = require('./config.json'),
+    System = require('./system'),
     Player = require('./player');
 
-console.log('Render');
 /**
  * @module Render
  * @description
@@ -45,9 +45,9 @@ Render.createContext = function() {
  */
 Render.injectCanvas = function(parent) {
   Render.__parent__ = parent;
-  parent.appendChild(Render.__canvas__);
-  parent.addEventListener('resize', Render.resize);
+  window.addEventListener('resize', Render.resize);
   Render.resize();
+  parent.appendChild(Render.__canvas__);
 };
 
 /**
@@ -61,8 +61,8 @@ Render.resize = function() {
     let parent = Render.__parent__,
         canvas = Render.__canvas__;
 
-    Render.bounds.width = canvas.width = parent.offsetWidth;
-    Render.bounds.height = canvas.height = parent.offsetHeight;
+    Render.bounds.width = canvas.width = window.innerWidth;
+    Render.bounds.height = canvas.height = window.innerHeight;
     Player.offset.x = -(Render.bounds.width * 3);
     Player.offset.y = -(Render.bounds.height * 3);
   }
@@ -78,10 +78,8 @@ Render.ctx = Render.createContext();
 
 /**
  * @name Render.drawCircle
- * @param {number} cx
- * The x-coordinate center of the circle
- * @param {number} cy
- * The y-coordinate center of the circle
+ * @param {number} cx center coord x
+ * @param {number} cy center coord y
  * @description
  * Uses parametric equation of a circle to draw a polygonal
  * circle with a fixed number of sides.
@@ -110,60 +108,60 @@ Render.drawCircle = function(cx, cy, numberOfSides) {
  * Draws a piece of food.
  */
 Render.drawFood = function(food) {
-  Render.ctx.strokeStyle = food.color.border || config.food.borderColor;
-  Render.ctx.fillStyle = food.color.fill || config.food.fillColor;
-  Render.ctx.lineWidth = config.food.border;
+  Render.ctx.strokeStyle = food.color.border || Config.food.borderColor;
+  Render.ctx.fillStyle = food.color.fill || Config.food.fillColor;
+  Render.ctx.lineWidth = Config.food.border;
 
-  let x = food.x - player.x + (Render.bounds.width / 2),
-      y = food.y - player.y + (Render.bounds.height / 2);
+  let x = food.x - Player.x + (Render.bounds.width / 2),
+      y = food.y - Player.y + (Render.bounds.height / 2);
 
-  drawCircle(x, y, config.food.size);
+  drawCircle(x, y, Config.food.size);
 };
 
 /**
  * @name Render.drawEnemy
  * @param {Player} enemy
- * An instance of a enemy player object
+ * An instance of a enemy Player object
  * @description
  * Draws an enemy.
  */
 Render.drawEnemy = function(enemy) {
-  let x = enemy.x - player.x + (Render.bounds.width / 2),
-      y = enemy.y - player.y + (Render.bounds.height / 2);
+  let x = enemy.x - Player.x + (Render.bounds.width / 2),
+      y = enemy.y - Player.y + (Render.bounds.height / 2);
 
   Render.drawPlayer(enemy, x, y);
 };
 
 /**
  * @name Render.drawPlayer
- * @param {Player} player The instance of your player object
- * @param {number} xOverride Allows overriding of player x
- * @param {number} yOverride Allows overriding of player y
+ * @param {Player} player The instance of your Player object
+ * @param {number} xOverride Allows overriding of Player x
+ * @param {number} yOverride Allows overriding of Player y
  * @description
  * Draws your player.
  */
 Render.drawPlayer = function(player, xOverride, yOverride) {
   let x = xOverride || Render.bounds.width / 2,
       y = yOverride || Render.bounds.height / 2,
-      mass = config.player.defaultSize + player.mass,
-      fontSize = (player.mass / 2) + config.player.defaultSize;
+      mass = Config.player.default_size + player.mass,
+      fontSize = (player.mass / 2) + Config.player.default_size;
 
   Render.ctx.strokeStyle = `hsl(${player.hue}, 80%, 40%)`;
   Render.ctx.fillStyle = `hsl(${player.hue}, 70%, 50%)`;
-  Render.ctx.lineWidth = config.player.border;
+  Render.ctx.lineWidth = Config.player.border;
 
   Render.ctx.beginPath();
   Render.ctx.arc(x, y, mass, 0, 2 * Math.PI);
   Render.ctx.stroke();
   Render.ctx.fill();
 
-  Render.ctx.lineWidth = config.player.textBorderSize;
+  Render.ctx.lineWidth = Config.player.text_border_size;
   Render.ctx.miterLimit = 1;
   Render.ctx.lineJoin = 'round';
   Render.ctx.textAlign = 'center';
-  Render.ctx.fillStyle = config.player.textColor;
+  Render.ctx.fillStyle = Config.player.text_color;
   Render.ctx.textBaseline = 'middle';
-  Render.ctx.strokeStyle = config.player.textBorder;
+  Render.ctx.strokeStyle = Config.player.text_border;
   Render.ctx.font = 'bold ' + fontSize + 'px sans-serif';
   Render.ctx.strokeText(player.name, x, y);
   Render.ctx.fillText(player.name, x, y);
@@ -184,6 +182,9 @@ Render.clearRect = function() {
  * Draw the background grid on screen.
  */
 Render.drawGrid = function() {
+  Render.ctx.fillStyle = System.status.background;
+  Render.ctx.fillRect(0, 0, Render.bounds.width, Render.bounds.height);
+
   for(let x = Player.offset.x; x < Render.bounds.width; x += Render.bounds.height / 20) {
     Render.ctx.moveTo(x, 0);
     Render.ctx.lineTo(x, Render.bounds.height);
@@ -191,7 +192,7 @@ Render.drawGrid = function() {
 
   for(let y = Player.offset.y; y < Render.bounds.height; y += Render.bounds.height / 20) {
     Render.ctx.moveTo(0, y);
-    Render.ctx.lineTo(x, Render.bounds.width);
+    Render.ctx.lineTo(Render.bounds.width, y);
   }
 
   Render.ctx.strokeStyle = '#ddd';
@@ -230,4 +231,3 @@ Render.disconnected = function() {
 
 export default Render;
 
-console.log('Export Render');

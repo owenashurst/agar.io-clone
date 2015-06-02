@@ -16,7 +16,7 @@ Events.socket = __setup__(io());
 
 Events.emit = {};
 
-Events.emit.playerSendTarget = function(target) {
+Events.emit.sendTarget = function(target) {
   Events.socket.emit('player-send-target', target);
 };
 
@@ -37,16 +37,21 @@ function __setup__(socket) {
     Chat.addSystemLine(`Ping: ${latency} ms`);
   });
 
+  socket.on('connect', function() {
+    console.log('Socket: connected');
+    System.status.connected = true;
+  });
+
   socket.on('connect_failed', function() {
     console.log('Socket: failed');
     socket.close();
-    System.status.disconnected = true;
+    System.status.connected = false;
   });
 
   socket.on('disconnect', function() {
     console.log('Socket: disconnect');
     socket.close();
-    System.status.disconnected = true;
+    System.status.connected = false;
   });
 
   socket.on('welcome', function(settings) {

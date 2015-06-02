@@ -20,6 +20,13 @@ Player.target = { x: 0, y: 0 };
 Player.offset = { x: 0, y: 0 };
 
 /**
+ * @name Player.mass
+ * @description
+ * The size of the player.
+ */
+Player.mass = 0;
+
+/**
  * @name Player.update
  * @param {object} data
  * @description
