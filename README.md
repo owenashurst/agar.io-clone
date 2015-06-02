@@ -81,7 +81,7 @@ The game will then be accessible at `http://localhost:3000`.
 ## FAQ
 1. **What is this game?**
 
-  This is a clone of the game [Agar.IO](agar.io). Someone said that Agar.IO is a clone of an iPad game called Osmos, but we haven't tried it yet. (Cloneception? :P)
+  This is a clone of the game [Agar.IO](http://agar.io/). Someone said that Agar.IO is a clone of an iPad game called Osmos, but we haven't tried it yet. (Cloneception? :P)
   
 2. **Why would you make a clone of this game?**
 
