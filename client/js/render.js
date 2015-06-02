@@ -65,6 +65,8 @@ Render.resize = function() {
     Render.bounds.height = canvas.height = window.innerHeight;
     Player.gameWidth = Render.bounds.width * 3;
     Player.gameHeight = Render.bounds.height * 3;
+    Player.x = Player.gameWidth / 2;
+    Player.y = Player.gameHeight / 2;
     Player.offset.x = -Player.gameWidth;
     Player.offset.y = -Player.gameHeight;
   }
@@ -92,7 +94,7 @@ Render.drawCircle = function(cx, cy, numberOfSides, initialRotation=0) {
 
   Render.ctx.beginPath();
   for(let i = 0; i < numberOfSides; i++) {
-    theta = initialRotation + (i / numberOfSides) * 2 * Math.PI;
+    theta = initialRotation + (i / numberOfSides) * 3 * Math.PI;
     x = cx + radius * Math.sin(theta);
     y = cy + radius * Math.cos(theta);
     Render.ctx.lineTo(x, y);
