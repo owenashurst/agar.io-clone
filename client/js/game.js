@@ -1,9 +1,9 @@
-let Events = require('./events'),
-    Chat = require('./chat'),
-    Render = require('./render'),
-    Player = require('./player'),
-    System = require('./system'),
-    Polyfill = require('./polyfill');
+import Events from './events';
+import Chat from './chat';
+import Render from './render';
+import Player from './player';
+import System from './system';
+import Polyfill from './polyfill';
 
 let Game = {};
 
@@ -116,9 +116,6 @@ Game.setTargetFromEvent = function(event) {
 Game.targetOutOfBounds = function() {
   // figure this out later
 };
-
-// start the game when DOM loads
-window.addEventListener('load', Game.init);
 
 export default Game;
 

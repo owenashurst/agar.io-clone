@@ -1,6 +1,6 @@
-let Config = require('./config.json'),
-    System = require('./system'),
-    Player = require('./player');
+import Config from './config.json';
+import System from './system';
+import Player from './player';
 
 /**
  * @module Render

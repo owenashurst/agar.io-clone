@@ -1,6 +1,6 @@
-let System = require('./system'),
-    Player = require('./player'),
-    Chat = require('./chat');
+import System from './system';
+import Player from './player';
+import Chat from './chat';
 
 /**
  * @module Events

@@ -10,7 +10,7 @@ gulp.task('build', ['build-client', 'move-client', 'build-server', 'move-server'
 
 gulp.task('build-client', function () {
   var b = browserify({
-    entries: './client/js/game.js',
+    entries: './client/js/app.js',
     transform: [babelify]
   });
 

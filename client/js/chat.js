@@ -1,5 +1,5 @@
-let Events = require('./events'),
-    Player = require('./player');
+import Events from './events';
+import Player from './player';
 
 /**
  * @module Chat

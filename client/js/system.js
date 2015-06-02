@@ -1,5 +1,5 @@
-let Chat = require('./chat'),
-    Config = require('./config.json');
+import Chat from './chat';
+import Config from './config.json';
 
 /**
  * @module System

@@ -154,7 +154,7 @@ io.on('connection', function (socket) {
             currentPlayer = player;
         }
 
-        io.emit('playerJoin', {playersList: users, connectedName: player.name});
+        io.emit('player_join', {playersList: users, connectedName: player.name});
         console.log('Total player: ' + users.length);
 
         // Add new food when player connected
@@ -183,14 +183,14 @@ io.on('connection', function (socket) {
         );
     });
 
-    socket.on('playerChat', function (data) {
+    socket.on('player-chat', function (data) {
         var _sender = data.sender.replace(/(<([^>]+)>)/ig, '');
         var _message = data.message.replace(/(<([^>]+)>)/ig, '');
-        socket.broadcast.emit('serverSendPlayerChat', {sender: _sender, message: _message});
+        socket.broadcast.emit('server_send_player_chat', {sender: _sender, message: _message});
     });
 
     // Heartbeat function, update everytime
-    socket.on('playerSendTarget', function (target) {
+    socket.on('player-send-target', function (target) {
      // if you want to use uncomment the line below
     //    console.log(currentPlayer.x + " " + currentPlayer.y);
         if (target.x !== currentPlayer.x || target.y !== currentPlayer.y) {
@@ -242,7 +242,7 @@ io.on('connection', function (socket) {
                             currentPlayer.speed += currentPlayer.mass / massDecreaseRatio;
                         }
 
-                        sockets[users[e].id].emit('RIP');
+                        sockets[users[e].id].emit('player_rip');
                         sockets[users[e].id].disconnect();
                         users.splice(e, 1);
                         break;
@@ -256,7 +256,7 @@ io.on('connection', function (socket) {
                             users[e].speed += users[e].mass / massDecreaseRatio;
                         }
 
-                        sockets[currentPlayer.id].emit('RIP');
+                        sockets[currentPlayer.id].emit('player_rip');
                         sockets[currentPlayer.id].disconnect();
                         users.splice(currentPlayer, 1);
                         break;
@@ -265,8 +265,8 @@ io.on('connection', function (socket) {
             }
 
             // Do some continuos emit
-            socket.emit('serverTellPlayerMove', currentPlayer, foods);
-            socket.broadcast.emit('serverUpdateAll', users, foods);
+            socket.emit('server_tell_player_move', currentPlayer, foods);
+            socket.broadcast.emit('server_update_all', users, foods);
         }
     });
 });
