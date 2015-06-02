@@ -341,6 +341,34 @@ function drawgrid(){
     graph.stroke();
 }
 
+function drawborder() {
+    var borderX = 0;
+    var borderY = 0;
+
+    graph.strokeStyle = playerConfig.borderColor;
+
+    if (player.x + screenWidth / 2 >= gameWidth) {
+        borderX = (gameWidth - player.x) + screenWidth / 2 + player.mass + playerConfig.defaultSize;
+    } else if (player.x - screenWidth / 2 <= 0) {
+        borderX = screenWidth / 2 - player.x - player.mass - playerConfig.defaultSize;
+    }
+    if (player.y + screenHeight / 2 >= gameHeight) {
+        borderY = (gameHeight - player.y) + screenHeight / 2 + player.mass + playerConfig.defaultSize;
+    } else if (player.y - screenHeight / 2 <= 0) {
+        borderY = screenHeight / 2 - player.y - player.mass - playerConfig.defaultSize;
+    }
+    if (borderX) {
+        graph.moveTo(borderX, 0);
+        graph.lineTo(borderX, screenHeight);
+        graph.stroke();
+    }
+    if (borderY) {
+        graph.moveTo(0, borderY);
+        graph.lineTo(screenWidth, borderY);
+        graph.stroke();
+    }
+}
+
 function gameInput(mouse) {
     target.x = mouse.clientX;
     target.y = mouse.clientY;
@@ -369,7 +397,9 @@ function gameLoop() {
             for (var i = 0; i < foods.length; i++) {
                 drawFood(foods[i]);
             }
-
+            
+            drawborder();
+            
             for (i = 0; i < enemies.length; i++) {
                 if (enemies[i].id != player.id) {
                     drawEnemy(enemies[i]);
