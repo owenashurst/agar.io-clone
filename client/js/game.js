@@ -32,7 +32,30 @@ Game.start = function() {
   Game.DOM.gameArea.style.display = 'block';
   Game.DOM.startMenu.style.display = 'none';
 
+  // Listen for mouse actions
+  let canvas = Render.__canvas__;
+  canvas.addEventListener('mousemove', Game.setTargetFromEvent, false);
+  canvas.addEventListener('mouseout', Game.targetOutOfBounds, false);
+
   Game.loop();
+};
+
+/**
+ * @name Game.setTargetFromEvent
+ * @param {Event} event
+ * @description
+ * Pass this as a callback to a mousemove event. It will update the
+ * player's target based on the position of the event.
+ */
+Game.setTargetFromEvent = function(event) {
+  Player.target = {
+    x: event.clientX,
+    y: event.clentY
+  };
+};
+
+Game.targetOutOfBounds = function() {
+  // figure this out later
 };
 
 /**
