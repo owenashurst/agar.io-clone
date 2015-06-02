@@ -134,3 +134,5 @@ Chat.printHelp = function() {
   });
 };
 
+export default Chat;
+
