@@ -162,6 +162,15 @@ Render.drawPlayer = function(player, xOverride, yOverride) {
 };
 
 /**
+ * @name Render.clearRect
+ * @description
+ * Clears the canvas
+ */
+Render.clearRect = function() {
+  Render.ctx.clearRect(0, 0, Render.bounds.width, Render.bounds.height);
+};
+
+/**
  * @name Render.drawGrid
  * @description
  * Draw the background grid on screen.
