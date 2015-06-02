@@ -11,5 +11,9 @@
     "text_border": "black",
     "text_border_size": 3,
     "default_size": 10
+  },
+  "background": {
+    "light": "#eee",
+    "dark": "#181818"
   }
 }

@@ -97,7 +97,7 @@ Chat.addChatLine = function(name, text) {
   li.appendChild(user);
   li.appendChild(message);
 
-  Create.refreshList();
+  Chat.refreshList();
   Chat.DOM.list.appendChild(li);
 };
 

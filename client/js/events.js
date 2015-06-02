@@ -12,7 +12,7 @@ let System = require('./system'),
  */
 let Events = {};
 
-Events.socket = Events.setup(io());
+Events.socket = __setup__(io());
 
 Events.emit = {};
 
@@ -29,7 +29,7 @@ Events.emit.chat = function(message) {
   Events.socket.emit('player-chat', { message, player });
 };
 
-Events.setup = function(socket) {
+function __setup__(socket) {
 
   socket.on('pong', function() {
     let latency = Date.now() - System.status.lastPing;
@@ -49,10 +49,10 @@ Events.setup = function(socket) {
   socket.on('welcome', function(settings) {
     System.status.started = true;
 
-    player.name = settings.name;
-    player.id = settings.id;
-    player.hue = settings.hue;
-    socket.emit('gotit', player);
+    Player.name = settings.name;
+    Player.id = settings.id;
+    Player.hue = settings.hue;
+    socket.emit('gotit', Player);
 
     Chat.addSystemLine('Connected to the game!');
   });
