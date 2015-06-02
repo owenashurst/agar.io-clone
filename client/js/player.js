@@ -26,6 +26,10 @@ Player.offset = { x: 0, y: 0 };
  */
 Player.mass = 0;
 
+Player.x = 0;
+Player.y = 0;
+Player.speed = 5;
+
 /**
  * @name Player.update
  * @param {object} data

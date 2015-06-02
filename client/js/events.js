@@ -23,7 +23,7 @@ Events.onUpdate = function(fn) {
 Events.emit = {};
 
 Events.emit.sendTarget = function(target) {
-  Events.socket.emit('player-send-target', target);
+  Events.socket.emit('player_send_target', target);
 };
 
 Events.emit.ping = function() {
@@ -32,7 +32,7 @@ Events.emit.ping = function() {
 };
 
 Events.emit.chat = function(message) {
-  Events.socket.emit('player-chat', { message, player: Player });
+  Events.socket.emit('player_chat', { message, player: Player });
 };
 
 function __setup__(socket) {
@@ -100,7 +100,10 @@ function __setup__(socket) {
 
     Player.offset.x += (Player.x - update.x);
     Player.offset.y += (Player.y - update.y);
-    Player.update(update);
+    Player.x = update.x;
+    Player.y = update.y;
+    Player.mass = update.mass;
+    //Player.update(update);
   });
 
   socket.on('server_tell_update_all', function(enemies, food) {

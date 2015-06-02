@@ -62,7 +62,7 @@ Chat.send = function() {
       Chat.addSystemLine(`Unrecognised Command: ${name}, type -help for more info`);
     }
   } else {
-    Events.default.emit.chat({
+    Events.emit.chat({
       sender: Player.name,
       message: text
     });
@@ -96,7 +96,7 @@ Chat.refreshList = function() {
 Chat.addChatLine = function(name, text) {
   let li = document.createElement('li'),
       b = document.createElement('b'),
-      user = document.createTextNode(name),
+      user = document.createTextNode(`${name}: `),
       message = document.createTextNode(text);
 
   li.className = (name === Player.name) ? 'me' : 'friend';

@@ -84,7 +84,7 @@ Game.init = function() {
  * itself using requestAnimationFrame.
  */
 Game.loop = function() {
-  Polyfill.requestAnimationFrame(Game.loop, 1000);
+  Polyfill.requestAnimationFrame(Game.loop);
 
   if(!System.status.connected) return Render.disconnected();
   if(!System.status.started) return Render.gameOver();
