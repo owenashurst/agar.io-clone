@@ -1,4 +1,13 @@
-var Chat = {};
+let Events = require('./events'),
+    Player = require('./player');
+
+/**
+ * @module Chat
+ * @description
+ * This module ties the events system to the DOM for the chat
+ * interface. All chat related stuff lives in here.
+ */
+let Chat = {};
 
 Chat.DOM = {};
 Chat.commands = {};
@@ -46,7 +55,11 @@ Chat.send = function() {
       Chat.addSystemLine(`Unrecognised Command: ${name}, type -help for more info`);
     }
   } else {
-    //socket.emit('playerChat', { sender: player.name, message: text });
+    Events.emit.chat({
+      sender: Player.name,
+      message: text
+    });
+
     Chat.addChatLine(player.name, text);
   }
 

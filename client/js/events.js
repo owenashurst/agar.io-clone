@@ -1,5 +1,13 @@
 let System = require('./system');
 
+/**
+ * @module Events
+ * @description
+ * A stateless module which handles all socket connections and
+ * interface points for other modules to interact with the sockets.
+ *
+ * This module should not include any mutable state.
+ */
 let Events = {};
 
 Events.socket = Events.setup(io());

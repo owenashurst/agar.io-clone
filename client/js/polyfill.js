@@ -1,6 +1,11 @@
-let Polyfill = {};
+/**
+ * @module Polyfill
+ * @description
+ * All polyfills should live in here.
+ */
+let Polyfill = window;
 
-Polyfill.requestAnimationFrame = window.requestAnimationFrame =
+Polyfill.requestAnimationFrame =
   window.requestAnimationFrame       ||
   window.webkitRequestAnimationFrame ||
   window.mozRequestAnimationFrame    ||

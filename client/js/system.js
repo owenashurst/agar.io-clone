@@ -1,18 +1,29 @@
-let Chat = require('./chat');
+let Chat = require('./chat'),
+    Config = require('./config.json');
 
+/**
+ * @module System
+ * @description
+ * A stateful module which exposes system specific properties
+ * and methods.
+ */
 let System = {};
 
 System.status = {
   started: false,
   connected: false,
   lastPing: 0,
-  darkMode: false
+  background: Config.background.light
 };
 
 System.toggleDarkMode = function() {
-  System.status.darkMode = !System.status.darkMode;
-  // update in DOM
-  Chat.addSystemLine('Dark mode' + System.status.darkMode ? 'enabled' : 'disabled');
+  if(System.status.background === Config.background.light) {
+    System.status.background = Config.background.dark;
+    Chat.addSystemLine('Dark mode enabled');
+  } else {
+    System.status.background = Config.background.dark;
+    Chat.addSystemLine('Dark mode enabled');
+  }
 };
 
 export default System;

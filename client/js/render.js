@@ -1,5 +1,12 @@
 let Config = require('./config.json');
 
+/**
+ * @module Render
+ * @description
+ * This is a stateless rendering module (with the exception of the
+ * canvas it keeps track of). No stateful properties should be added
+ * here and the methods should only be informed by their arguments.
+ */
 let Render = {};
 
 /**
@@ -125,12 +132,9 @@ Render.drawEnemy = function(enemy) {
 
 /**
  * @name Render.drawPlayer
- * @param {Player} player
- * The instance of your player object
- * @param {number} xOverride
- * Allows overriding of player x
- * @param {number} yOverride
- * Allows overriding of player y
+ * @param {Player} player The instance of your player object
+ * @param {number} xOverride Allows overriding of player x
+ * @param {number} yOverride Allows overriding of player y
  * @description
  * Draws your player.
  */
