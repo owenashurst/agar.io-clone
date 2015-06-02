@@ -397,3 +397,10 @@ function gameLoop() {
         graph.fillText('Disconnected!', screenWidth / 2, screenHeight / 2);
     }
 }
+
+window.addEventListener('resize', function() {
+    screenWidth = window.innerWidth;
+    screenHeight = window.innerHeight;
+    player.screenWidth = c.width = screenWidth;
+    player.screenHeight = c.height = screenHeight;
+}, true);
