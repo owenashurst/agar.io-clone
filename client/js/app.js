@@ -47,7 +47,7 @@ var foodConfig = {
     border: 2,
     borderColor: '#f39c12',
     fillColor: '#f1c40f',
-    size: 5
+    size: 10
 };
 
 var playerConfig = {
