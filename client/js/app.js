@@ -37,6 +37,8 @@ var gameStart = false;
 var disconnected = false;
 
 var startPingTime = 0;
+var oldx = 0;
+var oldy = 0;
 
 var chatCommands = {};
 var backgroundColor = '#EEEEEE';
@@ -241,12 +243,16 @@ function SetupSocket(socket) {
         xoffset += (player.x - playerData.x);
         yoffset += (player.y - playerData.y);
         player = playerData;
+        if(foodsList !== 0){
         foods = foodsList;
+        }
     });
 
     socket.on('serverUpdateAll', function (players, foodsList) {
         enemies = players;
+        if(foodsList !== 0){
         foods = foodsList;
+        }
     });
 
     // Die
@@ -377,7 +383,13 @@ function gameLoop() {
             }
 
             drawPlayer();
-            socket.emit('0', target); // playerSendTarget Heartbeat
+
+            if (target.x !== oldx && target.y !== oldy) {
+                socket.emit('0', target); // playerSendTarget Heartbeat
+                oldx = target.x;
+                oldy = target.y;
+            }
+
         } else {
             graph.fillStyle = '#333333';
             graph.fillRect(0, 0, screenWidth, screenHeight);
