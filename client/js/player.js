@@ -7,11 +7,17 @@ let Player = {};
 
 /**
  * @name Player.target
- * @type {object}
  * @description
  * Keeps track of where the mouse is.
  */
 Player.target = { x, y };
+
+/**
+ * @name Player.offset
+ * @description
+ * Keeps track of player offset.
+ */
+Player.offset = { x, y };
 
 /**
  * @name Player.update

@@ -1,4 +1,6 @@
-let System = require('./system');
+let System = require('./system'),
+    Player = require('./player'),
+    Chat = require('./chat');
 
 /**
  * @module Events
@@ -31,6 +33,7 @@ Events.setup = function(socket) {
 
   socket.on('pong', function() {
     let latency = Date.now() - System.status.lastPing;
+    Chat.addSystemLine(`Ping: ${latency} ms`);
   });
 
   socket.on('connect_failed', function() {
@@ -51,20 +54,21 @@ Events.setup = function(socket) {
     player.hue = settings.hue;
     socket.emit('gotit', player);
 
-    //console.log('Game is started: ' + gameStart);
-    //addSystemLine('Connected to the game!');
+    Chat.addSystemLine('Connected to the game!');
   });
 
-  socket.on('player_disconnect', function(data) {
-    //enemies = data.playersList;
+  socket.on('player_disconnect', function(event) {
+    Game.entities.enemies = event.enemies;
+    // render player count
     //document.getElementById('status').innerHTML = 'Players: ' + enemies.length;
-    //addSystemLine('Player <b>' + data.disconnectName + '</b> disconnected!');
+    Chat.addSystemLine(`Player ${event.disconnectName} disconnected!`);
   });
 
-  socket.on('player_join', function(data) {
-    //enemies = data.playersList;
+  socket.on('player_join', function(event) {
+    Game.entities.enemies = event.enemies;
+    // render player count
     //document.getElementById('status').innerHTML = 'Players: ' + enemies.length;
-    //addSystemLine('Player <b>' + data.connectedName + '</b> joined!');
+    Chat.addSystemLine(`Player ${event.connectedName} connected!`);
   });
 
   socket.on('player_rip', function() {
@@ -72,20 +76,21 @@ Events.setup = function(socket) {
     socket.close();
   });
 
-  socket.on('server_send_player_chat', function(data) {
-    // addChatLine(data.sender, data.message);
+  socket.on('server_send_player_chat', function(event) {
+    Chat.addChatLine(event.sender, event.message);
   });
 
-  socket.on('server_tell_player_move', function() {
-    //xoffset += (player.x - playerData.x);
-    //yoffset += (player.y - playerData.y);
-    //player = playerData;
-    //foods = foodsList;
+  socket.on('server_tell_player_move', function(update, food) {
+    Game.entities.food = food;
+
+    Player.offset.x += (Player.x - update.x);
+    Player.offset.y += (Player.y - update.y);
+    Player.update(player);
   });
 
-  socket.on('server_tell_update_all', function() {
-    //enemies = players;
-    //foods = foodsList;
+  socket.on('server_tell_update_all', function(enemies, food) {
+    Game.entities.enemies = enemies;
+    Game.entities.food = food;
   });
 
   return socket;

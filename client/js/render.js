@@ -1,4 +1,5 @@
-let Config = require('./config.json');
+let Config = require('./config.json'),
+    Player = require('./player');
 
 /**
  * @module Render
@@ -61,6 +62,8 @@ Render.resize = function() {
 
     Render.bounds.width = canvas.width = parent.offsetWidth;
     Render.bounds.height = canvas.height = parent.offsetHeight;
+    Player.offset.x = -(Render.bounds.width * 3);
+    Player.offset.y = -(Render.bounds.height * 3);
   }
 };
 
@@ -180,12 +183,12 @@ Render.clearRect = function() {
  * Draw the background grid on screen.
  */
 Render.drawGrid = function() {
-  for(let x = xoffset; x < Render.bounds.width; x += Render.bounds.height / 20) {
+  for(let x = Player.offset.x; x < Render.bounds.width; x += Render.bounds.height / 20) {
     Render.ctx.moveTo(x, 0);
     Render.ctx.lineTo(x, Render.bounds.height);
   }
 
-  for(let y = xoffset; y < Render.bounds.height; y += Render.bounds.height / 20) {
+  for(let y = Player.offset.y; y < Render.bounds.height; y += Render.bounds.height / 20) {
     Render.ctx.moveTo(0, y);
     Render.ctx.lineTo(x, Render.bounds.width);
   }
