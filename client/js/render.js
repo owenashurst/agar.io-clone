@@ -1,3 +1,5 @@
+let Config = require('./config.json');
+
 let Render = {};
 
 /**
@@ -97,14 +99,14 @@ Render.drawCircle = function(cx, cy, numberOfSides) {
  * Draws a piece of food.
  */
 Render.drawFood = function(food) {
-  Render.ctx.strokeStyle = food.color.border || foodConfig.borderColor;
-  Render.ctx.fillStyle = food.color.fill || foodConfig.fillColor;
-  Render.ctx.lineWidth = foodConfig.border;
+  Render.ctx.strokeStyle = food.color.border || config.food.borderColor;
+  Render.ctx.fillStyle = food.color.fill || config.food.fillColor;
+  Render.ctx.lineWidth = config.food.border;
 
   let x = food.x - player.x + (Render.bounds.width / 2),
       y = food.y - player.y + (Render.bounds.height / 2);
 
-  drawCircle(x, y, foodConfig.size);
+  drawCircle(x, y, config.food.size);
 };
 
 /**
@@ -135,25 +137,25 @@ Render.drawEnemy = function(enemy) {
 Render.drawPlayer = function(player, xOverride, yOverride) {
   let x = xOverride || Render.bounds.width / 2,
       y = yOverride || Render.bounds.height / 2,
-      mass = playerConfig.defaultSize + player.mass,
-      fontSize = (player.mass / 2) + playerConfig.defaultSize;
+      mass = config.player.defaultSize + player.mass,
+      fontSize = (player.mass / 2) + config.player.defaultSize;
 
   Render.ctx.strokeStyle = `hsl(${player.hue}, 80%, 40%)`;
   Render.ctx.fillStyle = `hsl(${player.hue}, 70%, 50%)`;
-  Render.ctx.lineWidth = playerConfig.border;
+  Render.ctx.lineWidth = config.player.border;
 
   Render.ctx.beginPath();
   Render.ctx.arc(x, y, mass, 0, 2 * Math.PI);
   Render.ctx.stroke();
   Render.ctx.fill();
 
-  Render.ctx.lineWidth = playerConfig.textBorderSize;
+  Render.ctx.lineWidth = config.player.textBorderSize;
   Render.ctx.miterLimit = 1;
   Render.ctx.lineJoin = 'round';
   Render.ctx.textAlign = 'center';
-  Render.ctx.fillStyle = playerConfig.textColor;
+  Render.ctx.fillStyle = config.player.textColor;
   Render.ctx.textBaseline = 'middle';
-  Render.ctx.strokeStyle = playerConfig.textBorder;
+  Render.ctx.strokeStyle = config.player.textBorder;
   Render.ctx.font = 'bold ' + fontSize + 'px sans-serif';
   Render.ctx.strokeText(player.name, x, y);
   Render.ctx.fillText(player.name, x, y);
