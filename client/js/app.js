@@ -59,6 +59,8 @@ var yoffset = -gameHeight;
 
 var gameStart = false;
 var disconnected = false;
+var died = false;
+var kicked = false;
 
 var startPingTime = 0;
 
@@ -140,7 +142,7 @@ function addSystemLine(text) {
     if (chatList.childNodes.length >=5) {
         chatList.removeChild(chatList.childNodes[0]);
     }
-    chatList.appendChild(chatLine, chatList.childNodes[0]);
+    chatList.appendChild(chatLine);
 }
 
 function registerChatCommand(name, description, callback) {
@@ -189,6 +191,14 @@ registerChatCommand('dark', 'toggle dark mode', function (args) {
 
 registerChatCommand('help', 'show information about chat commands', function () {
     printHelp();
+});
+
+registerChatCommand('password', 'login as an admin using the set admin password', function (args) {
+    socket.emit('pass', args);
+});
+
+registerChatCommand('kick', 'kick a player', function (args) {
+    socket.emit('kick', args);
 });
 
 function sendChat(key) {
@@ -248,11 +258,21 @@ function SetupSocket(socket) {
         addSystemLine('Player <b>' + data.disconnectName + '</b> disconnected!');
     });
 
+    socket.on('playerDied', function (data) {
+        enemies = data.playersList;
+        document.getElementById('status').innerHTML = 'Players: ' + enemies.length;
+        addSystemLine('Player <b>' + data.disconnectName + '</b> died!');
+    });
+
     socket.on('playerJoin', function (data) {
         console.log(data);
         enemies = data.playersList;
         document.getElementById('status').innerHTML = 'Players: ' + enemies.length;
         addSystemLine('Player <b>' + data.connectedName + '</b> joined!');
+    });
+
+    socket.on('serverMSG', function (data) {
+        addSystemLine(data);
     });
 
     // Chat
@@ -280,6 +300,13 @@ function SetupSocket(socket) {
     // Die
     socket.on('RIP', function () {
         gameStart = false;
+        died = true;
+        socket.close();
+    });
+
+    socket.on('kick', function () {
+        gameStart = false;
+        kicked = true;
         socket.close();
     });
 }
@@ -424,7 +451,18 @@ function gameLoop() {
         graph.textAlign = 'center';
         graph.fillStyle = '#FFFFFF';
         graph.font = 'bold 30px sans-serif';
-        graph.fillText('Disconnected!', screenWidth / 2, screenHeight / 2);
+
+        if (died) {
+            graph.fillText('You died!', screenWidth / 2, screenHeight / 2);
+        } else {
+            if(kicked){
+                  graph.fillText('You were kicked!', screenWidth / 2, screenHeight / 2);
+            }
+            else{
+                  graph.fillText('Disconnected!', screenWidth / 2, screenHeight / 2);
+            }
+
+        }
     }
 }
 
