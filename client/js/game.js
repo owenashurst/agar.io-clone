@@ -114,8 +114,8 @@ Game.loop = function() {
  * player's target based on the position of the event.
  */
 Game.setTargetFromEvent = function(event) {
-  Player.target.x = event.clientX;
-  Player.target.y = event.clientY;
+  Player.target.x = event.clientX - Render.bounds.width /2 ;
+  Player.target.y = event.clientY - Render.bounds.height / 2;
 };
 
 Game.targetOutOfBounds = function() {
