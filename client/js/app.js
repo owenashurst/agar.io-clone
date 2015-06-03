@@ -52,8 +52,8 @@ window.onload = function() {
 // Canvas
 var screenWidth = window.innerWidth;
 var screenHeight = window.innerHeight;
-var gameWidth = screenWidth * 3;
-var gameHeight = screenHeight * 3;
+var gameWidth = screenWidth * 10;
+var gameHeight = screenHeight * 10;
 var xoffset = -gameWidth;
 var yoffset = -gameHeight;
 
@@ -240,6 +240,7 @@ function SetupSocket(socket) {
         gameStart = true;
         console.log('Game is started: ' + gameStart);
         addSystemLine('Connected to the game!');
+        addSystemLine('Type <b>-help</b> for a list of commands');
     });
 
     socket.on('playerDisconnect', function (data) {
