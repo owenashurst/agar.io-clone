@@ -1,34 +1,34 @@
 ﻿<!doctype html>
-<html lang="en">
+<html lang="pl">
 <head>
     <meta charset="UTF-8">
-    <title>Agar.IO Clone</title>
+    <title>Klon Gry Agar.IO</title>
 
     <link rel="stylesheet" href="/css/main.css" />
 </head>
 <body>
     <div id="gameAreaWrapper" style="display:none;">
-        <div id="status">Players: 0</div>
+        <div id="status">Graczy: 0</div>
         <div class="chatbox">
             <ul id="chatList" class="chat-list"></ul>
-            <input id="chatInput" type="text" class="chat-input" placeholder="Chat here..." />
+            <input id="chatInput" type="text" class="chat-input" placeholder="Rozmawiamy tutaj..." />
         </div>
         <canvas tabindex="1" id="cvs"></canvas>
     </div>
     <div id="startMenuWrapper">
         <div id="startMenu">
-            <p>Open Agar</p>
-            <input type="text" tabindex="0" autofocus placeholder="Enter your name here" id="playerNameInput" />
-            <b class="input-error">Nick must be alphanumeric characters only!</b>
+            <p>Otwarta Gra Agar</p>
+            <input type="text" tabindex="0" autofocus placeholder="Wpisz swoje imię tutaj" id="playerNameInput" />
+            <b class="input-error">Nick musi być zbudowany tylko ze znaków alfanumerycznych! (dozwolone znaki a-z A-Z)</b>
             <br />
-            <button id="startButton">Play</button>
+            <button id="startButton">Graj</button>
             <br/>
-            <h3>Gameplay</h3>
+            <h3>Zasady rozgrywki</h3>
             <ul>
-                <li>Move your mouse on the screen to move your character</li>
-                <li>Eat food and other players in order to grow your character (food respawns every time a player eats it)</li>
-                <li>A player's mass is the number of food particles eaten</li>
-                <li>Objective: Try to get fat and eat other players</li>
+                <li>Poruszaj swoją myszką na planszy aby móc kierować swoją postacią</li>
+                <li>Zjadaj kawałki jedzenia i innych graczy aby powiększać swoją masę postaci (jedzenie odradza się zawsze kiedy gracz zjada kawałki jedzenia)</li>
+                <li>Masa gracza jest równa liczbie cząstek żywności spożywanej</li>
+                <li>Cel: Spróbuj być grubym i jeść innych graczy</li>
             </ul>
         </div>
     </div>
