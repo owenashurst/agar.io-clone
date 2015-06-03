@@ -164,8 +164,9 @@ io.on('connection', function (socket) {
     });
 
     socket.on('disconnect', function () {
-        var playerName = findPlayer(userID).name;
-
+        var playerDisconnected = findPlayer(userID);
+        
+	if(playerDisconnected.hasOwnProperty(name)){
         removePlayer(userID);
 
         console.log('User #' + userID + ' disconnected');
@@ -174,9 +175,13 @@ io.on('connection', function (socket) {
             'playerDisconnect',
             {
                 playersList: users,
-                disconnectName: playerName
+                disconnectName: playerDisconnected.name
             }
         );
+        }
+        else{
+        	console.log("Unknown user disconnected");
+        }
     });
 
     socket.on('playerChat', function (data) {
