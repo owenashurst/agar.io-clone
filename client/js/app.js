@@ -61,8 +61,6 @@ var gameStart = false;
 var disconnected = false;
 
 var startPingTime = 0;
-var oldx = 0;
-var oldy = 0;
 
 var chatCommands = {};
 var backgroundColor = '#EEEEEE';
@@ -408,11 +406,7 @@ function gameLoop() {
 
             drawPlayer();
 
-            if (target.x !== oldx && target.y !== oldy) {
-                socket.emit('0', target); // playerSendTarget Heartbeat
-                oldx = target.x;
-                oldy = target.y;
-            }
+            socket.emit('0', target); // playerSendTarget Heartbeat
 
         } else {
             graph.fillStyle = '#333333';
