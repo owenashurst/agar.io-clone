@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "A simple Agar.io clone",
   "main": "server/server.js",
+  "engines": {
+    "node": "0.10.x"
+  },
   "scripts": {
     "postinstall": "node ./node_modules/bower/bin/bower install && node ./node_modules/gulp/bin/gulp.js build",
     "start": "node ./node_modules/gulp/bin/gulp.js run",
