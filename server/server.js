@@ -168,18 +168,18 @@ io.on('connection', function (socket) {
     socket.on('disconnect', function () {
         var playerDisconnected = findPlayer(userID);
         
-	if(playerDisconnected.hasOwnProperty(name)){
-        removePlayer(userID);
+        if(playerDisconnected.hasOwnProperty('name')){
+            removePlayer(userID);
 
-        console.log('User #' + userID + ' disconnected');
+            console.log('User #' + userID + ' disconnected');
 
-        socket.broadcast.emit(
-            'playerDisconnect',
-            {
-                playersList: users,
-                disconnectName: playerDisconnected.name
-            }
-        );
+            socket.broadcast.emit(
+                'playerDisconnect',
+                {
+                    playersList: users,
+                    disconnectName: playerDisconnected.name
+                }
+            );
         }
         else{
         	console.log("Unknown user disconnected");
