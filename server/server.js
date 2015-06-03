@@ -56,35 +56,15 @@ function generateFood(target) {
 
 // arr is for example users or foods
 function findIndex(arr, id) {
-    var len = arr.length;
-
-    while (len--) {
-        if (arr[len].id === id) {
-            return len;
-        }
-    }
-
-    return -1;
-
+    return arr.map(function(x){ return x.id; }).indexOf(id);
 }
 
 function randomColor() {
-    var color = '#' + ('00000'+(Math.random()*(1<<24)|0).toString(16)).slice(-6),
-        difference = 32,
-        c = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(color),
-        r = parseInt(c[1], 16) - difference,
-        g = parseInt(c[2], 16) - difference,
-        b = parseInt(c[3], 16) - difference;
-
-    if (r < 0) {
-        r = 0;
-    }
-    if (g < 0) {
-        g = 0;
-    }
-    if (b < 0) {
-        b = 0;
-    }
+    var color = '#' + ('00000' + (Math.random() * (1 << 24) | 0).toString(16)).slice(-6);
+    var c = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(color);
+    var r = (parseInt(c[1], 16) - 32) > 0 ? (parseInt(c[1], 16) - 32) : 0;
+    var g = (parseInt(c[2], 16) - 32) > 0 ? (parseInt(c[2], 16) - 32) : 0;
+    var b = (parseInt(c[3], 16) - 32) > 0 ? (parseInt(c[3], 16) - 32) : 0;
 
     return {
         fill: color,
