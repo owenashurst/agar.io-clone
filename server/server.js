@@ -116,8 +116,8 @@ function hitTest(start, end, min) {
 }
 
 function movePlayer(player, target) {
-    var dist = Math.sqrt(Math.pow(target.y - player.screenHeight / 2, 2) + Math.pow(target.x - player.screenWidth / 2, 2)),
-       deg = Math.atan2(target.y - player.screenHeight / 2, target.x - player.screenWidth / 2);
+    var dist = Math.sqrt(Math.pow(target.y, 2) + Math.pow(target.x, 2)),
+       deg = Math.atan2(target.y, target.x);
 
     var deltaY = player.speed * Math.sin(deg);
     var deltaX = player.speed * Math.cos(deg);

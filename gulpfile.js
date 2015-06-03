@@ -15,7 +15,7 @@ gulp.task('build-client', ['move-client'], function () {
         basedir: __dirname,
         entries: 'client/js/app.js',
         transform: [babelify]
-    })
+    });
 
     b.bundle()
         .on("error", function (err) {
@@ -33,8 +33,9 @@ gulp.task('move-client', function () {
 });
 
 gulp.task('build-server', ['move-server'], function () {
+    var inputDir = path.join(__dirname, 'server/');
     var outputDir = path.join(__dirname, 'bin/server/');
-    return gulp.src('server/*.js')
+    return gulp.src(inputDir + '*.js')
 		.pipe(jshint())
 		.pipe(jshint.reporter('default', { verbose: true }))
 		.pipe(gulp.dest(outputDir));
