@@ -4,16 +4,7 @@ var app = express();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
 var fs = require('fs');
-var yaml = require('js-yaml');
-
-var configFilePath = 'server/config.yml';
-
-if (!fs.existsSync(configFilePath)) {
-    console.log("Config file not found!");
-    return;
-}
-
-var config = yaml.safeLoad(fs.readFileSync(configFilePath));
+var config = require('./config.json');
 
 var users = [];
 var foods = [];
