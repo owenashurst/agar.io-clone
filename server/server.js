@@ -168,7 +168,7 @@ io.on('connection', function (socket) {
     socket.on('disconnect', function () {
         var playerDisconnected = findPlayer(userID);
         
-	if(playerDisconnected.hasOwnProperty(name)){
+	if(playerDisconnected.hasOwnProperty('name')){
         removePlayer(userID);
 
         console.log('User #' + userID + ' disconnected');
