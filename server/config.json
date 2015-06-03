@@ -9,5 +9,6 @@
     "maxFoodCount": 50,
     "noPlayer": 0,
     "defaultPlayerSize": 50,
-    "eatableMassDistance": 5
+    "eatableMassDistance": 5,
+    "adminPass": "DEFAULT"
 }
