@@ -15,7 +15,7 @@ gulp.task('build-client', ['move-client'], function () {
         basedir: __dirname,
         entries: 'client/js/app.js',
         transform: [babelify]
-    })
+    });
 
     b.bundle()
         .on("error", function (err) {
