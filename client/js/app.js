@@ -66,32 +66,32 @@ var chatCommands = {};
 var backgroundColor = '#EEEEEE';
 
 var foodConfig = {
-    border: 2,
+    border: 0,
     borderColor: '#f39c12',
     fillColor: '#f1c40f',
     size: 10
 };
 
 var playerConfig = {
-    border: 3,
+    border: 15,
     textColor: '#FFFFFF',
     textBorder: '#000000',
     textBorderSize: 3,
-    defaultSize: 10
+    defaultSize: 30
 };
 
 var enemyConfig = {
-    border: 3,
+    border: 15,
     textColor: '#FFFFFF',
     textBorder: '#000000',
     textBorderSize: 3,
-    defaultSize: 10
+    defaultSize: 30
 };
 
 var player = {
     id: -1,
     x: gameWidth / 2, y: gameHeight / 2,
-    mass: 0, speed: 5,
+    mass: 0, speed: 20,
     //TODO: exclude width and height out of player package
     screenWidth: screenWidth,
     screenHeight: screenHeight,
@@ -110,7 +110,7 @@ c.addEventListener('mouseout', outOfBounds, false);
 
 // register when the mouse goes off the canvas
 function outOfBounds() {
-  target = { x : screenWidth / 2, y : screenHeight / 2 };
+    target = { x : screenWidth / 2, y : screenHeight / 2 };
 }
 
 

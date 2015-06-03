@@ -7,5 +7,5 @@ newFoodPerPlayer: 30
 respawnFoodPerPlayer: 1
 maxFoodCount: 50
 noPlayer: 0
-defaultPlayerSize: 20
+defaultPlayerSize: 50
 eatableMassDistance: 5
