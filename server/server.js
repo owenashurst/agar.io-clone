@@ -121,8 +121,10 @@ function movePlayer(player, target) {
         deltaX *= dist / (100 + defaultPlayerSize + player.mass);
     }
 
-    player.y += (player.y + deltaY >= 0 && player.y + deltaY <= player.gameHeight) ? deltaY : 0;
-    player.x += (player.x + deltaX >= 0 && player.x + deltaX <= player.gameWidth) ? deltaX : 0;
+    var borderCalc = defaultPlayerSize + player.mass - 15;
+
+    player.y += (player.y + deltaY >= borderCalc && player.y + deltaY <= player.gameHeight - borderCalc) ? deltaY : 0;
+    player.x += (player.x + deltaX >= borderCalc && player.x + deltaX <= player.gameWidth - borderCalc) ? deltaX : 0;
 }
 
 
