@@ -163,9 +163,9 @@ updatereq = true;
     });
 
     socket.on('disconnect', function () {
+    	if(findPlayer(userID) !== null){
         var playerName = findPlayer(userID).name;
 
-        if(findPlayer(userID) !== null){
         removePlayer(userID);
 
         console.log('User #' + userID + ' disconnected');
