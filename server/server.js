@@ -118,9 +118,12 @@ function hitTest(start, end, min) {
 function movePlayer(player, target) {
     var dist = Math.sqrt(Math.pow(target.y - player.screenHeight / 2, 2) + Math.pow(target.x - player.screenWidth / 2, 2)),
        deg = Math.atan2(target.y - player.screenHeight / 2, target.x - player.screenWidth / 2);
+    
+    //Slows player as mass increases. 
+    var slowDown = ((player.mass + 1)/17) + 1;
 
-    var deltaY = player.speed * Math.sin(deg);
-    var deltaX = player.speed * Math.cos(deg);
+	var deltaY = player.speed * Math.sin(deg)/ slowDown;
+	var deltaX = player.speed * Math.cos(deg)/ slowDown;
 
     if (dist < (100 + defaultPlayerSize + player.mass)) {
         deltaY *= dist / (100 + defaultPlayerSize + player.mass);
