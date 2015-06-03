@@ -13,14 +13,38 @@ function startGame() {
     animloop();
 }
 
-window.onload = function() {
-    document.getElementById('startButton').onclick = startGame;
+// check if nick is valid alphanumeric characters (and underscores)
+function validNick() {
+    var regex = /^\w*$/;
+    console.log("Regex Test", regex.exec(playerNameInput.value));
+    return regex.exec(playerNameInput.value) !== null;
+}
 
-    playerNameInput.addEventListener('keypress', function(e) {
+window.onload = function() {
+    'use strict';
+
+    var btn = document.getElementById('startButton'),
+        nickErrorText = document.querySelector('#startMenu .input-error');
+
+    btn.onclick = function () {
+
+        // check if the nick is valid
+        if (validNick()) {
+            startGame();
+        } else {
+            nickErrorText.style.display = 'inline';
+        }
+    };
+
+    playerNameInput.addEventListener('keypress', function (e) {
         var key = e.which || e.keyCode;
 
         if (key === KEY_ENTER) {
-            startGame();
+            if (validNick()) {
+                startGame();
+            } else {
+                nickErrorText.style.display = 'inline';
+            }
         }
     });
 };
@@ -28,48 +52,48 @@ window.onload = function() {
 // Canvas
 var screenWidth = window.innerWidth;
 var screenHeight = window.innerHeight;
-var gameWidth = screenWidth * 3;
-var gameHeight = screenHeight * 3;
+var gameWidth = screenWidth * 10;
+var gameHeight = screenHeight * 10;
 var xoffset = -gameWidth;
 var yoffset = -gameHeight;
 
 var gameStart = false;
 var disconnected = false;
+var died = false;
+var kicked = false;
 
 var startPingTime = 0;
-var oldx = 0;
-var oldy = 0;
 
 var chatCommands = {};
 var backgroundColor = '#EEEEEE';
 
 var foodConfig = {
-    border: 2,
+    border: 0,
     borderColor: '#f39c12',
     fillColor: '#f1c40f',
     size: 10
 };
 
 var playerConfig = {
-    border: 3,
+    border: 15,
     textColor: '#FFFFFF',
     textBorder: '#000000',
     textBorderSize: 3,
-    defaultSize: 10
+    defaultSize: 30
 };
 
 var enemyConfig = {
-    border: 3,
+    border: 15,
     textColor: '#FFFFFF',
     textBorder: '#000000',
     textBorderSize: 3,
-    defaultSize: 10
+    defaultSize: 30
 };
 
 var player = {
     id: -1,
     x: gameWidth / 2, y: gameHeight / 2,
-    mass: 0, speed: 5,
+    mass: 0, speed: 20,
     //TODO: exclude width and height out of player package
     screenWidth: screenWidth,
     screenHeight: screenHeight,
@@ -88,7 +112,7 @@ c.addEventListener('mouseout', outOfBounds, false);
 
 // register when the mouse goes off the canvas
 function outOfBounds() {
-  target = { x : screenWidth / 2, y : screenHeight / 2 };
+    target = { x : screenWidth / 2, y : screenHeight / 2 };
 }
 
 
@@ -118,7 +142,7 @@ function addSystemLine(text) {
     if (chatList.childNodes.length >=5) {
         chatList.removeChild(chatList.childNodes[0]);
     }
-    chatList.appendChild(chatLine, chatList.childNodes[0]);
+    chatList.appendChild(chatLine);
 }
 
 function registerChatCommand(name, description, callback) {
@@ -167,6 +191,14 @@ registerChatCommand('dark', 'toggle dark mode', function (args) {
 
 registerChatCommand('help', 'show information about chat commands', function () {
     printHelp();
+});
+
+registerChatCommand('password', 'login as an admin using the set admin password', function (args) {
+    socket.emit('pass', args);
+});
+
+registerChatCommand('kick', 'kick a player', function (args) {
+    socket.emit('kick', args);
 });
 
 function sendChat(key) {
@@ -218,6 +250,7 @@ function SetupSocket(socket) {
         gameStart = true;
         console.log('Game is started: ' + gameStart);
         addSystemLine('Connected to the game!');
+        addSystemLine('Type <b>-help</b> for a list of commands');
     });
 
     socket.on('playerDisconnect', function (data) {
@@ -226,11 +259,21 @@ function SetupSocket(socket) {
         addSystemLine('Player <b>' + data.disconnectName + '</b> disconnected!');
     });
 
+    socket.on('playerDied', function (data) {
+        enemies = data.playersList;
+        document.getElementById('status').innerHTML = 'Players: ' + enemies.length;
+        addSystemLine('Player <b>' + data.disconnectName + '</b> died!');
+    });
+
     socket.on('playerJoin', function (data) {
         console.log(data);
         enemies = data.playersList;
         document.getElementById('status').innerHTML = 'Players: ' + enemies.length;
         addSystemLine('Player <b>' + data.connectedName + '</b> joined!');
+    });
+
+    socket.on('serverMSG', function (data) {
+        addSystemLine(data);
     });
 
     // Chat
@@ -258,6 +301,13 @@ function SetupSocket(socket) {
     // Die
     socket.on('RIP', function () {
         gameStart = false;
+        died = true;
+        socket.close();
+    });
+
+    socket.on('kick', function () {
+        gameStart = false;
+        kicked = true;
         socket.close();
     });
 }
@@ -333,18 +383,61 @@ function drawEnemy(enemy) {
 }
 
 function drawgrid(){
-    for (var x = xoffset; x < screenWidth; x += screenHeight/20) {
+    for (var x = xoffset; x < screenWidth; x += screenHeight / 20) {
         graph.moveTo(x, 0);
         graph.lineTo(x, screenHeight);
     }
 
-    for (var y = yoffset ; y < screenHeight; y += screenHeight/20) {
+    for (var y = yoffset ; y < screenHeight; y += screenHeight / 20) {
         graph.moveTo(0, y);
         graph.lineTo(screenWidth, y);
     }
 
     graph.strokeStyle = '#ddd';
     graph.stroke();
+}
+
+function drawborder() {
+    var borderX = 0;
+    var borderY = 0;
+
+    graph.strokeStyle = playerConfig.borderColor;
+
+    // Left-vertical
+    if (player.x <= screenWidth/2) {
+        graph.beginPath();
+        graph.moveTo(screenWidth/2 - player.x, 0 ? player.y > screenHeight/2 : screenHeight/2 - player.y);
+        graph.lineTo(screenWidth/2 - player.x, gameHeight + screenHeight/2 - player.y);
+        graph.strokeStyle = "#000000";
+        graph.stroke();
+    }
+
+    // Top-horizontal
+    if (player.y <= screenHeight/2) {
+        graph.beginPath();
+        graph.moveTo(0 ? player.x > screenWidth/2 : screenWidth/2 - player.x, screenHeight/2 - player.y);
+        graph.lineTo(gameWidth + screenWidth/2 - player.x, screenHeight/2 - player.y);
+        graph.strokeStyle = "#000000";
+        graph.stroke();
+    }
+
+    // Right-vertical
+    if (gameWidth - player.x <= screenWidth/2) {
+        graph.beginPath();
+        graph.moveTo(gameWidth + screenWidth/2 - player.x, screenHeight/2 - player.y);
+        graph.lineTo(gameWidth + screenWidth/2 - player.x, gameHeight + screenHeight/2 - player.y);
+        graph.strokeStyle = "#000000";
+        graph.stroke();
+    }
+
+    // Bottom-horizontal
+    if (gameHeight - player.y <= screenHeight/2) {
+        graph.beginPath();
+        graph.moveTo(gameWidth + screenWidth/2 - player.x, gameHeight + screenHeight/2 - player.y);
+        graph.lineTo(screenWidth/2 - player.x, gameHeight + screenHeight/2 - player.y);
+        graph.strokeStyle = "#000000";
+        graph.stroke();
+    }
 }
 
 function gameInput(mouse) {
@@ -372,10 +465,13 @@ function gameLoop() {
             graph.fillStyle = backgroundColor;
             graph.fillRect(0, 0, screenWidth, screenHeight);
             drawgrid();
+            drawborder();
             for (var i = 0; i < foods.length; i++) {
                 drawFood(foods[i]);
             }
-
+            
+            drawborder();
+            
             for (i = 0; i < enemies.length; i++) {
                 if (enemies[i].id != player.id) {
                     drawEnemy(enemies[i]);
@@ -384,11 +480,7 @@ function gameLoop() {
 
             drawPlayer();
 
-            if (target.x !== oldx && target.y !== oldy) {
-                socket.emit('0', target); // playerSendTarget Heartbeat
-                oldx = target.x;
-                oldy = target.y;
-            }
+            socket.emit('0', target); // playerSendTarget Heartbeat
 
         } else {
             graph.fillStyle = '#333333';
@@ -406,7 +498,18 @@ function gameLoop() {
         graph.textAlign = 'center';
         graph.fillStyle = '#FFFFFF';
         graph.font = 'bold 30px sans-serif';
-        graph.fillText('Disconnected!', screenWidth / 2, screenHeight / 2);
+
+        if (died) {
+            graph.fillText('You died!', screenWidth / 2, screenHeight / 2);
+        } else {
+            if(kicked){
+                  graph.fillText('You were kicked!', screenWidth / 2, screenHeight / 2);
+            }
+            else{
+                  graph.fillText('Disconnected!', screenWidth / 2, screenHeight / 2);
+            }
+
+        }
     }
 }
 

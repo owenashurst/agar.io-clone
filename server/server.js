@@ -4,16 +4,7 @@ var app = express();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
 var fs = require('fs');
-var yaml = require('js-yaml');
-
-var configFilePath = 'server/config.yml';
-
-if (!fs.existsSync(configFilePath)) {
-    console.log("Config file not found!");
-    return;
-}
-
-var config = yaml.safeLoad(fs.readFileSync(configFilePath));
+var config = require('./config.json');
 
 var users = [];
 var foods = [];
@@ -22,6 +13,7 @@ var updatereq = true;
 
 var maxSizeMass = config.maxSizeMass;
 var maxMoveSpeed = config.maxMoveSpeed;
+var password = config.adminPass;
 
 var massDecreaseRatio = config.massDecreaseRatio;
 
@@ -118,17 +110,22 @@ function hitTest(start, end, min) {
 function movePlayer(player, target) {
     var dist = Math.sqrt(Math.pow(target.y - player.screenHeight / 2, 2) + Math.pow(target.x - player.screenWidth / 2, 2)),
        deg = Math.atan2(target.y - player.screenHeight / 2, target.x - player.screenWidth / 2);
+    
+    //Slows player as mass increases. 
+    var slowDown = ((player.mass + 1)/17) + 1;
 
-    var deltaY = player.speed * Math.sin(deg);
-    var deltaX = player.speed * Math.cos(deg);
+	var deltaY = player.speed * Math.sin(deg)/ slowDown;
+	var deltaX = player.speed * Math.cos(deg)/ slowDown;
 
     if (dist < (100 + defaultPlayerSize + player.mass)) {
         deltaY *= dist / (100 + defaultPlayerSize + player.mass);
         deltaX *= dist / (100 + defaultPlayerSize + player.mass);
     }
 
-    player.y += (player.y + deltaY >= 0 && player.y + deltaY <= player.gameHeight) ? deltaY : 0;
-    player.x += (player.x + deltaX >= 0 && player.x + deltaX <= player.gameWidth) ? deltaX : 0;
+    var borderCalc = defaultPlayerSize + player.mass - 15;
+
+    player.y += (player.y + deltaY >= borderCalc && player.y + deltaY <= player.gameHeight - borderCalc) ? deltaY : 0;
+    player.x += (player.x + deltaX >= borderCalc && player.x + deltaX <= player.gameWidth - borderCalc) ? deltaX : 0;
 }
 
 
@@ -161,7 +158,7 @@ io.on('connection', function (socket) {
         for (var i = 0; i < newFoodPerPlayer; i++) {
             generateFood(player);
         }
-updatereq = true;
+        updatereq = true;
     });
 
     socket.on('ping', function () {
@@ -169,8 +166,9 @@ updatereq = true;
     });
 
     socket.on('disconnect', function () {
-        var playerName = findPlayer(userID).name;
-
+        var playerDisconnected = findPlayer(userID);
+        
+	if(playerDisconnected.hasOwnProperty(name)){
         removePlayer(userID);
 
         console.log('User #' + userID + ' disconnected');
@@ -179,15 +177,51 @@ updatereq = true;
             'playerDisconnect',
             {
                 playersList: users,
-                disconnectName: playerName
+                disconnectName: playerDisconnected.name
             }
         );
+        }
+        else{
+        	console.log("Unknown user disconnected");
+        }
     });
 
     socket.on('playerChat', function (data) {
         var _sender = data.sender.replace(/(<([^>]+)>)/ig, '');
         var _message = data.message.replace(/(<([^>]+)>)/ig, '');
         socket.broadcast.emit('serverSendPlayerChat', {sender: _sender, message: _message});
+    });
+
+    socket.on('pass', function (data) {
+        if(data[0] == config.adminPass){
+                console.log("Someone just logged in as an admin");
+                socket.emit('serverMSG', "Welcome back " + currentPlayer.name);
+                socket.broadcast.emit('serverMSG', currentPlayer.name + " just logged in as admin!");
+                currentPlayer.admin = true;
+        }
+        else{
+                console.log("Incorrect Admin Password received");
+                socket.emit('serverMSG', "Password incorrect attempt logged.");
+                // TODO actually log incorrect passwords
+        }
+    });
+
+    socket.on('kick', function (data) {
+        if(currentPlayer.admin){
+                for (var e = 0; e < users.length; e++) {
+                      if(users[e].name == data[0]){
+                           sockets[users[e].id].emit('kick');
+                           sockets[users[e].id].disconnect();
+                           users.splice(e, 1);
+                           console.log("User kicked successfully");
+                           socket.emit('serverMSG', "User kicked successfully");
+                      }
+                }
+        }
+        else{
+                console.log("Trying admin commands without admin privileges");
+                socket.emit('serverMSG', "You are not permitted to use this command");
+        }
     });
 
     // Heartbeat function, update everytime

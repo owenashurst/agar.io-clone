@@ -148,3 +148,9 @@ canvas {
 	margin: 10px; padding: 10px;
 	margin-top: 0;
 }
+
+#startMenu .input-error {
+  color : red;
+  display: none;
+  font-size : 12px;
+}
