@@ -165,6 +165,7 @@ updatereq = true;
     socket.on('disconnect', function () {
         var playerName = findPlayer(userID).name;
 
+        if(findPlayer(userID) !== null){
         removePlayer(userID);
 
         console.log('User #' + userID + ' disconnected');
@@ -176,6 +177,10 @@ updatereq = true;
                 disconnectName: playerName
             }
         );
+        }
+        else{
+        	console.log("Unknown user disconnected");
+        }
     });
 
     socket.on('playerChat', function (data) {
