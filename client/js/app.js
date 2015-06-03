@@ -13,14 +13,38 @@ function startGame() {
     animloop();
 }
 
-window.onload = function() {
-    document.getElementById('startButton').onclick = startGame;
+// check if nick is valid alphanumeric characters (and underscores)
+function validNick() {
+    var regex = /^\w+$/;
+    console.log("Regex Test", regex.exec(playerNameInput.value));
+    return regex.exec(playerNameInput.value) !== null;
+}
 
-    playerNameInput.addEventListener('keypress', function(e) {
+window.onload = function() {
+    'use strict';
+
+    var btn = document.getElementById('startButton'),
+        nickErrorText = document.querySelector('#startMenu .input-error');
+
+    btn.onclick = function () {
+
+        // check if the nick is valid
+        if (validNick()) {
+            startGame();
+        } else {
+            nickErrorText.style.display = 'inline';
+        }
+    };
+
+    playerNameInput.addEventListener('keypress', function (e) {
         var key = e.which || e.keyCode;
 
         if (key === KEY_ENTER) {
-            startGame();
+            if (validNick()) {
+                startGame();
+            } else {
+                nickErrorText.style.display = 'inline';
+            }
         }
     });
 };
