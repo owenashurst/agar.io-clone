@@ -1,0 +1,93 @@
+{
+  "name": "insight",
+  "version": "0.5.3",
+  "description": "Understand how your tool is being used by anonymously reporting usage metrics to an analtyics vendor, e.g. Google Analytics.",
+  "keywords": [
+    "npm",
+    "package",
+    "stats",
+    "google",
+    "analytics",
+    "track",
+    "metrics"
+  ],
+  "author": {
+    "name": "Sindre Sorhus",
+    "email": "sindresorhus@gmail.com",
+    "url": "http://sindresorhus.com"
+  },
+  "main": "lib",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yeoman/insight.git"
+  },
+  "scripts": {
+    "test": "mocha --timeout 20000 --reporter spec test/test.js"
+  },
+  "files": [
+    "lib"
+  ],
+  "dependencies": {
+    "async": "^0.9.0",
+    "chalk": "^1.0.0",
+    "configstore": "^0.3.1",
+    "inquirer": "^0.8.0",
+    "lodash.debounce": "^3.0.1",
+    "object-assign": "^2.0.0",
+    "os-name": "^1.0.0",
+    "request": "^2.40.0",
+    "tough-cookie": "^0.12.1"
+  },
+  "devDependencies": {
+    "mocha": "*",
+    "object-values": "^1.0.0",
+    "sinon": "*"
+  },
+  "engines": {
+    "node": ">=0.10.0"
+  },
+  "license": "BSD",
+  "gitHead": "80982e1644351d9b965f651a654ebee0b40b6f8a",
+  "bugs": {
+    "url": "https://github.com/yeoman/insight/issues"
+  },
+  "homepage": "https://github.com/yeoman/insight",
+  "_id": "insight@0.5.3",
+  "_shasum": "353626c1b86b12c7bdfecb0a54ef80cd7e6f89e0",
+  "_from": "insight@>=0.5.0 <0.6.0",
+  "_npmVersion": "2.5.1",
+  "_nodeVersion": "0.12.0",
+  "_npmUser": {
+    "name": "sindresorhus",
+    "email": "sindresorhus@gmail.com"
+  },
+  "maintainers": [
+    {
+      "name": "sindresorhus",
+      "email": "sindresorhus@gmail.com"
+    },
+    {
+      "name": "passy",
+      "email": "phartig@rdrei.net"
+    },
+    {
+      "name": "sboudrias",
+      "email": "admin@simonboudrias.com"
+    },
+    {
+      "name": "eddiemonge",
+      "email": "eddie+npm@eddiemonge.com"
+    },
+    {
+      "name": "rayshan",
+      "email": "ray@rayshan.com"
+    }
+  ],
+  "dist": {
+    "shasum": "353626c1b86b12c7bdfecb0a54ef80cd7e6f89e0",
+    "tarball": "http://registry.npmjs.org/insight/-/insight-0.5.3.tgz"
+  },
+  "directories": {},
+  "_resolved": "https://registry.npmjs.org/insight/-/insight-0.5.3.tgz",
+  "readme": "ERROR: No README data found!"
+}

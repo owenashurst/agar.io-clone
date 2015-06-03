@@ -1,0 +1,53 @@
+{
+  "name": "pump",
+  "version": "1.0.0",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/mafintosh/pump.git"
+  },
+  "license": "MIT",
+  "description": "pipe streams together and close all of them if one of them closes",
+  "keywords": [
+    "streams",
+    "pipe",
+    "destroy",
+    "callback"
+  ],
+  "author": {
+    "name": "Mathias Buus Madsen",
+    "email": "mathiasbuus@gmail.com"
+  },
+  "dependencies": {
+    "end-of-stream": "^1.1.0",
+    "once": "^1.3.1"
+  },
+  "scripts": {
+    "test": "node test.js"
+  },
+  "gitHead": "dc0a3c33ac51a37f2ac3551d1a292620fdc5ad91",
+  "bugs": {
+    "url": "https://github.com/mafintosh/pump/issues"
+  },
+  "homepage": "https://github.com/mafintosh/pump",
+  "_id": "pump@1.0.0",
+  "_shasum": "f0250fe282742492e4dea170e5ed3f7bc8a5e32c",
+  "_from": "pump@>=1.0.0 <2.0.0",
+  "_npmVersion": "2.0.0",
+  "_npmUser": {
+    "name": "mafintosh",
+    "email": "mathiasbuus@gmail.com"
+  },
+  "maintainers": [
+    {
+      "name": "mafintosh",
+      "email": "mathiasbuus@gmail.com"
+    }
+  ],
+  "dist": {
+    "shasum": "f0250fe282742492e4dea170e5ed3f7bc8a5e32c",
+    "tarball": "http://registry.npmjs.org/pump/-/pump-1.0.0.tgz"
+  },
+  "directories": {},
+  "_resolved": "https://registry.npmjs.org/pump/-/pump-1.0.0.tgz",
+  "readme": "ERROR: No README data found!"
+}

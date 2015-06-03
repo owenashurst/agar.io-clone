@@ -1,0 +1,61 @@
+{
+  "name": "rc",
+  "version": "1.0.3",
+  "description": "hardwired configuration loader",
+  "main": "index.js",
+  "browserify": "browser.js",
+  "scripts": {
+    "test": "set -e; node test/test.js; node test/ini.js; node test/nested-env-vars.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dominictarr/rc.git"
+  },
+  "license": "(BSD OR MIT OR Apache2)",
+  "keywords": [
+    "config",
+    "rc",
+    "unix",
+    "defaults"
+  ],
+  "bin": {
+    "rc": "./index.js"
+  },
+  "author": {
+    "name": "Dominic Tarr",
+    "email": "dominic.tarr@gmail.com",
+    "url": "dominictarr.com"
+  },
+  "dependencies": {
+    "minimist": "~0.0.7",
+    "deep-extend": "~0.2.5",
+    "strip-json-comments": "0.1.x",
+    "ini": "~1.3.0"
+  },
+  "gitHead": "2a4f80785efa317eaf38499fa1f9dcd3c60e54e9",
+  "bugs": {
+    "url": "https://github.com/dominictarr/rc/issues"
+  },
+  "homepage": "https://github.com/dominictarr/rc",
+  "_id": "rc@1.0.3",
+  "_shasum": "51bf28d21f13a9324528a9633460161ad9a39f77",
+  "_from": "rc@>=1.0.1 <2.0.0",
+  "_npmVersion": "1.4.28",
+  "_npmUser": {
+    "name": "dominictarr",
+    "email": "dominic.tarr@gmail.com"
+  },
+  "maintainers": [
+    {
+      "name": "dominictarr",
+      "email": "dominic.tarr@gmail.com"
+    }
+  ],
+  "dist": {
+    "shasum": "51bf28d21f13a9324528a9633460161ad9a39f77",
+    "tarball": "http://registry.npmjs.org/rc/-/rc-1.0.3.tgz"
+  },
+  "directories": {},
+  "_resolved": "https://registry.npmjs.org/rc/-/rc-1.0.3.tgz",
+  "readme": "ERROR: No README data found!"
+}

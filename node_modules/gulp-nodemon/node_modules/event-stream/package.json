@@ -1,0 +1,83 @@
+{
+  "name": "event-stream",
+  "version": "3.3.1",
+  "description": "construct pipes of streams of events",
+  "homepage": "http://github.com/dominictarr/event-stream",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/dominictarr/event-stream.git"
+  },
+  "dependencies": {
+    "through": "~2.3.1",
+    "duplexer": "~0.1.1",
+    "from": "~0",
+    "map-stream": "~0.1.0",
+    "pause-stream": "0.0.11",
+    "split": "0.3",
+    "stream-combiner": "~0.0.4"
+  },
+  "devDependencies": {
+    "asynct": "*",
+    "it-is": "1",
+    "ubelt": "~3.2.2",
+    "stream-spec": "~0.3.5",
+    "tape": "~2.3.0"
+  },
+  "scripts": {
+    "prepublish": "npm ls && npm test",
+    "test": "asynct test/",
+    "test_tap": "set -e; for t in test/*.js; do node $t; done"
+  },
+  "testling": {
+    "files": "test/*.js",
+    "browsers": {
+      "ie": [
+        8,
+        9
+      ],
+      "firefox": [
+        13
+      ],
+      "chrome": [
+        20
+      ],
+      "safari": [
+        5.1
+      ],
+      "opera": [
+        12
+      ]
+    }
+  },
+  "author": {
+    "name": "Dominic Tarr",
+    "email": "dominic.tarr@gmail.com",
+    "url": "http://bit.ly/dominictarr"
+  },
+  "gitHead": "d32723482dc2db8085a7457552232e01ff11bda6",
+  "bugs": {
+    "url": "https://github.com/dominictarr/event-stream/issues"
+  },
+  "_id": "event-stream@3.3.1",
+  "_shasum": "b8cf6c00119181e688f335363daa7915ce890bdb",
+  "_from": "event-stream@>=3.2.1 <4.0.0",
+  "_npmVersion": "2.4.1",
+  "_nodeVersion": "0.10.35",
+  "_npmUser": {
+    "name": "dominictarr",
+    "email": "dominic.tarr@gmail.com"
+  },
+  "maintainers": [
+    {
+      "name": "dominictarr",
+      "email": "dominic.tarr@gmail.com"
+    }
+  ],
+  "dist": {
+    "shasum": "b8cf6c00119181e688f335363daa7915ce890bdb",
+    "tarball": "http://registry.npmjs.org/event-stream/-/event-stream-3.3.1.tgz"
+  },
+  "directories": {},
+  "_resolved": "https://registry.npmjs.org/event-stream/-/event-stream-3.3.1.tgz",
+  "readme": "ERROR: No README data found!"
+}

@@ -1,0 +1,76 @@
+{
+  "name": "etag",
+  "description": "Create simple ETags",
+  "version": "1.6.0",
+  "contributors": [
+    {
+      "name": "Douglas Christopher Wilson",
+      "email": "doug@somethingdoug.com"
+    },
+    {
+      "name": "David Björklund",
+      "email": "david.bjorklund@gmail.com"
+    }
+  ],
+  "license": "MIT",
+  "keywords": [
+    "etag",
+    "http",
+    "res"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jshttp/etag.git"
+  },
+  "dependencies": {
+    "crc": "3.2.1"
+  },
+  "devDependencies": {
+    "benchmark": "1.0.0",
+    "beautify-benchmark": "0.2.4",
+    "istanbul": "0.3.9",
+    "mocha": "~1.21.4",
+    "seedrandom": "2.3.11"
+  },
+  "files": [
+    "LICENSE",
+    "HISTORY.md",
+    "README.md",
+    "index.js"
+  ],
+  "engines": {
+    "node": ">= 0.6"
+  },
+  "scripts": {
+    "bench": "node benchmark/index.js",
+    "test": "mocha --reporter spec --bail --check-leaks test/",
+    "test-cov": "istanbul cover node_modules/mocha/bin/_mocha -- --reporter dot --check-leaks test/",
+    "test-travis": "istanbul cover node_modules/mocha/bin/_mocha --report lcovonly -- --reporter spec --check-leaks test/"
+  },
+  "gitHead": "76a8f5250b02e85bc1c9b1b049d83b853a87df44",
+  "bugs": {
+    "url": "https://github.com/jshttp/etag/issues"
+  },
+  "homepage": "https://github.com/jshttp/etag",
+  "_id": "etag@1.6.0",
+  "_shasum": "8bcb2c6af1254c481dfc8b997c906ef4e442c207",
+  "_from": "etag@>=1.6.0 <1.7.0",
+  "_npmVersion": "1.4.28",
+  "_npmUser": {
+    "name": "dougwilson",
+    "email": "doug@somethingdoug.com"
+  },
+  "maintainers": [
+    {
+      "name": "dougwilson",
+      "email": "doug@somethingdoug.com"
+    }
+  ],
+  "dist": {
+    "shasum": "8bcb2c6af1254c481dfc8b997c906ef4e442c207",
+    "tarball": "http://registry.npmjs.org/etag/-/etag-1.6.0.tgz"
+  },
+  "directories": {},
+  "_resolved": "https://registry.npmjs.org/etag/-/etag-1.6.0.tgz",
+  "readme": "ERROR: No README data found!"
+}
