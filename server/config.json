@@ -10,4 +10,5 @@
     "noPlayer": 0,
     "defaultPlayerSize": 50,
     "eatableMassDistance": 5
+    "adminPass": "DEFAULT"
 }
