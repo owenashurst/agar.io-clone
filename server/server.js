@@ -13,6 +13,7 @@ var updatereq = true;
 
 var maxSizeMass = config.maxSizeMass;
 var maxMoveSpeed = config.maxMoveSpeed;
+var password = config.adminPass;
 
 var massDecreaseRatio = config.massDecreaseRatio;
 
@@ -157,7 +158,7 @@ io.on('connection', function (socket) {
         for (var i = 0; i < newFoodPerPlayer; i++) {
             generateFood(player);
         }
-updatereq = true;
+        updatereq = true;
     });
 
     socket.on('ping', function () {
@@ -165,8 +166,9 @@ updatereq = true;
     });
 
     socket.on('disconnect', function () {
-        var playerName = findPlayer(userID).name;
-
+        var playerDisconnected = findPlayer(userID);
+        
+	if(playerDisconnected.hasOwnProperty('name')){
         removePlayer(userID);
 
         console.log('User #' + userID + ' disconnected');
@@ -175,15 +177,51 @@ updatereq = true;
             'playerDisconnect',
             {
                 playersList: users,
-                disconnectName: playerName
+                disconnectName: playerDisconnected.name
             }
         );
+        }
+        else{
+        	console.log("Unknown user disconnected");
+        }
     });
 
     socket.on('playerChat', function (data) {
         var _sender = data.sender.replace(/(<([^>]+)>)/ig, '');
         var _message = data.message.replace(/(<([^>]+)>)/ig, '');
         socket.broadcast.emit('serverSendPlayerChat', {sender: _sender, message: _message});
+    });
+
+    socket.on('pass', function (data) {
+        if(data[0] == config.adminPass){
+                console.log("Someone just logged in as an admin");
+                socket.emit('serverMSG', "Welcome back " + currentPlayer.name);
+                socket.broadcast.emit('serverMSG', currentPlayer.name + " just logged in as admin!");
+                currentPlayer.admin = true;
+        }
+        else{
+                console.log("Incorrect Admin Password received");
+                socket.emit('serverMSG', "Password incorrect attempt logged.");
+                // TODO actually log incorrect passwords
+        }
+    });
+
+    socket.on('kick', function (data) {
+        if(currentPlayer.admin){
+                for (var e = 0; e < users.length; e++) {
+                      if(users[e].name == data[0]){
+                           sockets[users[e].id].emit('kick');
+                           sockets[users[e].id].disconnect();
+                           users.splice(e, 1);
+                           console.log("User kicked successfully");
+                           socket.emit('serverMSG', "User kicked successfully");
+                      }
+                }
+        }
+        else{
+                console.log("Trying admin commands without admin privileges");
+                socket.emit('serverMSG', "You are not permitted to use this command");
+        }
     });
 
     // Heartbeat function, update everytime
