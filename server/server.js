@@ -122,7 +122,9 @@ function movePlayer(player, target) {
         deltaX *= dist / (100 + defaultPlayerSize + player.mass);
     }
 
-    var borderCalc = defaultPlayerSize + player.mass - 15;
+    // This makes it more agar-ish
+    //var borderCalc = defaultPlayerSize + player.mass - 15;
+    var borderCalc = 0;
 
     player.y += (player.y + deltaY >= borderCalc && player.y + deltaY <= player.gameHeight - borderCalc) ? deltaY : 0;
     player.x += (player.x + deltaX >= borderCalc && player.x + deltaX <= player.gameWidth - borderCalc) ? deltaX : 0;
