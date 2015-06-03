@@ -1,5 +1,5 @@
 port: 3000
-maxSizeMass: 50
+maxSizeMass: 200
 maxMoveSpeed: 10
 massDecreaseRatio: 1000
 foodMass: 1
