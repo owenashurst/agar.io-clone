@@ -8,6 +8,13 @@ var SAT = require('sat');
 
 var config = require('./config.json');
 
+app.use(express.static(__dirname + '/../client'));
+
+// import modules
+var Player = require('./lib/player');
+var BST = require('./lib/bstree');
+var PlayerTree = new BST();
+
 var users = [];
 var foods = [];
 var sockets = [];
@@ -127,26 +134,33 @@ io.on('connection', function (socket) {
     console.log('A user connected. Assigning UserID...');
 
     var userID = socket.id;
-    var playerSettings = {
-      id: userID,
-      hue: Math.round(Math.random() * 360)
-    };
-    var currentPlayer = {};
 
-    socket.emit('welcome', playerSettings);
+    // register a new user
+    var user = new Player({
+        id : socket.id,  // TODO : make player ids numeric
+        hue : Math.round(Math.random() * 360)
+    });
 
+    // emit a welcome ping with user id and hue
+    socket.emit('welcome', user.getSettings());
+
+    // Tell others that a new player has connected upon player acknowledgement
     socket.on('gotit', function (player) {
-        player.id = userID;
         sockets[player.id] = socket;
-
-        if (findPlayer(player.id) === null) {
+        
+        // prevents multiple join notifications
+        if (PlayerTree.find(player.id) === null) {
             console.log('Player ' + player.id + ' connected!');
-            users.push(player);
+            PlayerTree.insert(player.id, player);
             currentPlayer = player;
         }
 
-        io.emit('playerJoin', {playersList: users, connectedName: player.name});
-        console.log('Total player: ' + users.length);
+        io.emit('playerJoin', {
+            playersList: users,
+            connectedName: player.name
+        });
+
+        console.log('Total players: ' + PlayerTree.getSize());
 
         // Add new food when player connected
         for (var i = 0; i < newFoodPerPlayer; i++) {
@@ -156,28 +170,21 @@ io.on('connection', function (socket) {
         updatereq = true;
     });
 
+    // respond to client ping connection
     socket.on('ping', function () {
         socket.emit('pong');
     });
 
     socket.on('disconnect', function () {
-        var playerDisconnected = findPlayer(userID);
+        var name = PlayerTree.find(userID).name;
 
-        if (playerDisconnected.hasOwnProperty('name')) {
-            removePlayer(userID);
+        // remove the user from the tree
+        PlayerTree.remove(userID);
 
-            console.log('User #' + userID + ' disconnected');
-
-            socket.broadcast.emit(
-                'playerDisconnect',
-                {
-                    playersList: users,
-                    disconnectName: playerDisconnected.name
-                }
-            );
-        } else {
-            console.log('Unknown user disconnected');
-        }
+        socket.broadcast.emit('playerDisconnect', {
+            playersList: users,
+            disconnectName: name
+        });
     });
 
     socket.on('playerChat', function(data) {
