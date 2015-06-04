@@ -162,7 +162,7 @@ canvas {
 	margin-bottom: 10px;
 }
 
-#settingsButton:active, #startButton:hover {
+#settingsButton:active, #settingsButton:hover {
 	top: 1px;
 	background: #55D88B;
 	outline: none;
