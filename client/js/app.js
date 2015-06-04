@@ -129,7 +129,7 @@ function addChatLine(name, text) {
     chatLine.className = (name == player.name)?'me':'friend';
     chatLine.innerHTML = '<b>' + name + '</b>: ' + text;
     var chatList = document.getElementById('chatList');
-    if (chatList.childNodes.length >=5) {
+    if (chatList.childNodes.length >=11) {
         chatList.removeChild(chatList.childNodes[0]);
     }
     chatList.appendChild(chatLine);
@@ -140,7 +140,7 @@ function addSystemLine(text) {
     chatLine.className = 'system';
     chatLine.innerHTML = text;
     var chatList = document.getElementById('chatList');
-    if (chatList.childNodes.length >=5) {
+    if (chatList.childNodes.length >=11) {
         chatList.removeChild(chatList.childNodes[0]);
     }
     chatList.appendChild(chatLine);
