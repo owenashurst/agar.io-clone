@@ -56,7 +56,7 @@ canvas {
 }
 
 .chatbox .chat-list li.system:before {
-	content: "Â» ";
+	content: "» ";
 }
 
 .chatbox .chat-input {
