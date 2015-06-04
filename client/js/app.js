@@ -1,6 +1,7 @@
 var playerName;
 var playerNameInput = document.getElementById('playerNameInput');
 var socket;
+var reason;
 var KEY_ENTER = 13;
 
 
@@ -193,7 +194,7 @@ registerChatCommand('help', 'show information about chat commands', function () 
     printHelp();
 });
 
-registerChatCommand('password', 'login as an admin using the set admin password', function (args) {
+registerChatCommand('login', 'login as an admin using the set admin password', function (args) {
     socket.emit('pass', args);
 });
 
@@ -305,8 +306,10 @@ function SetupSocket(socket) {
         socket.close();
     });
 
-    socket.on('kick', function () {
+    socket.on('kick', function (data) {
         gameStart = false;
+        console.log(data);
+        reason = data;
         kicked = true;
         socket.close();
     });
@@ -503,7 +506,12 @@ function gameLoop() {
             graph.fillText('You died!', screenWidth / 2, screenHeight / 2);
         } else {
             if(kicked){
-                  graph.fillText('You were kicked!', screenWidth / 2, screenHeight / 2);
+                  if(reason !== ""){
+                       graph.fillText('You were kicked for reason ' + reason, screenWidth / 2, screenHeight / 2);
+                  }
+                  else{
+                       graph.fillText('You were kicked!', screenWidth / 2, screenHeight / 2);
+                  }
             }
             else{
                   graph.fillText('Disconnected!', screenWidth / 2, screenHeight / 2);
