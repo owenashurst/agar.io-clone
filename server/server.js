@@ -97,7 +97,7 @@ function movePlayer(player, target) {
        deg = Math.atan2(target.y - player.screenHeight / 2, target.x - player.screenWidth / 2);
     
     //Slows player as mass increases. 
-    var slowDown = ((player.mass + 1)/17) + 1;
+    var slowDown = ((player.mass - 9)/17) + 1;
 
 	var deltaY = player.speed * Math.sin(deg)/ slowDown;
 	var deltaX = player.speed * Math.cos(deg)/ slowDown;

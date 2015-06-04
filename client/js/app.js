@@ -79,7 +79,7 @@ var playerConfig = {
     textColor: '#FFFFFF',
     textBorder: '#000000',
     textBorderSize: 3,
-    defaultSize: 30
+    defaultSize: 20
 };
 
 var enemyConfig = {
@@ -87,13 +87,13 @@ var enemyConfig = {
     textColor: '#FFFFFF',
     textBorder: '#000000',
     textBorderSize: 3,
-    defaultSize: 30
+    defaultSize: 20
 };
 
 var player = {
     id: -1,
     x: gameWidth / 2, y: gameHeight / 2,
-    mass: 0, speed: 20,
+    mass: 10, speed: 20,
     //TODO: exclude width and height out of player package
     screenWidth: screenWidth,
     screenHeight: screenHeight,
