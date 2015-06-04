@@ -125,25 +125,45 @@ chatInput.addEventListener('keypress', sendChat);
 
 // Chat
 function addChatLine(name, text) {
+    var cont;
+    var another = false;
     var chatLine = document.createElement('li');
     chatLine.className = (name == player.name)?'me':'friend';
+    if((text.length + playerName.length) > 35){
+        cont = text.substring(30);
+        text = text.substring(0,30)+"...";
+        another = true;
+    }
     chatLine.innerHTML = '<b>' + name + '</b>: ' + text;
     var chatList = document.getElementById('chatList');
     if (chatList.childNodes.length >=11) {
         chatList.removeChild(chatList.childNodes[0]);
     }
     chatList.appendChild(chatLine);
+    if(another){
+        addChatLine(name, cont);
+    }
 }
 
 function addSystemLine(text) {
+    var cont;
+    var another = false;
     var chatLine = document.createElement('li');
     chatLine.className = 'system';
+    if(text.length > 35){
+        cont = text.substring(30);
+        text = text.substring(0,30)+"...";
+        another = true;
+    }
     chatLine.innerHTML = text;
     var chatList = document.getElementById('chatList');
     if (chatList.childNodes.length >=11) {
         chatList.removeChild(chatList.childNodes[0]);
     }
     chatList.appendChild(chatLine);
+    if(another){
+        addSystemLine(cont);
+    }
 }
 
 function registerChatCommand(name, description, callback) {
