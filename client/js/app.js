@@ -223,93 +223,108 @@ function sendChat(key) {
 }
 
 function SetupSocket(socket) {
-    // Handle ping
-    socket.on('pong', function () {
-        var latency = Date.now() - startPingTime;
-        console.log('Latency: ' + latency + 'ms');
-        addSystemLine('Ping: ' + latency + 'ms');
-    });
+    // // Handle ping
+    // socket.on('pong', function () {
+    //     var latency = Date.now() - startPingTime;
+    //     console.log('Latency: ' + latency + 'ms');
+    //     addSystemLine('Ping: ' + latency + 'ms');
+    // });
 
-    // Handle error
-    socket.on('connect_failed', function () {
-        socket.close();
-        disconnected = true;
-    });
+    // // Handle error
+    // socket.on('connect_failed', function () {
+    //     socket.close();
+    //     disconnected = true;
+    // });
 
-    socket.on('disconnect', function () {
-        socket.close();
-        disconnected = true;
-    });
+    // socket.on('disconnect', function () {
+    //     socket.close();
+    //     disconnected = true;
+    // });
 
     // Handle connection
-    socket.on('welcome', function (playerSettings) {
+    // 0 -> Welcome
+    socket.on(0, function (data) {
         player.name = playerName;
-        player.id = playerSettings.id;
-        player.hue = playerSettings.hue;
-        socket.emit('gotit', player);
+
+        var playerSettings = new DataView(data);
+        player.id = playerSettings.getUint32(2); // UID
+        player.hue = playerSettings.getUint8(1); // hue
+
+        var buffer = new ArrayBuffer(1 + 4); // Message + UID
+        var view = new DataView(buffer);
+        view.setUint8(0, 1); // Set gotit message in the array
+        view.setUint32(1, player.id); // Set uid in the array
+
+        socket.emit(1, buffer); // Emit a gotit
         gameStart = true;
         console.log('Game is started: ' + gameStart);
         addSystemLine('Connected to the game!');
         addSystemLine('Type <b>-help</b> for a list of commands');
     });
 
-    socket.on('playerDisconnect', function (data) {
-        enemies = data.playersList;
-        document.getElementById('status').innerHTML = 'Players: ' + enemies.length;
-        addSystemLine('Player <b>' + data.disconnectName + '</b> disconnected!');
-    });
+    // socket.on('playerDisconnect', function (data) {
+    //     enemies = data.playersList;
+    //     document.getElementById('status').innerHTML = 'Players: ' + enemies.length;
+    //     addSystemLine('Player <b>' + data.disconnectName + '</b> disconnected!');
+    // });
 
-    socket.on('playerDied', function (data) {
-        enemies = data.playersList;
-        document.getElementById('status').innerHTML = 'Players: ' + enemies.length;
-        addSystemLine('Player <b>' + data.disconnectName + '</b> died!');
-    });
+    // socket.on('playerDied', function (data) {
+    //     enemies = data.playersList;
+    //     document.getElementById('status').innerHTML = 'Players: ' + enemies.length;
+    //     addSystemLine('Player <b>' + data.disconnectName + '</b> died!');
+    // });
 
-    socket.on('playerJoin', function (data) {
-        console.log(data);
-        enemies = data.playersList;
-        document.getElementById('status').innerHTML = 'Players: ' + enemies.length;
-        addSystemLine('Player <b>' + data.connectedName + '</b> joined!');
-    });
-
-    socket.on('serverMSG', function (data) {
-        addSystemLine(data);
-    });
-
-    // Chat
-    socket.on('serverSendPlayerChat', function (data) {
-        addChatLine(data.sender, data.message);
-    });
-
-    // Handle movement
-    socket.on('serverTellPlayerMove', function (playerData, foodsList) {
-        xoffset += (player.x - playerData.x);
-        yoffset += (player.y - playerData.y);
-        player = playerData;
-        if(foodsList !== 0){
-        foods = foodsList;
+    // 2 -> playerJoin
+    socket.on(2, function (data) {
+        var playersArray = new DataView(data);
+        var playersNumber = playerSettings.getUint8(1); // Length of players list
+        var enemies = [];
+        for (var i = 0; i < playersNumber; i++) {
+            enemies.push(playerSettings.getUint32(i + 2));
         }
+
+        document.getElementById('status').innerHTML = 'Players: ' + enemies.length;
+        addSystemLine('Player <b>' + player.name + '</b> joined!');
     });
 
-    socket.on('serverUpdateAll', function (players, foodsList) {
-        enemies = players;
-        if(foodsList !== 0){
-        foods = foodsList;
-        }
-    });
+    // socket.on('serverMSG', function (data) {
+    //     addSystemLine(data);
+    // });
 
-    // Die
-    socket.on('RIP', function () {
-        gameStart = false;
-        died = true;
-        socket.close();
-    });
+    // // Chat
+    // socket.on('serverSendPlayerChat', function (data) {
+    //     addChatLine(data.sender, data.message);
+    // });
 
-    socket.on('kick', function () {
-        gameStart = false;
-        kicked = true;
-        socket.close();
-    });
+    // // Handle movement
+    // socket.on('serverTellPlayerMove', function (playerData, foodsList) {
+    //     xoffset += (player.x - playerData.x);
+    //     yoffset += (player.y - playerData.y);
+    //     player = playerData;
+    //     if(foodsList !== 0){
+    //     foods = foodsList;
+    //     }
+    // });
+
+    // socket.on('serverUpdateAll', function (players, foodsList) {
+    //     enemies = players;
+    //     if(foodsList !== 0){
+    //     foods = foodsList;
+    //     }
+    // });
+
+    // // Die
+    // socket.on('RIP', function () {
+    //     gameStart = false;
+    //     died = true;
+    //     socket.close();
+    // });
+
+    // socket.on('kick', function () {
+    //     gameStart = false;
+    //     kicked = true;
+    //     socket.close();
+    // });
 }
 
 function drawCircle(centerX, centerY, size) {
