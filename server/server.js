@@ -152,6 +152,7 @@ io.on('connection', function (socket) {
         for (var i = 0; i < newFoodPerPlayer; i++) {
             generateFood(player);
         }
+
         updatereq = true;
     });
 
@@ -162,64 +163,61 @@ io.on('connection', function (socket) {
     socket.on('disconnect', function () {
         var playerDisconnected = findPlayer(userID);
 
-	if(playerDisconnected.hasOwnProperty('name')){
-        removePlayer(userID);
+        if (playerDisconnected.hasOwnProperty('name')) {
+            removePlayer(userID);
 
-        console.log('User #' + userID + ' disconnected');
+            console.log('User #' + userID + ' disconnected');
 
-        socket.broadcast.emit(
-            'playerDisconnect',
-            {
-                playersList: users,
-                disconnectName: playerDisconnected.name
-            }
-        );
-        }
-        else{
-        	console.log("Unknown user disconnected");
+            socket.broadcast.emit(
+                'playerDisconnect',
+                {
+                    playersList: users,
+                    disconnectName: playerDisconnected.name
+                }
+            );
+        } else {
+            console.log('Unknown user disconnected');
         }
     });
 
-    socket.on('playerChat', function (data) {
+    socket.on('playerChat', function(data) {
         var _sender = data.sender.replace(/(<([^>]+)>)/ig, '');
         var _message = data.message.replace(/(<([^>]+)>)/ig, '');
         socket.broadcast.emit('serverSendPlayerChat', {sender: _sender, message: _message});
     });
 
-    socket.on('pass', function (data) {
-        if(data[0] == config.adminPass){
-                console.log("Someone just logged in as an admin");
-                socket.emit('serverMSG', "Welcome back " + currentPlayer.name);
-                socket.broadcast.emit('serverMSG', currentPlayer.name + " just logged in as admin!");
-                currentPlayer.admin = true;
-        }
-        else{
-                console.log("Incorrect Admin Password received");
-                socket.emit('serverMSG', "Password incorrect attempt logged.");
-                // TODO actually log incorrect passwords
+    socket.on('pass', function(data) {
+        if (data[0] === config.adminPass) {
+            console.log('Someone just logged in as an admin');
+            socket.emit('serverMSG', 'Welcome back ' + currentPlayer.name);
+            socket.broadcast.emit('serverMSG', currentPlayer.name + ' just logged in as admin!');
+            currentPlayer.admin = true;
+        } else {
+            console.log('Incorrect Admin Password received');
+            socket.emit('serverMSG', 'Password incorrect attempt logged.');
+            // TODO actually log incorrect passwords
         }
     });
 
-    socket.on('kick', function (data) {
-        if(currentPlayer.admin){
-                for (var e = 0; e < users.length; e++) {
-                      if(users[e].name == data[0]){
-                           sockets[users[e].id].emit('kick');
-                           sockets[users[e].id].disconnect();
-                           users.splice(e, 1);
-                           console.log("User kicked successfully");
-                           socket.emit('serverMSG', "User kicked successfully");
-                      }
+    socket.on('kick', function(data) {
+        if (currentPlayer.admin) {
+            for (var e = 0; e < users.length; e++) {
+                if (users[e].name === data[0]) {
+                    sockets[users[e].id].emit('kick');
+                    sockets[users[e].id].disconnect();
+                    users.splice(e, 1);
+                    console.log('User kicked successfully');
+                    socket.emit('serverMSG', 'User kicked successfully');
                 }
-        }
-        else{
-                console.log("Trying admin commands without admin privileges");
-                socket.emit('serverMSG', "You are not permitted to use this command");
+            }
+        } else {
+            console.log('Trying admin commands without admin privileges');
+            socket.emit('serverMSG', 'You are not permitted to use this command');
         }
     });
 
     // Heartbeat function, update everytime
-    socket.on('0', function (target) {
+    socket.on('0', function(target) {
 
         if (target.x !== currentPlayer.x || target.y !== currentPlayer.y) {
             movePlayer(currentPlayer, target);
@@ -286,16 +284,14 @@ io.on('connection', function (socket) {
             }
 
             // Do some continuous emit
-               if(updatereq){
-                              socket.emit('serverTellPlayerMove', currentPlayer, foods);
-                              socket.broadcast.emit('serverUpdateAll', users, foods);
-                              updatereq = false;
-               }
-               else{
-                              socket.emit('serverTellPlayerMove', currentPlayer, 0);
-                              socket.broadcast.emit('serverUpdateAll', users, 0);
-               }
-
+            if (updatereq) {
+                socket.emit('serverTellPlayerMove', currentPlayer, foods);
+                socket.broadcast.emit('serverUpdateAll', users, foods);
+                updatereq = false;
+            } else {
+                socket.emit('serverTellPlayerMove', currentPlayer, 0);
+                socket.broadcast.emit('serverUpdateAll', users, 0);
+            }
         }
     });
 });
