@@ -41,7 +41,7 @@ gulp.task('run', ["build"], function () {
         delay: 10,
         script: 'server/server.js',
         cwd: "./bin/",
-        args: ["/server/config.yml"],
+        args: ["/server/config.json"],
         ext: 'html js css'
     })
 	  .on('restart', function () {
