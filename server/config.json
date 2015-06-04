@@ -8,7 +8,7 @@
     "respawnFoodPerPlayer": 1,
     "maxFoodCount": 50,
     "noPlayer": 0,
-    "defaultPlayerSize": 50,
+    "defaultPlayerSize": 40,
     "eatableMassDistance": 5,
     "adminPass": "DEFAULT"
 }
