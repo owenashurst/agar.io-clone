@@ -19,6 +19,9 @@ function Player(cfg) {
     // player position
     this.x = cfg.x || 0;
     this.y = cfg.y || 0;
+
+    // server info
+    this.socketId = cfg.socketId || '';
 }
 
 /**

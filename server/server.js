@@ -138,6 +138,7 @@ io.on('connection', function (socket) {
     // register a new user
     var user = new Player({
         id : socket.id,  // TODO : make player ids numeric
+        socketId : socket.id,
         hue : Math.round(Math.random() * 360)
     });
 
@@ -156,13 +157,13 @@ io.on('connection', function (socket) {
         }
 
         io.emit('playerJoin', {
-            playersList: users,
+            playersList: PlayerTree.asArray(),
             connectedName: player.name
         });
 
         console.log('Total players: ' + PlayerTree.getSize());
 
-        // Add new food when player connected
+        // Add new food when new player connects 
         for (var i = 0; i < newFoodPerPlayer; i++) {
             generateFood(player);
         }
@@ -182,7 +183,7 @@ io.on('connection', function (socket) {
         PlayerTree.remove(userID);
 
         socket.broadcast.emit('playerDisconnect', {
-            playersList: users,
+            playersList: PlayerTree.asArray(),
             disconnectName: name
         });
     });
@@ -249,6 +250,7 @@ io.on('connection', function (socket) {
                 updatereq = true;
             }
 
+            // loop though the users to see if 
             for (var e = 0; e < users.length; e++) {
                 if (hitTest(
                         {x: users[e].x, y: users[e].y},
