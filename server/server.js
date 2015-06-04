@@ -60,8 +60,17 @@ function generateFood(target) {
 }
 
 // arr is for example users or foods
+// http://jsperf.com/while-vs-map-findindex/2
 function findIndex(arr, id) {
-    return arr.map(function(x){ return x.id; }).indexOf(id);
+    var len = arr.length;
+
+    while (len--) {
+        if (arr[len].id === id) {
+        return len;
+        }
+    }
+
+    return -1;
 }
 
 function randomColor() {
@@ -95,8 +104,8 @@ function hitTest(start, end, min) {
 function movePlayer(player, target) {
     var dist = Math.sqrt(Math.pow(target.y - player.screenHeight / 2, 2) + Math.pow(target.x - player.screenWidth / 2, 2)),
        deg = Math.atan2(target.y - player.screenHeight / 2, target.x - player.screenWidth / 2);
-    
-    //Slows player as mass increases. 
+
+    //Slows player as mass increases.
     var slowDown = ((player.mass + 1)/17) + 1;
 
 	var deltaY = player.speed * Math.sin(deg)/ slowDown;
@@ -152,7 +161,7 @@ io.on('connection', function (socket) {
 
     socket.on('disconnect', function () {
         var playerDisconnected = findPlayer(userID);
-        
+
 	if(playerDisconnected.hasOwnProperty('name')){
         removePlayer(userID);
 
@@ -286,7 +295,7 @@ io.on('connection', function (socket) {
                               socket.emit('serverTellPlayerMove', currentPlayer, 0);
                               socket.broadcast.emit('serverUpdateAll', users, 0);
                }
-            
+
         }
     });
 });
