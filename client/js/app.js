@@ -93,7 +93,7 @@ var enemyConfig = {
 var player = {
     id: -1,
     x: gameWidth / 2, y: gameHeight / 2,
-    mass: 0, speed: 20,
+    mass: 0, speed: 8,
     //TODO: exclude width and height out of player package
     screenWidth: screenWidth,
     screenHeight: screenHeight,
