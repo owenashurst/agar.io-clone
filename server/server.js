@@ -4,6 +4,8 @@ var app = express();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
 var fs = require('fs');
+var SAT = require('sat');
+
 var config = require('./config.json');
 
 var users = [];
@@ -32,6 +34,9 @@ var defaultPlayerSize = config.defaultPlayerSize;
 
 var eatableMassDistance = config.eatableMassDistance;
 
+var V = SAT.Vector;
+var C = SAT.Circle;
+
 app.use(express.static(__dirname + '/../client'));
 
 function genPos(from, to) {
@@ -56,35 +61,15 @@ function generateFood(target) {
 
 // arr is for example users or foods
 function findIndex(arr, id) {
-    var len = arr.length;
-
-    while (len--) {
-        if (arr[len].id === id) {
-            return len;
-        }
-    }
-
-    return -1;
-
+    return arr.map(function(x){ return x.id; }).indexOf(id);
 }
 
 function randomColor() {
-    var color = '#' + ('00000'+(Math.random()*(1<<24)|0).toString(16)).slice(-6),
-        difference = 32,
-        c = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(color),
-        r = parseInt(c[1], 16) - difference,
-        g = parseInt(c[2], 16) - difference,
-        b = parseInt(c[3], 16) - difference;
-
-    if (r < 0) {
-        r = 0;
-    }
-    if (g < 0) {
-        g = 0;
-    }
-    if (b < 0) {
-        b = 0;
-    }
+    var color = '#' + ('00000' + (Math.random() * (1 << 24) | 0).toString(16)).slice(-6);
+    var c = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(color);
+    var r = (parseInt(c[1], 16) - 32) > 0 ? (parseInt(c[1], 16) - 32) : 0;
+    var g = (parseInt(c[2], 16) - 32) > 0 ? (parseInt(c[2], 16) - 32) : 0;
+    var b = (parseInt(c[3], 16) - 32) > 0 ? (parseInt(c[3], 16) - 32) : 0;
 
     return {
         fill: color,
@@ -226,38 +211,28 @@ io.on('connection', function (socket) {
 
     // Heartbeat function, update everytime
     socket.on('0', function (target) {
-     // if you want to use uncomment the line below
-    //    console.log(currentPlayer.x + " " + currentPlayer.y);
+
         if (target.x !== currentPlayer.x || target.y !== currentPlayer.y) {
             movePlayer(currentPlayer, target);
 
-            for (var f = 0; f < foods.length; f++) {
-                if (hitTest(
-                        {x: foods[f].x, y: foods[f].y},
-                        {x: currentPlayer.x, y: currentPlayer.y},
-                        currentPlayer.mass + defaultPlayerSize
-                    )) {
-                    foods[f] = {};
-                    foods.splice(f, 1);
+            var playerCircle = new C(new V(currentPlayer.x, currentPlayer.y), currentPlayer.mass + config.defaultPlayerSize);
 
-                    if (currentPlayer.mass < maxSizeMass) {
-                        currentPlayer.mass += foodMass;
-                    }
+            var foodEaten = foods
+                .map( function(food) { return SAT.pointInCircle(new V(food.x, food.y), playerCircle); })
+                .reduce( function(a, b, c) { return b ? a.concat(c) : a; }, []);
 
-                    if (currentPlayer.speed < maxMoveSpeed) {
-                        currentPlayer.speed += currentPlayer.mass / massDecreaseRatio;
-                    }
+            foodEaten.forEach( function(food) {
+                foods[food] = {};
+                foods.splice(food, 1);
+                generateFood(currentPlayer);
+            });
 
-                    console.log('Food eaten');
-                    
+            currentPlayer.mass += foodMass * foodEaten.length;
+            currentPlayer.speed += (currentPlayer.mass / massDecreaseRatio) * foodEaten.length;
 
-                    // Respawn food
-                    for (var r = 0; r < respawnFoodPerPlayer; r++) {
-                        generateFood(currentPlayer);
-                    }
-                    updatereq = true;
-                    break;
-                }
+            if (foodEaten.length) {
+                console.log('Food eaten: ' + foodEaten);
+                updatereq = true;
             }
 
             for (var e = 0; e < users.length; e++) {
