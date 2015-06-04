@@ -178,7 +178,8 @@ BSTree.prototype._search = function (id) {
 * @param {number} id - identifier used in comparing tree nodes
 */
 BSTree.prototype.find = function (id) {
-    return this._search(id).data;
+    var node = this._search(id);
+    return node ? node.data : null;
 };
 
 

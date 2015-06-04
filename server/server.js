@@ -11,8 +11,8 @@ var config = require('./config.json');
 app.use(express.static(__dirname + '/../client'));
 
 // import modules
-var Player = require('./lib/player');
-var BST = require('./lib/bstree');
+var Player = require(__dirname +'/lib/player');
+var BST = require(__dirname + '/lib/bstree');
 var PlayerTree = new BST();
 
 var users = [];
@@ -66,20 +66,6 @@ function generateFood(target) {
     }
 }
 
-// arr is for example users or foods
-// http://jsperf.com/while-vs-map-findindex/2
-function findIndex(arr, id) {
-    var len = arr.length;
-
-    while (len--) {
-        if (arr[len].id === id) {
-        return len;
-        }
-    }
-
-    return -1;
-}
-
 function randomColor() {
     var color = '#' + ('00000' + (Math.random() * (1 << 24) | 0).toString(16)).slice(-6);
     var c = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(color);
@@ -93,51 +79,43 @@ function randomColor() {
     };
 }
 
-function findPlayer(id) {
-    var index = findIndex(users, id);
-
-    return index !== -1 ? users[index] : null;
-}
-
-function removePlayer(id) {
-    users.splice(findIndex(users, id), 1);
-}
-
 function hitTest(start, end, min) {
     var distance = Math.sqrt((start.x - end.x) * (start.x - end.x) + (start.y - end.y) * (start.y - end.y));
     return (distance <= min);
 }
 
-function movePlayer(player, target) {
-    var dist = Math.sqrt(Math.pow(target.y - player.screenHeight / 2, 2) + Math.pow(target.x - player.screenWidth / 2, 2)),
-       deg = Math.atan2(target.y - player.screenHeight / 2, target.x - player.screenWidth / 2);
+// function movePlayer(player, target) {
+//     var dist = Math.sqrt(Math.pow(target.y - player.screenHeight / 2, 2) + Math.pow(target.x - player.screenWidth / 2, 2)),
+//        deg = Math.atan2(target.y - player.screenHeight / 2, target.x - player.screenWidth / 2);
+// 
+//     //Slows player as mass increases.
+//     var slowDown = ((player.mass + 1)/17) + 1;
+// 
+// 	var deltaY = player.speed * Math.sin(deg)/ slowDown;
+// 	var deltaX = player.speed * Math.cos(deg)/ slowDown;
+// 
+//     if (dist < (100 + defaultPlayerSize + player.mass)) {
+//         deltaY *= dist / (100 + defaultPlayerSize + player.mass);
+//         deltaX *= dist / (100 + defaultPlayerSize + player.mass);
+//     }
+// 
+//     var borderCalc = defaultPlayerSize + player.mass - 15;
+// 
+//     player.y += (player.y + deltaY >= borderCalc && player.y + deltaY <= player.gameHeight - borderCalc) ? deltaY : 0;
+//     player.x += (player.x + deltaX >= borderCalc && player.x + deltaX <= player.gameWidth - borderCalc) ? deltaX : 0;
+// }
 
-    //Slows player as mass increases.
-    var slowDown = ((player.mass + 1)/17) + 1;
 
-	var deltaY = player.speed * Math.sin(deg)/ slowDown;
-	var deltaX = player.speed * Math.cos(deg)/ slowDown;
-
-    if (dist < (100 + defaultPlayerSize + player.mass)) {
-        deltaY *= dist / (100 + defaultPlayerSize + player.mass);
-        deltaX *= dist / (100 + defaultPlayerSize + player.mass);
-    }
-
-    var borderCalc = defaultPlayerSize + player.mass - 15;
-
-    player.y += (player.y + deltaY >= borderCalc && player.y + deltaY <= player.gameHeight - borderCalc) ? deltaY : 0;
-    player.x += (player.x + deltaX >= borderCalc && player.x + deltaX <= player.gameWidth - borderCalc) ? deltaX : 0;
-}
-
-
+// Web socket server
 io.on('connection', function (socket) {
     console.log('A user connected. Assigning UserID...');
 
-    var userID = socket.id;
+    // use numeric user ids
+    var userID = Math.floor(Math.random() * 1000000);
 
     // register a new user
     var user = new Player({
-        id : socket.id,  // TODO : make player ids numeric
+        id : userID,
         socketId : socket.id,
         hue : Math.round(Math.random() * 360)
     });
@@ -147,13 +125,21 @@ io.on('connection', function (socket) {
 
     // Tell others that a new player has connected upon player acknowledgement
     socket.on('gotit', function (player) {
+
+        currentPlayer = new Player(player); 
+
+        // cache the socket object for later
+        // TODO : each player should remember it's socket and disconnect itself
         sockets[player.id] = socket;
-        
+
         // prevents multiple join notifications
         if (PlayerTree.find(player.id) === null) {
             console.log('Player ' + player.id + ' connected!');
-            PlayerTree.insert(player.id, player);
-            currentPlayer = player;
+            
+            PlayerTree.insert(player.id, currentPlayer);
+
+            // rebuild users list
+            users = PlayerTree.asArray();
         }
 
         io.emit('playerJoin', {
@@ -163,7 +149,7 @@ io.on('connection', function (socket) {
 
         console.log('Total players: ' + PlayerTree.getSize());
 
-        // Add new food when new player connects 
+        // Add new food when new player connects
         for (var i = 0; i < newFoodPerPlayer; i++) {
             generateFood(player);
         }
@@ -228,7 +214,12 @@ io.on('connection', function (socket) {
     socket.on('0', function(target) {
 
         if (target.x !== currentPlayer.x || target.y !== currentPlayer.y) {
-            movePlayer(currentPlayer, target);
+          
+            console.log('Current Player', currentPlayer);
+  
+            // move the current player towards the target
+            PlayerTree.find(currentPlayer.id).move(target, defaultPlayerSize);
+            //currentPlayer.move(target, defaultPlayerSize);
 
             var playerCircle = new C(new V(currentPlayer.x, currentPlayer.y), currentPlayer.mass + config.defaultPlayerSize);
 
@@ -242,15 +233,20 @@ io.on('connection', function (socket) {
                 generateFood(currentPlayer);
             });
 
+<<<<<<< HEAD
             currentPlayer.mass += foodMass * foodEaten.length;
             currentPlayer.speed += (currentPlayer.mass / massDecreaseRatio) * foodEaten.length;
+=======
+                    console.log('Food eaten');
+
+>>>>>>> Work In Progress: Server.js now uses modular structure
 
             if (foodEaten.length) {
                 console.log('Food eaten: ' + foodEaten);
                 updatereq = true;
             }
 
-            // loop though the users to see if 
+            // loop though the users to see if
             for (var e = 0; e < users.length; e++) {
                 if (hitTest(
                         {x: users[e].x, y: users[e].y},
@@ -272,7 +268,10 @@ io.on('connection', function (socket) {
 
                         sockets[users[e].id].emit('RIP');
                         sockets[users[e].id].disconnect();
-                        users.splice(e, 1);
+
+                        // remove the player
+                        PlayerTree.remove(users[e]);
+                        users = PlayerTree.asArray();
                         break;
                     }
                     if (currentPlayer.mass !== 0 && currentPlayer.mass < users[e].mass - eatableMassDistance) {
@@ -286,7 +285,10 @@ io.on('connection', function (socket) {
 
                         sockets[currentPlayer.id].emit('RIP');
                         sockets[currentPlayer.id].disconnect();
-                        users.splice(currentPlayer, 1);
+
+                        // remove the player
+                        PlayerTree.remove(currentPlayer);
+                        users = PlayerTree.asArray();
                         break;
                     }
                 }
