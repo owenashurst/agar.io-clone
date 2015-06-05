@@ -106,6 +106,7 @@ The game will then be accessible at `http://localhost:3000`.
 
 ## For Developers
  - [Game Architecture](https://github.com/huytd/agar.io-clone/wiki/Game-Architecture)
+ - If you want to start your own project, I recommend you use [this template](https://github.com/huytd/node-online-game-template)
 
 ## License
 >You can check out the full license [here](https://github.com/huytd/agar.io-clone/blob/master/LICENSE)
