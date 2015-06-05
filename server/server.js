@@ -167,9 +167,8 @@ io.on('connection', function (socket) {
         var name = PlayerTree.find(userID).name;
 
         // remove the user from the tree
-        console.log('Removing ... userID', userID);
+        console.log('Removing user:', userID);
         PlayerTree.remove(userID);
-        console.log('done');
         users = PlayerTree.asArray();
 
         socket.broadcast.emit('playerDisconnect', {
