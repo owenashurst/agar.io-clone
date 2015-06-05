@@ -21,6 +21,10 @@ function Player(cfg) {
     // player position
     this.x = cfg.x || 0;
     this.y = cfg.y || 0;
+    this.screenHeight = cfg.screenHeight || 0;
+    this.screenWidth = cfg.screenWidth || 0;
+    this.gameHeight = cfg.gameHeight || 0;
+    this.gameWidth = cfg.gameWidth || 0;
 
     // server info
     this.socketId = cfg.socketId || '';
@@ -42,10 +46,6 @@ Player.prototype.getSettings = function () {
 Player.prototype.move = function (target, defaultPlayerSize) {
     'use strict';
 
-    console.log('Moving player to :', target);
-
-    return;
-    /*
     var player = this;
 
     var dist = Math.sqrt(Math.pow(target.y - player.screenHeight / 2, 2) + Math.pow(target.x - player.screenWidth / 2, 2)),
@@ -57,6 +57,7 @@ Player.prototype.move = function (target, defaultPlayerSize) {
     var deltaY = player.speed * Math.sin(deg) / slowDown;
     var deltaX = player.speed * Math.cos(deg) / slowDown;
 
+
     if (dist < (100 + defaultPlayerSize + player.mass)) {
         deltaY *= dist / (100 + defaultPlayerSize + player.mass);
         deltaX *= dist / (100 + defaultPlayerSize + player.mass);
@@ -66,7 +67,6 @@ Player.prototype.move = function (target, defaultPlayerSize) {
 
     player.y += (player.y + deltaY >= borderCalc && player.y + deltaY <= player.gameHeight - borderCalc) ? deltaY : 0;
     player.x += (player.x + deltaX >= borderCalc && player.x + deltaX <= player.gameWidth - borderCalc) ? deltaX : 0;
-    */
 };
 
 

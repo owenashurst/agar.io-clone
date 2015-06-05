@@ -117,6 +117,7 @@ BSTree.prototype.insert = function (id, data) {
     // creates the root node
     if (currentNode === null) {
         this._root = new Node(id, data, null);
+        this._size += 1;
         return;
     }
 

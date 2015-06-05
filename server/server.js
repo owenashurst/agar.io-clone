@@ -126,7 +126,10 @@ io.on('connection', function (socket) {
     // Tell others that a new player has connected upon player acknowledgement
     socket.on('gotit', function (player) {
 
-        currentPlayer = new Player(player); 
+        console.log('Gotit', player);
+
+        currentPlayer = new Player(player);
+        console.log('currentPlayer', currentPlayer);
 
         // cache the socket object for later
         // TODO : each player should remember it's socket and disconnect itself
@@ -135,7 +138,8 @@ io.on('connection', function (socket) {
         // prevents multiple join notifications
         if (PlayerTree.find(player.id) === null) {
             console.log('Player ' + player.id + ' connected!');
-            
+
+        
             PlayerTree.insert(player.id, currentPlayer);
 
             // rebuild users list
@@ -214,12 +218,9 @@ io.on('connection', function (socket) {
     socket.on('0', function(target) {
 
         if (target.x !== currentPlayer.x || target.y !== currentPlayer.y) {
-          
-            console.log('Current Player', currentPlayer);
-  
+      
             // move the current player towards the target
-            PlayerTree.find(currentPlayer.id).move(target, defaultPlayerSize);
-            //currentPlayer.move(target, defaultPlayerSize);
+            currentPlayer.move(target, defaultPlayerSize);
 
             var playerCircle = new C(new V(currentPlayer.x, currentPlayer.y), currentPlayer.mass + config.defaultPlayerSize);
 
@@ -233,13 +234,8 @@ io.on('connection', function (socket) {
                 generateFood(currentPlayer);
             });
 
-<<<<<<< HEAD
-            currentPlayer.mass += foodMass * foodEaten.length;
-            currentPlayer.speed += (currentPlayer.mass / massDecreaseRatio) * foodEaten.length;
-=======
-                    console.log('Food eaten');
-
->>>>>>> Work In Progress: Server.js now uses modular structure
+                currentPlayer.mass += foodMass * foodEaten.length;
+              currentPlayer.speed += (currentPlayer.mass / massDecreaseRatio) * foodEaten.length;
 
             if (foodEaten.length) {
                 console.log('Food eaten: ' + foodEaten);
