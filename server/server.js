@@ -110,18 +110,14 @@ function hitTest(start, end, min) {
 io.on('connection', function (socket) {
     console.log('A user connected. Assigning UserID...');
 
+    // empty currentPlayer
+    var currentPlayer = {};
+
     // use numeric user ids
     var userID = Math.floor(Math.random() * 1000000);
 
-    // register a new user
-    var user = new Player({
-        id : userID,
-        socketId : socket.id,
-        hue : Math.round(Math.random() * 360)
-    });
-
     // emit a welcome ping with user id and hue
-    socket.emit('welcome', user.getSettings());
+    socket.emit('welcome', { id : userID, hue : Math.round(Math.random() * 360) });
 
     // Tell others that a new player has connected upon player acknowledgement
     socket.on('gotit', function (player) {
