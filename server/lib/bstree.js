@@ -195,6 +195,16 @@ BSTree.prototype.remove = function (id) {
     // gracefully return if deleting a non-existant node
     if (node === null) { return; }
 
+    // if we are removing the root node, remove it and return
+    if (this._size === 1) {
+      this._root = null;
+      this._size = 0;
+      return;
+    }
+
+    // tree has size >= 2.
+    // Find the correct node and remove it
+
     isLeft = node.parent.left === node.id;
     isRight = node.parent.right === node.id;
 

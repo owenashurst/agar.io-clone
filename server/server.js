@@ -126,10 +126,7 @@ io.on('connection', function (socket) {
     // Tell others that a new player has connected upon player acknowledgement
     socket.on('gotit', function (player) {
 
-        console.log('Gotit', player);
-
         currentPlayer = new Player(player);
-        console.log('currentPlayer', currentPlayer);
 
         // cache the socket object for later
         // TODO : each player should remember it's socket and disconnect itself
@@ -170,10 +167,13 @@ io.on('connection', function (socket) {
         var name = PlayerTree.find(userID).name;
 
         // remove the user from the tree
+        console.log('Removing ... userID', userID);
         PlayerTree.remove(userID);
+        console.log('done');
+        users = PlayerTree.asArray();
 
         socket.broadcast.emit('playerDisconnect', {
-            playersList: PlayerTree.asArray(),
+            playersList: users,
             disconnectName: name
         });
     });
@@ -198,7 +198,7 @@ io.on('connection', function (socket) {
     });
 
     socket.on('kick', function(data) {
-        if (currentPlayer.admin) {
+        if (currentPlayer.admin){
             for (var e = 0; e < users.length; e++) {
                 if (users[e].name === data[0]) {
                     sockets[users[e].id].emit('kick');
