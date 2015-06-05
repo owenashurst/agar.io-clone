@@ -15,6 +15,7 @@ var Player = require(__dirname +'/lib/player');
 var BST = require(__dirname + '/lib/bstree');
 var PlayerTree = new BST();
 
+var playerID = 0;
 var users = [];
 var foods = [];
 var sockets = [];
@@ -113,8 +114,9 @@ io.on('connection', function (socket) {
     // empty currentPlayer
     var currentPlayer = {};
 
-    // use numeric user ids
-    var userID = Math.floor(Math.random() * 1000000);
+    // Use a per-server, 32-bit integer for uniquely identifying users
+    // Overflow happens after the server stays up for 124 days: it was calculated assuming that 200 new users connect every second.
+    var userID = playerID++;
 
     // emit a welcome ping with user id and hue
     socket.emit('welcome', { id : userID, hue : Math.round(Math.random() * 360) });
