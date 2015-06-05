@@ -232,27 +232,6 @@ io.on('connection', function (socket) {
         }
     });
 
-    socket.on('kickall', function (data) {
-        if(currentPlayer.admin){
-                var reason = "";
-console.log(users.length);
-while(users.length > 0){
-                
-                    console.log("kicked " + users[0].name);
-                        sockets[users[0].id].emit('kick', reason);
-                        sockets[users[0].id].disconnect();
-                   console.log("run");
-             
-}
-                
-users = [];
-        }
-        else{
-                console.log(currentPlayer.name + " is trying to use -kickall but isn't admin");
-                socket.emit('serverMSG', "You are not permitted to use this command");
-        }
-    });
-
     // Heartbeat function, update everytime
     socket.on('0', function (target) {
 
