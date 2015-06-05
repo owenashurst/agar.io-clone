@@ -1,14 +1,8 @@
 {
-    "port": 3000,
-    "maxSizeMass": 200,
-    "maxMoveSpeed": 7,
-    "massDecreaseRatio": 1000,
+    "port": 3000,       
     "foodMass": 1,
-    "newFoodPerPlayer": 50,
-    "respawnFoodPerPlayer": 1,
-    "maxFoodCount": 50,
-    "noPlayer": 0,
-    "defaultPlayerSize": 50,
-    "eatableMassDistance": 5,
-    "adminPass": "DEFAULT"
+    "defaultPlayerMass": 10,
+    "gameWidth": 5000,
+    "gameHeight": 5000,
+    "gameMass": 2000    
 }
