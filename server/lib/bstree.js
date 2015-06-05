@@ -190,54 +190,81 @@ BSTree.prototype.find = function (id) {
 */
 BSTree.prototype.remove = function (id) {
     var node = this._search(id),
-        isLeft, isRight;
+        isLeaf,
+        isSubTreeRoot,
+        branch,
+        min,
+        max;
 
     // gracefully return if deleting a non-existant node
     if (node === null) { return; }
 
-    // if we are removing the root node, remove it and return
-    if (this._size === 1) {
-      this._root = null;
-      this._size = 0;
-      return;
+    isLeaf = node.left === null && node.right === null;
+    isSubTreeRoot = node.left !== null && node.right !== null;
+
+    // root node removal
+    // Three options:
+    //  1) Tree only has the root node
+    //  2) Tree only has one branch from root
+    //  3) Tree has two branches from root
+
+    if (this._root === node) {
+
+        // the tree consists of only the root node
+        if (isLeaf) {
+            this._root = null;
+
+        // node has both left and right trees
+        // replace root with the min of the right subtree
+        } else if (isSubTreeRoot) {
+            min = this.getMin(node.right);
+
+            // replace the reference to the minimum node with the min's right subtree
+            min.parent[min.parent.left === min ? 'left' : 'right'] = min.right;
+
+            // delete the reference to the parent from min
+            min.parent = null;
+
+            // assign min to the root node
+            min.right = node.right;
+            min.left = node.left;
+            this._root = min;
+
+        // the root only has one branch extending
+        // the first node in that branch is now root
+        } else {
+            this._root = node[node.right === null ? 'left' : 'right'];
+            this._root.parent = null;
+        }
+
+        this._size -= 1;
+        return;
     }
 
-    // tree has size >= 2.
+    // We are deleting a node that is not the tree
     // Find the correct node and remove it
-
-    isLeft = node.parent.left === node.id;
-    isRight = node.parent.right === node.id;
+    branch = node.parent.left === node ? 'left' : 'right';
 
     // if the node is a leaf node, simply remove it
-    if (node.left === null && node.right === null) {
+    if (isLeaf) {
+        node.parent[branch] = null;
 
-        // remove parent's reference to the node
-        node.parent[isLeft ? 'left' : 'right'] = null;
-
-    // if node has a right subtree
-    } else if (node.left === null) {
-
-        // move the right subtree up to the appropriate position on the parent
-        node.parent[isLeft ? 'left' : 'right'] = node.right;
-
-    // if node has a left subtree
-    } else if (node.right === null) {
-
-        // move the left subtree up to the appropriate position on the parent
-        node.parent[isLeft ? 'left' : 'right'] = node.left;
-
-    // if node has both right and left subtrees
-    } else {
-        var min = this.getMin(node.right);
+    // if the node has left and right subtrees
+    } else if (isSubTreeRoot) {
+        min = this.getMin(node.right);
 
         // replace the node with the next largest node
-        node.parent[isLeft ? 'left' : 'right'] = min;
+        node.parent[branch] = min;
 
         // assign the right subtree to the new node
         min.right = node.right;
 
         // remove the old node's pointer
         min.parent.left = null;
+
+    // node only has one child branch, so move it up the tree
+    } else {
+      node.parent[branch] = node[node.left === null ? 'right' : 'left'];
     }
 
     // update tree size
@@ -273,3 +300,23 @@ BSTree.prototype.asArray = function () {
 };
 
 module.exports = BSTree;
+
+/*
+// for testing
+var BST = require('./server/lib/bstree');
+var tree = new BST();
+tree.insert(5,  { name : "5" });
+tree.insert(10, { name : "10" });
+tree.insert(9, { name : "9" });
+tree.insert(8, { name : "8" });
+tree.insert(1, { name : "1" });
+tree.insert(2, { name : "2" });
+tree.insert(0, { name : "0" });
+tree.insert(3, { name : "3" });
+tree.insert(7, { name : "7" });
+tree.insert(4, { name : "4" });
+tree.insert(6, { name : "6" });
+tree.asArray();
+*/
+
+
