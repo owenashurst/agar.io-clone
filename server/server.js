@@ -39,23 +39,6 @@ function removeFood(toRem){
     while(toRem--) food.pop();
 }
 
-function balanceMass(){    
-    var totalMass = food.length * c.foodMass +
-        users.map(function(u){ return u.mass; })
-        .reduce(function(pu,cu){ return pu+cu;});
-    
-    if(totalMass < c.gameMass) {
-        addFood(c.gameMass - totalMass);
-        console.log('mass rebalanced');
-    }
-    else if(totalMass > c.gameMass){
-        removeFood(totalMass - c.gameMass);
-        console.log('mass rebalanced');
-    }
-}
-
-// arr is for example users or food
-// http://jsperf.com/while-vs-map-findindex/2
 function findIndex(arr, id) {
     var len = arr.length;
 
@@ -86,26 +69,44 @@ function massToRadius(mass){
 }
 
 function movePlayer(player, target) {
-    var dist = Math.sqrt(Math.pow(target.y - player.screenHeight / 2, 2) + Math.pow(target.x - player.screenWidth / 2, 2)),
-       deg = Math.atan2(target.y - player.screenHeight / 2, target.x - player.screenWidth / 2);
+    var dist = Math.sqrt(Math.pow(target.y, 2) + Math.pow(target.x, 2));
+    var deg = Math.atan2(target.y, target.x);
 
-    //Slows player as mass increases.
-    var slowDown = ((player.mass + 1)/17) + 1;
+    var slowDown = Math.log(player.mass);
 
     var deltaY = player.speed * Math.sin(deg)/ slowDown;
     var deltaX = player.speed * Math.cos(deg)/ slowDown;
 
-    if (dist < (100 + c.defaultPlayerSize + player.mass)) {
-        deltaY *= dist / (100 + c.defaultPlayerSize + player.mass);
-        deltaX *= dist / (100 + c.defaultPlayerSize + player.mass);
+    if (dist < (50 + player.mass)) {
+        deltaY *= dist / (50 + player.mass);
+        deltaX *= dist / (50 + player.mass);
     }
 
-    var borderCalc = c.defaultPlayerSize + player.mass - 15;
+    var borderCalc = player.mass - 5;
 
-    player.y += (player.y + deltaY >= borderCalc && player.y + deltaY <= player.gameHeight - borderCalc) ? deltaY : 0;
-    player.x += (player.x + deltaX >= borderCalc && player.x + deltaX <= player.gameWidth - borderCalc) ? deltaX : 0;
+    if(!isNaN(deltaY)) player.y += deltaY;
+    if(!isNaN(deltaX)) player.x += deltaX;    
+
+    if(player.x > c.gameWidth) player.x = c.gameWidth;
+    if(player.y > c.gameHeight) player.y = c.gameHeight;
+    if(player.x < 0) player.x = 0;
+    if(player.y < 0) player.y = 0;
 }
 
+function balanceMass(){    
+    var totalMass = food.length * c.foodMass +
+        users.map(function(u){ return u.mass; })
+        .reduce(function(pu,cu){ return pu+cu;});
+    
+    if(totalMass < c.gameMass) {
+        addFood(c.gameMass - totalMass);
+        console.log('mass rebalanced');
+    }
+    else if(totalMass > c.gameMass){
+        removeFood(totalMass - c.gameMass);
+        console.log('mass rebalanced');
+    }
+}
 
 io.on('connection', function (socket) {
     console.log('A user connected!');
