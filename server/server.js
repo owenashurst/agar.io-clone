@@ -11,9 +11,8 @@ var SAT = require('sat');
 var c = require('./config.json');
 
 var users = [];
-var foods = [];
-var sockets = [];
-var updatereq = true;
+var food = [];
+var sockets = {};
 
 var V = SAT.Vector;
 var C = SAT.Circle;
@@ -24,23 +23,38 @@ function genPos(from, to) {
     return Math.floor(Math.random() * (to - from)) + from;
 }
 
-function addFoods(target) {
-    foods.push({
-        id: (new Date()).getTime(),
-        x: genPos(0, target.gameWidth),
-        y: genPos(0, target.gameHeight),
-        color: randomColor(),
-        rotation: Math.random() * (Math.PI * 2)
-    });
-}
-
-function generateFood(target) {
-    if (foods.length < c.maxFoodCount) {
-        addFoods(target);
+function addFood(toAdd) {
+    while(toAdd--){
+        food.push({
+            // make ids unique
+            id: ((new Date()).getTime() + '' + (new Date()).getMilliseconds() + '' + food.length) >>> 0,
+            x: genPos(0, c.gameWidth),
+            y: genPos(0, c.gameHeight),
+            color: randomColor(),
+        });
     }
 }
 
-// arr is for example users or foods
+function removeFood(toRem){
+    while(toRem--) food.pop();
+}
+
+function balanceMass(){    
+    var totalMass = food.length * c.foodMass +
+        users.map(function(u){ return u.mass; })
+        .reduce(function(pu,cu){ return pu+cu;});
+    
+    if(totalMass < c.gameMass) {
+        addFood(c.gameMass - totalMass);
+        console.log('mass rebalanced');
+    }
+    else if(totalMass > c.gameMass){
+        removeFood(totalMass - c.gameMass);
+        console.log('mass rebalanced');
+    }
+}
+
+// arr is for example users or food
 // http://jsperf.com/while-vs-map-findindex/2
 function findIndex(arr, id) {
     var len = arr.length;
@@ -89,8 +103,8 @@ function movePlayer(player, target) {
     //Slows player as mass increases.
     var slowDown = ((player.mass + 1)/17) + 1;
 
-	var deltaY = player.speed * Math.sin(deg)/ slowDown;
-	var deltaX = player.speed * Math.cos(deg)/ slowDown;
+    var deltaY = player.speed * Math.sin(deg)/ slowDown;
+    var deltaX = player.speed * Math.cos(deg)/ slowDown;
 
     if (dist < (100 + c.defaultPlayerSize + player.mass)) {
         deltaY *= dist / (100 + c.defaultPlayerSize + player.mass);
@@ -105,36 +119,37 @@ function movePlayer(player, target) {
 
 
 io.on('connection', function (socket) {
-    console.log('A user connected. Assigning UserID...');
+    console.log('A user connected!');
 
-    var userID = socket.id;
-    var playerSettings = {
-      id: userID,
-      hue: Math.round(Math.random() * 360)
+    var currentPlayer = {
+        id: socket.id,
+        x: genPos(0, c.gameWidth),
+        y: genPos(0, c.gameHeight),
+        mass: c.defaultPlayerMass,        
+        hue: Math.round(Math.random() * 360),
     };
-    var currentPlayer = {};
-
-    socket.emit('welcome', playerSettings);
+    
+    socket.emit('welcome', currentPlayer);
 
     socket.on('gotit', function (player) {
-        player.id = userID;
-        sockets[player.id] = socket;
+        console.log('Player ' + player.id + ' connecting');
 
-        if (findPlayer(player.id) === null) {
+        if(sockets[player.id]){
+            console.log('That playerID is already connected, kicking');
+            socket.disconnect();
+        }
+        else {
             console.log('Player ' + player.id + ' connected!');
-            users.push(player);
+            sockets[player.id] = socket;
             currentPlayer = player;
-        }
+            users.push(currentPlayer);
+            io.emit('playerJoin', {
+                playersList: users, 
+                connectedName: currentPlayer.name});
+            socket.emit('gameSetup', c);
+            console.log('Total player: ' + users.length);
+        }        
 
-        io.emit('playerJoin', {playersList: users, connectedName: player.name});
-        console.log('Total player: ' + users.length);
-
-        // Add new food when player connected
-        for (var i = 0; i < c.newFoodPerPlayer; i++) {
-            generateFood(player);
-        }
-
-        updatereq = true;
     });
 
     socket.on('ping', function () {
@@ -142,23 +157,16 @@ io.on('connection', function (socket) {
     });
 
     socket.on('disconnect', function () {
-        var playerDisconnected = findPlayer(userID);
+        users.splice(findIndex(users, currentPlayer.id), 1);
+        console.log('User #' + currentPlayer.id + ' disconnected');
 
-        if (playerDisconnected.hasOwnProperty('name')) {
-            removePlayer(userID);
-
-            console.log('User #' + userID + ' disconnected');
-
-            socket.broadcast.emit(
-                'playerDisconnect',
-                {
-                    playersList: users,
-                    disconnectName: playerDisconnected.name
-                }
-            );
-        } else {
-            console.log('Unknown user disconnected');
-        }
+        socket.broadcast.emit(
+            'playerDisconnect',
+            {
+                playersList: users,
+                disconnectName: currentPlayer.name
+            }
+        );
     });
 
     socket.on('playerChat', function(data) {
@@ -199,20 +207,20 @@ io.on('connection', function (socket) {
 
     // Heartbeat function, update everytime
     socket.on('0', function(target) {
-
+        // rebalance mass
+        balanceMass();
         if (target.x !== currentPlayer.x || target.y !== currentPlayer.y) {
             movePlayer(currentPlayer, target);
 
             var playerCircle = new C(new V(currentPlayer.x, currentPlayer.y), currentPlayer.mass + c.defaultPlayerSize);
 
-            var foodEaten = foods
+            var foodEaten = food
                 .map( function(food) { return SAT.pointInCircle(new V(food.x, food.y), playerCircle); })
                 .reduce( function(a, b, c) { return b ? a.concat(c) : a; }, []);
 
-            foodEaten.forEach( function(food) {
-                foods[food] = {};
-                foods.splice(food, 1);
-                generateFood(currentPlayer);
+            foodEaten.forEach( function(f) {
+                food[f] = {};
+                food.splice(f, 1);                
             });
 
             currentPlayer.mass += c.foodMass * foodEaten.length;
@@ -220,7 +228,6 @@ io.on('connection', function (socket) {
 
             if (foodEaten.length) {
                 console.log('Food eaten: ' + foodEaten);
-                updatereq = true;
             }
 
             for (var e = 0; e < users.length; e++) {
@@ -266,8 +273,8 @@ io.on('connection', function (socket) {
 
             // Do some continuous emit
             if (updatereq) {
-                socket.emit('serverTellPlayerMove', currentPlayer, foods);
-                socket.broadcast.emit('serverUpdateAll', users, foods);
+                socket.emit('serverTellPlayerMove', currentPlayer, food);
+                socket.broadcast.emit('serverUpdateAll', users, food);
                 updatereq = false;
             } else {
                 socket.emit('serverTellPlayerMove', currentPlayer, 0);
