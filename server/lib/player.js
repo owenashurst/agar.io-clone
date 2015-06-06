@@ -9,8 +9,7 @@ function Player(cfg) {
 
     cfg = cfg || {};
 
-    // initialize a pseudo-random ID for the player entity
-    this.id = cfg.id || Math.random() * 100000;
+    this.id = cfg.id;
 
     // player attributes
     this.speed = cfg.speed || 0;
