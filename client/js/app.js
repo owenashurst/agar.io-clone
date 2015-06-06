@@ -108,8 +108,8 @@ c.width = screenWidth; c.height = screenHeight;
 c.addEventListener('mouseout', outOfBounds, false);
 
 // register when the mouse goes off the canvas
-function outOfBounds() {
-    target = { x : screenWidth / 2, y : screenHeight / 2 };
+function outOfBounds() {    
+    target = { x : 0, y: 0 };
 }
 
 
@@ -308,7 +308,7 @@ function setupSocket(socket) {
     socket.on('RIP', function () {
         gameStart = false;
         died = true;
-        socket.close();
+        // socket.close();
     });
 
     socket.on('kick', function () {

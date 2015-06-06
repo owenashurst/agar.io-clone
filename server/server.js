@@ -97,10 +97,12 @@ function balanceMass(){
         .reduce(function(pu,cu){ return pu+cu;});
     
     if(totalMass < c.gameMass) {
+        console.log('adding ' + (c.gameMass - totalMass) + ' mass to level');
         addFood(c.gameMass - totalMass);
         console.log('mass rebalanced');
     }
     else if(totalMass > c.gameMass){
+        console.log('removing ' + (totalMass - c.gameMass) + ' mass from level');
         removeFood(totalMass - c.gameMass);
         console.log('mass rebalanced');
     }
@@ -219,32 +221,33 @@ io.on('connection', function (socket) {
             playerCircle.r = massToRadius(currentPlayer.mass);
             
             var otherUsers = users.filter(function(user) { return user.id != currentPlayer.id; });
-            var playerCollisions = null;
+            var playerCollisions = [];
+            
+            otherUsers.forEach(function(user) {
+                var response = new SAT.Response();
+                var collided = SAT.testCircleCircle(playerCircle,
+                    new C(new V(user.x, user.y), massToRadius(user.mass)),
+                    response);
 
-            if (otherUsers.length) {
-                playerCollisions = otherUsers.map(function(user) {
-                        var response = new SAT.Response();
-                        var collided = SAT.testCircleCircle(playerCircle,
-                            new C(new V(user.x, user.y), massToRadius(user.mass)),
-                            response);
-                        if (collided) {
-                            response.aUser = currentPlayer;
-                            response.bUser = user;
-                            return response;
-                        }
-                    })
-                    .reduce(function(b) {return b;});
-            }
+                if (collided) {
+                    response.aUser = currentPlayer;
+                    response.bUser = user;
+                    playerCollisions.push(response);
+                }
+            });
+                                           
+            playerCollisions.forEach(function(collision) {
+                //TODO: make overlap area-based
+                if (collision.aUser.mass >  collision.bUser.mass * 1.25 && collision.overlap > 50) {
+                    console.log('KILLING USER: ' + collision.bUser.id);
+                    console.log('collision info:');
+                    console.log(collision);
 
-            if (playerCollisions) {                
-                console.log(playerCollisions);
-                playerCollisions.forEach(function(collision) {
-                    if (playerCollisions.aUser.mass > playerCollisions.bUser.mass * 1.25 && playerCollisions.overlap > 50) {
-                        playerCollisions.aUser.mass += playerCollisions.bUser.mass;
-                        sockets[playerCollisions.bUser.id].emit('RIP');
-                    }
-                });
-            }
+                    collision.aUser.mass += collision.bUser.mass;
+                    sockets[collision.bUser.id].emit('RIP');
+                    sockets[collision.bUser.id].disconnect();
+                }
+            });    
 
             var visibleFood  = food
                 .map(function(f){ 
