@@ -81,19 +81,8 @@ function randomColor() {
     };
 }
 
-function findPlayer(id) {
-    var index = findIndex(users, id);
-
-    return index !== -1 ? users[index] : null;
-}
-
-function removePlayer(id) {
-    users.splice(findIndex(users, id), 1);
-}
-
-function hitTest(start, end, min) {
-    var distance = Math.sqrt((start.x - end.x) * (start.x - end.x) + (start.y - end.y) * (start.y - end.y));
-    return (distance <= min);
+function massToRadius(mass){
+    return Math.sqrt(mass / Math.PI) * 10;
 }
 
 function movePlayer(player, target) {
@@ -210,12 +199,15 @@ io.on('connection', function (socket) {
         // rebalance mass
         balanceMass();
         if (target.x !== currentPlayer.x || target.y !== currentPlayer.y) {
+            
             movePlayer(currentPlayer, target);
 
-            var playerCircle = new C(new V(currentPlayer.x, currentPlayer.y), currentPlayer.mass + c.defaultPlayerSize);
+            var playerCircle = new C(
+                new V(currentPlayer.x, currentPlayer.y), 
+                massToRadius(currentPlayer.mass));
 
             var foodEaten = food
-                .map( function(food) { return SAT.pointInCircle(new V(food.x, food.y), playerCircle); })
+                .map( function(f) { return SAT.pointInCircle(new V(f.x, f.y), playerCircle); })
                 .reduce( function(a, b, c) { return b ? a.concat(c) : a; }, []);
 
             foodEaten.forEach( function(f) {
@@ -224,62 +216,49 @@ io.on('connection', function (socket) {
             });
 
             currentPlayer.mass += c.foodMass * foodEaten.length;
-            currentPlayer.speed += (currentPlayer.mass / c.massDecreaseRatio) * foodEaten.length;
+            currentPlayer.speed = 10;            
+            playerCircle.r = massToRadius(currentPlayer.mass);
+            
+            var otherUsers = users.filter(function(user) { return user.id != currentPlayer.id; });
+            var playerCollisions = null;
 
-            if (foodEaten.length) {
-                console.log('Food eaten: ' + foodEaten);
+            if (otherUsers.length) {
+                playerCollisions = otherUsers.map(function(user) {
+                        var response = new SAT.Response();
+                        var collided = SAT.testCircleCircle(playerCircle,
+                            new C(new V(user.x, user.y), massToRadius(user.mass)),
+                            response);
+                        if (collided) {
+                            response.aUser = currentPlayer;
+                            response.bUser = user;
+                            return response;
+                        }
+                    })
+                    .reduce(function(b) {return b;});
             }
 
-            for (var e = 0; e < users.length; e++) {
-                if (hitTest(
-                        {x: users[e].x, y: users[e].y},
-                        {x: currentPlayer.x, y: currentPlayer.y},
-                        currentPlayer.mass + c.defaultPlayerSize
-                    ) || hitTest(
-                        {x: currentPlayer.x, y: currentPlayer.y},
-                        {x: users[e].x, y: users[e].y},
-                        users[e].mass + c.defaultPlayerSize
-                    )) {
-                    if (users[e].mass !== 0 && users[e].mass < currentPlayer.mass - c.eatableMassDistance) {
-                        if (currentPlayer.mass < c.maxSizeMass) {
-                            currentPlayer.mass += users[e].mass;
-                        }
-
-                        if (currentPlayer.speed < c.maxMoveSpeed) {
-                            currentPlayer.speed += currentPlayer.mass / c.massDecreaseRatio;
-                        }
-
-                        sockets[users[e].id].emit('RIP');
-                        sockets[users[e].id].disconnect();
-                        users.splice(e, 1);
-                        break;
+            if (playerCollisions) {                
+                console.log(playerCollisions);
+                playerCollisions.forEach(function(collision) {
+                    if (playerCollisions.aUser.mass > playerCollisions.bUser.mass * 1.25 && playerCollisions.overlap > 50) {
+                        playerCollisions.aUser.mass += playerCollisions.bUser.mass;
+                        sockets[playerCollisions.bUser.id].emit('RIP');
                     }
-                    if (currentPlayer.mass !== 0 && currentPlayer.mass < users[e].mass - c.eatableMassDistance) {
-                        if (users[e].mass < c.maxSizeMass) {
-                            users[e].mass += currentPlayer.mass;
-                        }
+                });
+            }
 
-                        if (users[e].speed < c.maxMoveSpeed) {
-                            users[e].speed += users[e].mass / c.massDecreaseRatio;
-                        }
-
-                        sockets[currentPlayer.id].emit('RIP');
-                        sockets[currentPlayer.id].disconnect();
-                        users.splice(currentPlayer, 1);
-                        break;
+            var visibleFood  = food
+                .map(function(f){ 
+                    if( f.x > currentPlayer.x - currentPlayer.screenWidth/2 - 20 && 
+                        f.x < currentPlayer.x + currentPlayer.screenWidth/2 + 20 && 
+                        f.y > currentPlayer.y - currentPlayer.screenHeight/2 - 20 && 
+                        f.y < currentPlayer.y + currentPlayer.screenHeight/2 + 20) {
+                    return f; 
                     }
-                }
-            }
+                })
+                .filter(function(f){ return f; });
 
-            // Do some continuous emit
-            if (updatereq) {
-                socket.emit('serverTellPlayerMove', currentPlayer, food);
-                socket.broadcast.emit('serverUpdateAll', users, food);
-                updatereq = false;
-            } else {
-                socket.emit('serverTellPlayerMove', currentPlayer, 0);
-                socket.broadcast.emit('serverUpdateAll', users, 0);
-            }
+            socket.emit('serverTellPlayerMove', currentPlayer, users, visibleFood);
         }
     });
 });
