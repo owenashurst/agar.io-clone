@@ -163,7 +163,7 @@ io.on('connection', function (socket) {
     socket.on('disconnect', function () {
         var playerDisconnected = findPlayer(userID);
 
-        if (playerDisconnected.hasOwnProperty('name')) {
+        if (playerDisconnected !== null && playerDisconnected.hasOwnProperty('name')) {
             removePlayer(userID);
 
             console.log('User #' + userID + ' disconnected');
@@ -216,9 +216,6 @@ io.on('connection', function (socket) {
 +                               }
 +                               
 +                           }
-+                   sockets[users[e].id].emit('kick', reason);
-                    sockets[users[e].id].disconnect();
-                    users.splice(e, 1);
                     if(reason !== ""){
 +                       console.log("User " + users[e].name + " kicked successfully by " + currentPlayer.name + " for reason " + reason);
 +                   }
@@ -226,6 +223,9 @@ io.on('connection', function (socket) {
 +                       console.log("User " + users[e].name + " kicked successfully by " + currentPlayer.name);
 +                   }
 +                   socket.emit('serverMSG', "User " + users[e].name + " was kicked by " + currentPlayer.name);
++                   sockets[users[e].id].emit('kick', reason);
++                   sockets[users[e].id].disconnect();
++                   users.splice(e, 1);
                     worked = true;
                 }
             }
