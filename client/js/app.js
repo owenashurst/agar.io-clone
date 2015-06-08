@@ -531,11 +531,11 @@ function gameLoop() {
         } else {
             if(kicked){
                   if(reason !== ""){
-+                       graph.fillText('You were kicked for reason ' + reason, screenWidth / 2, screenHeight / 2);
-+                 }
-+                 else{
-+                      graph.fillText('You were kicked!', screenWidth / 2, screenHeight / 2);
-+                 }
+                       graph.fillText('You were kicked for reason ' + reason, screenWidth / 2, screenHeight / 2);
+                 }
+                 else{
+                      graph.fillText('You were kicked!', screenWidth / 2, screenHeight / 2);
+                 }
             }
             else{
                   graph.fillText('Disconnected!', screenWidth / 2, screenHeight / 2);
