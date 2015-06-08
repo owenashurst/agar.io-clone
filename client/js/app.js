@@ -412,12 +412,12 @@ function drawEnemy(enemy) {
 }
 
 function drawgrid(){
-    for (var x = xoffset; x < screenWidth; x += screenHeight / 20) {
+    for (var x = xoffset - player.x; x < screenWidth; x += screenHeight / 20) {
         graph.moveTo(x, 0);
         graph.lineTo(x, screenHeight);
     }
 
-    for (var y = yoffset ; y < screenHeight; y += screenHeight / 20) {
+    for (var y = yoffset - player.y ; y < screenHeight; y += screenHeight / 20) {
         graph.moveTo(0, y);
         graph.lineTo(screenWidth, y);
     }
