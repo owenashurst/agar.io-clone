@@ -46,8 +46,8 @@ function genPos(from, to) {
 function addFoods(target) {
     foods.push({
         id: (new Date()).getTime(),
-        x: genPos(0, target.gameWidth),
-        y: genPos(0, target.gameHeight),
+        x: genPos(0, target.gameWidth - 10),
+        y: genPos(0, target.gameHeight - 10),
         color: randomColor(),
         rotation: Math.random() * (Math.PI * 2)
     });
