@@ -494,28 +494,17 @@ function gameLoop() {
             graph.fillStyle = backgroundColor;
             graph.fillRect(0, 0, screenWidth, screenHeight);
             drawgrid();
-<<<<<<< HEAD
             
             if(borderDraw){
                 drawborder();
             }
             
-            for (var i = 0; i < foods.length; i++) {
-                drawFood(foods[i]);
-            }
+            foods.forEach(function(f){ drawFood(f); });
     
             if(borderDraw){
                 drawborder();
             }
 
-=======
-            drawborder();
-            
-            foods.forEach(function(f){ drawFood(f); });
-            
-            drawborder();
-            
->>>>>>> origin/refactor_fixes
             for (i = 0; i < enemies.length; i++) {
                 if (enemies[i].id != player.id) {
                     drawEnemy(enemies[i]);
