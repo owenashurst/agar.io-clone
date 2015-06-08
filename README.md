@@ -50,6 +50,11 @@ A simple Agar.io clone built with socket.io and HTML5 Canvas on top of NodeJS.
 ---
 
 ## Installation
+Simply click the Deploy to Bluemix button below
+
+[![Deploy to Bluemix](https://bluemix.net/deploy/button.png)](https://bluemix.net/deploy)
+
+-or-
 >You can check out a more detailed setup tutorial on our [wiki](https://github.com/huytd/agar.io-clone/wiki/Setup)
 
 #### Requirements
