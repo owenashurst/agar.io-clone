@@ -206,32 +206,32 @@ io.on('connection', function (socket) {
             for (var e = 0; e < users.length; e++) {
                 if (users[e].name === data[0] && !users[e].admin && !worked){
                     if(data.length > 1){
-+                               for (var f = 1; f < data.length; f++) {
-+                                     if(f == data.length){
-+                                           reason = reason + data[f];
-+                                     }
-+                                     else{
-+                                           reason = reason + data[f] + " ";
-+                                     }
-+                               }
-+                               
-+                           }
-                    if(reason !== ""){
-+                       console.log("User " + users[e].name + " kicked successfully by " + currentPlayer.name + " for reason " + reason);
-+                   }
-+                   else{
-+                       console.log("User " + users[e].name + " kicked successfully by " + currentPlayer.name);
-+                   }
-+                   socket.emit('serverMSG', "User " + users[e].name + " was kicked by " + currentPlayer.name);
-+                   sockets[users[e].id].emit('kick', reason);
-+                   sockets[users[e].id].disconnect();
-+                   users.splice(e, 1);
+                               for (var f = 1; f < data.length; f++) {
+                                    if(f == data.length){
+                                           reason = reason + data[f];
+                                     }
+                                     else{
+                                           reason = reason + data[f] + " ";
+                                     }
+                               }
+                               
+                           }
+                if(reason !== ""){
+                       console.log("User " + users[e].name + " kicked successfully by " + currentPlayer.name + " for reason " + reason);
+                   }
+                   else{
+                       console.log("User " + users[e].name + " kicked successfully by " + currentPlayer.name);
+                   }
+                   socket.emit('serverMSG', "User " + users[e].name + " was kicked by " + currentPlayer.name);
+                   sockets[users[e].id].emit('kick', reason);
+                   sockets[users[e].id].disconnect();
+                   users.splice(e, 1);
                     worked = true;
                 }
             }
             if(!worked){
-+                       socket.emit('serverMSG', "Could not find user or user is admin");
-+           }
+                       socket.emit('serverMSG', "Could not find user or user is admin");
+           }
         } else {
             console.log(currentPlayer.name + " is trying to use -kick but isn't admin");
             socket.emit('serverMSG', 'You are not permitted to use this command');
