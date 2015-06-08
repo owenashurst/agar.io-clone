@@ -19,14 +19,14 @@ gulp.task('move-client', function () {
 });
 
 gulp.task('build-server', ['move-server'], function () {
-	return gulp.src('server/*.js')
+	return gulp.src(['server/*.js'])
 		.pipe(jshint())
 		.pipe(jshint.reporter('default', { verbose: true }))
 		.pipe(gulp.dest('bin/server/'));
 });
 
 gulp.task('move-server', function () {
-	return gulp.src(['server/**/*.*', '!server/**/*.js'])
+	return gulp.src(['server/**/*.*', 'server/**/*.js'])
 		.pipe(gulp.dest('./bin/server/'));
 });
 
