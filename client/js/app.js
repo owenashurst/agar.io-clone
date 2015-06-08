@@ -2,6 +2,7 @@ var playerName;
 var playerNameInput = document.getElementById('playerNameInput');
 var socket;
 var KEY_ENTER = 13;
+var borderDraw = false;
 
 
 function startGame() {
@@ -33,6 +34,18 @@ window.onload = function() {
             startGame();
         } else {
             nickErrorText.style.display = 'inline';
+        }
+    };
+
+    var settingsMenu = document.getElementById('settingsButton');
+
+    settingsMenu.onclick = function () {
+        if (settings.style.display != 'block') {
+            instructions.style.display = 'none';
+            settings.style.display = 'block';
+        } else {
+            instructions.style.display = 'block';
+            settings.style.display = 'none';
         }
     };
 
@@ -75,7 +88,7 @@ var foodConfig = {
 };
 
 var playerConfig = {
-    border: 4,
+    border: 5,
     textColor: '#FFFFFF',
     textBorder: '#000000',
     textBorderSize: 3,
@@ -83,7 +96,7 @@ var playerConfig = {
 };
 
 var enemyConfig = {
-    border: 4,
+    border: 5,
     textColor: '#FFFFFF',
     textBorder: '#000000',
     textBorderSize: 3,
@@ -93,9 +106,9 @@ var enemyConfig = {
 var player = {
     id: -1,
     x: screenWidth / 2, 
-    y: screenHeight / 2,
+    y: screenHeight / 2,    
     screenWidth: screenWidth,
-    screenHeight: screenHeight
+    screenHeight: screenHeight,
 };
 
 var foods = [];
@@ -108,8 +121,16 @@ c.width = screenWidth; c.height = screenHeight;
 c.addEventListener('mouseout', outOfBounds, false);
 
 // register when the mouse goes off the canvas
-function outOfBounds() {
-    target = { x : screenWidth / 2, y : screenHeight / 2 };
+function outOfBounds() {    
+    target = { x : 0, y: 0 };
+}
+
+function visibleBorder() {
+        if (document.getElementById('visBord').checked) {
+            borderDraw = true;
+        } else {
+            borderDraw= false;
+        }
 }
 
 var graph = c.getContext('2d');
@@ -241,11 +262,8 @@ function setupSocket(socket) {
         player = playerSettings;        
         player.name = playerName; 
         player.screenWidth = screenWidth;
-        player.screenHeight = screenHeight;       
+        player.screenHeight = screenHeight; 
         socket.emit('gotit', player);
-
-        // playerBall.fill = 'hsl(' + playerSettings.hue + ', 100%, 60%)';
-
         gameStart = true;
         console.log('Game is started: ' + gameStart);
         addSystemLine('Connected to the game!');
@@ -255,7 +273,7 @@ function setupSocket(socket) {
     socket.on('gameSetup', function(data){
         gameWidth = data.gameWidth;
         gameHeight = data.gameHeight;        
-    });
+     });
 
     socket.on('playerDisconnect', function (data) {
         enemies = data.playersList;
@@ -288,14 +306,20 @@ function setupSocket(socket) {
     // Handle movement
     socket.on('serverTellPlayerMove', function (playerData, userData, foodsList) {
         var xoffset = player.x - playerData.x;
-        var yoffset = player.y - playerData.y;        
+        var yoffset = player.y - playerData.y;
+        
         player = playerData;
         player.xoffset = isNaN(xoffset) ? 0 : xoffset;
         player.yoffset = isNaN(yoffset) ? 0 : yoffset;
-        // console.log(xoffset);
-        enemies = userData;
+
+        enemies = userData;        
+        foods = foodsList;
+    });
+
+    socket.on('serverUpdateAll', function (players, foodsList) {
+        enemies = players;
         if(foodsList !== 0){
-            foods = foodsList;
+        foods = foodsList;
         }
     });
 
@@ -303,7 +327,7 @@ function setupSocket(socket) {
     socket.on('RIP', function () {
         gameStart = false;
         died = true;
-        socket.close();
+        // socket.close();
     });
 
     socket.on('kick', function () {
@@ -311,6 +335,10 @@ function setupSocket(socket) {
         kicked = true;
         socket.close();
     });
+}
+
+function massToRadius(mass){
+    return Math.sqrt(mass / Math.PI) * 10;
 }
 
 function drawCircle(centerX, centerY, mass, sides) {
@@ -398,8 +426,47 @@ function drawgrid(){
     graph.stroke();
 }
 
-function massToRadius(mass){
-    return Math.sqrt(mass / Math.PI) * 10;
+function drawborder() {
+    var borderX = 0;
+    var borderY = 0;
+
+    graph.strokeStyle = playerConfig.borderColor;
+
+    // Left-vertical
+    if (player.x <= screenWidth/2) {
+        graph.beginPath();
+        graph.moveTo(screenWidth/2 - player.x, 0 ? player.y > screenHeight/2 : screenHeight/2 - player.y);
+        graph.lineTo(screenWidth/2 - player.x, gameHeight + screenHeight/2 - player.y);
+        graph.strokeStyle = "#000000";
+        graph.stroke();
+    }
+
+    // Top-horizontal
+    if (player.y <= screenHeight/2) {
+        graph.beginPath();
+        graph.moveTo(0 ? player.x > screenWidth/2 : screenWidth/2 - player.x, screenHeight/2 - player.y);
+        graph.lineTo(gameWidth + screenWidth/2 - player.x, screenHeight/2 - player.y);
+        graph.strokeStyle = "#000000";
+        graph.stroke();
+    }
+
+    // Right-vertical
+    if (gameWidth - player.x <= screenWidth/2) {
+        graph.beginPath();
+        graph.moveTo(gameWidth + screenWidth/2 - player.x, screenHeight/2 - player.y);
+        graph.lineTo(gameWidth + screenWidth/2 - player.x, gameHeight + screenHeight/2 - player.y);
+        graph.strokeStyle = "#000000";
+        graph.stroke();
+    }
+
+    // Bottom-horizontal
+    if (gameHeight - player.y <= screenHeight/2) {
+        graph.beginPath();
+        graph.moveTo(gameWidth + screenWidth/2 - player.x, gameHeight + screenHeight/2 - player.y);
+        graph.lineTo(screenWidth/2 - player.x, gameHeight + screenHeight/2 - player.y);
+        graph.strokeStyle = "#000000";
+        graph.stroke();
+    }
 }
 
 function gameInput(mouse) {
@@ -427,11 +494,17 @@ function gameLoop() {
             graph.fillStyle = backgroundColor;
             graph.fillRect(0, 0, screenWidth, screenHeight);
             drawgrid();
-            // drawborder();
+            
+            if(borderDraw){
+                drawborder();
+            }
+            
             foods.forEach(function(f){ drawFood(f); });
-            
-            // drawborder();
-            
+    
+            if(borderDraw){
+                drawborder();
+            }
+
             for (i = 0; i < enemies.length; i++) {
                 if (enemies[i].id != player.id) {
                     drawEnemy(enemies[i]);
@@ -475,5 +548,7 @@ function gameLoop() {
 
 window.addEventListener('resize', function() {
     screenWidth = window.innerWidth;
-    screenHeight = window.innerHeight;    
+    screenHeight = window.innerHeight;
+    player.screenWidth = c.width = screenWidth;
+    player.screenHeight = c.height = screenHeight;
 }, true);

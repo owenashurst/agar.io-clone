@@ -1,5 +1,3 @@
-'use strict';
-
 var path = require('path');
 var express = require('express');
 var app = express();
@@ -40,7 +38,15 @@ function removeFood(toRem){
 }
 
 function findIndex(arr, id) {
-    return arr.map(function(x){ return x.id; }).indexOf(id);
+    var len = arr.length;
+
+    while (len--) {
+        if (arr[len].id === id) {
+        return len;
+        }
+    }
+
+    return -1;
 }
 
 function randomColor() {
@@ -66,8 +72,8 @@ function movePlayer(player, target) {
 
     var slowDown = Math.log(player.mass);
 
-	var deltaY = player.speed * Math.sin(deg)/ slowDown;
-	var deltaX = player.speed * Math.cos(deg)/ slowDown;
+    var deltaY = player.speed * Math.sin(deg)/ slowDown;
+    var deltaX = player.speed * Math.cos(deg)/ slowDown;
 
     if (dist < (50 + player.mass)) {
         deltaY *= dist / (50 + player.mass);
@@ -91,10 +97,12 @@ function balanceMass(){
         .reduce(function(pu,cu){ return pu+cu;});
     
     if(totalMass < c.gameMass) {
+        console.log('adding ' + (c.gameMass - totalMass) + ' mass to level');
         addFood(c.gameMass - totalMass);
         console.log('mass rebalanced');
     }
     else if(totalMass > c.gameMass){
+        console.log('removing ' + (totalMass - c.gameMass) + ' mass from level');
         removeFood(totalMass - c.gameMass);
         console.log('mass rebalanced');
     }
@@ -110,7 +118,7 @@ io.on('connection', function (socket) {
         mass: c.defaultPlayerMass,        
         hue: Math.round(Math.random() * 360),
     };
-
+    
     socket.emit('welcome', currentPlayer);
 
     socket.on('gotit', function (player) {
@@ -128,8 +136,10 @@ io.on('connection', function (socket) {
             io.emit('playerJoin', {
                 playersList: users, 
                 connectedName: currentPlayer.name});
-            socket.emit('gameSetup', c)
-        }
+            socket.emit('gameSetup', c);
+            console.log('Total player: ' + users.length);
+        }        
+
     });
 
     socket.on('ping', function () {
@@ -149,49 +159,48 @@ io.on('connection', function (socket) {
         );
     });
 
-    socket.on('playerChat', function (data) {
+    socket.on('playerChat', function(data) {
         var _sender = data.sender.replace(/(<([^>]+)>)/ig, '');
         var _message = data.message.replace(/(<([^>]+)>)/ig, '');
         socket.broadcast.emit('serverSendPlayerChat', {sender: _sender, message: _message});
     });
 
-    socket.on('pass', function (data) {
-        if(data[0] == c.adminPass){
-                console.log("Someone just logged in as an admin");
-                socket.emit('serverMSG', "Welcome back " + currentPlayer.name);
-                socket.broadcast.emit('serverMSG', currentPlayer.name + " just logged in as admin!");
-                currentPlayer.admin = true;
-        }
-        else{
-                console.log("Incorrect Admin Password received");
-                socket.emit('serverMSG', "Password incorrect attempt logged.");
-                // TODO actually log incorrect passwords
+    socket.on('pass', function(data) {
+        if (data[0] === c.adminPass) {
+            console.log('Someone just logged in as an admin');
+            socket.emit('serverMSG', 'Welcome back ' + currentPlayer.name);
+            socket.broadcast.emit('serverMSG', currentPlayer.name + ' just logged in as admin!');
+            currentPlayer.admin = true;
+        } else {
+            console.log('Incorrect Admin Password received');
+            socket.emit('serverMSG', 'Password incorrect attempt logged.');
+            // TODO actually log incorrect passwords
         }
     });
 
-    socket.on('kick', function (data) {
-        if(currentPlayer.admin){
-                for (var e = 0; e < users.length; e++) {
-                      if(users[e].name == data[0]){
-                           sockets[users[e].id].emit('kick');
-                           sockets[users[e].id].disconnect();
-                           users.splice(e, 1);
-                           console.log("User kicked successfully");
-                           socket.emit('serverMSG', "User kicked successfully");
-                      }
+    socket.on('kick', function(data) {
+        if (currentPlayer.admin) {
+            for (var e = 0; e < users.length; e++) {
+                if (users[e].name === data[0]) {
+                    sockets[users[e].id].emit('kick');
+                    sockets[users[e].id].disconnect();
+                    users.splice(e, 1);
+                    console.log('User kicked successfully');
+                    socket.emit('serverMSG', 'User kicked successfully');
                 }
-        }
-        else{
-                console.log("Trying admin commands without admin privileges");
-                socket.emit('serverMSG', "You are not permitted to use this command");
+            }
+        } else {
+            console.log('Trying admin commands without admin privileges');
+            socket.emit('serverMSG', 'You are not permitted to use this command');
         }
     });
 
     // Heartbeat function, update everytime
-    socket.on('0', function (target) {        
+    socket.on('0', function(target) {
+        // rebalance mass
         balanceMass();
         if (target.x !== currentPlayer.x || target.y !== currentPlayer.y) {
-
+            
             movePlayer(currentPlayer, target);
 
             var playerCircle = new C(
@@ -212,34 +221,33 @@ io.on('connection', function (socket) {
             playerCircle.r = massToRadius(currentPlayer.mass);
             
             var otherUsers = users.filter(function(user) { return user.id != currentPlayer.id; });
-            var playerCollisions = null;
+            var playerCollisions = [];
+            
+            otherUsers.forEach(function(user) {
+                var response = new SAT.Response();
+                var collided = SAT.testCircleCircle(playerCircle,
+                    new C(new V(user.x, user.y), massToRadius(user.mass)),
+                    response);
 
-            if (otherUsers.length) {
-                playerCollisions = otherUsers.map(function(user) {
-                        var response = new SAT.Response();
-                        var collided = SAT.testCircleCircle(playerCircle,
-                            new C(new V(user.x, user.y), massToRadius(user.mass)),
-                            response);
-                        if (collided) {
-                            response.aUser = currentPlayer;
-                            response.bUser = user;
-                            return response;
-                        }
-                    })
-                    .reduce(function(b) {return b;});
-            }
+                if (collided) {
+                    response.aUser = currentPlayer;
+                    response.bUser = user;
+                    playerCollisions.push(response);
+                }
+            });
+                                           
+            playerCollisions.forEach(function(collision) {
+                //TODO: make overlap area-based
+                if (collision.aUser.mass >  collision.bUser.mass * 1.25 && collision.overlap > 50) {
+                    console.log('KILLING USER: ' + collision.bUser.id);
+                    console.log('collision info:');
+                    console.log(collision);
 
-            if (playerCollisions) {                
-                console.log(playerCollisions);
-                playerCollisions.forEach(function(collision) {
-                    if (playerCollisions.aUser.mass > playerCollisions.bUser.mass * 1.25 && playerCollisions.overlap > 50) {
-                        playerCollisions.aUser.mass += playerCollisions.bUser.mass;
-                        sockets[playerCollisions.bUser.id].emit('RIP');
-                        // sockets[playerCollisions.bUser.id].disconnect();
-                        // users.splice(playerCollisions.bUser, 1);                
-                    }
-                });
-            }
+                    collision.aUser.mass += collision.bUser.mass;
+                    sockets[collision.bUser.id].emit('RIP');
+                    sockets[collision.bUser.id].disconnect();
+                }
+            });    
 
             var visibleFood  = food
                 .map(function(f){ 
@@ -257,6 +265,7 @@ io.on('connection', function (socket) {
     });
 });
 
+// Don't touch on ip
 var ipaddress = process.env.OPENSHIFT_NODEJS_IP || process.env.IP || '127.0.0.1';
 var serverport = process.env.OPENSHIFT_NODEJS_PORT || process.env.PORT || c.port;
 if (process.env.OPENSHIFT_NODEJS_IP !== undefined) {

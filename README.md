@@ -15,9 +15,11 @@ A simple Agar.io clone built with socket.io and HTML5 Canvas on top of NodeJS.
 ## Live Demos
 [![Singapore](https://img.shields.io/badge/singapore-offline-red.svg)](http://codedaily.vn:3000/) 
 [![Heroku EU](https://img.shields.io/badge/heroku eu-online-green.svg)](https://agar-clone.herokuapp.com/) 
-[![Heroku US](https://img.shields.io/badge/heroku us-online-green.svg)](https://agar-clone-us.herokuapp.com/) 
+[![Heroku US](https://img.shields.io/badge/heroku us-online-green.svg)](https://agar-clone-us.herokuapp.com/)
+[![Bluemix US](http://img.shields.io/badge/bluemix us-online-green.svg)](http://agar-clone.mybluemix.net/)
+[![Bluemix EU](http://img.shields.io/badge/bluemix eu-online-green.svg)](http://agar-clone.eu-gb.mybluemix.net/)
 [![Cloud9](https://img.shields.io/badge/cloud9-offline-red.svg)](https://agar-io-clone-d3vont3ch.c9.io/) 
-[![TS3Bahu](https://img.shields.io/badge/TS3Bahu-offline-red.svg)](http://agar.ts3bahu.com:3000)
+[![TS3Bahu](https://img.shields.io/badge/TS3Bahu-online-green.svg)](http://agar.ts3bahu.com:3000)
 
 ---
 
@@ -106,6 +108,7 @@ The game will then be accessible at `http://localhost:3000`.
 
 ## For Developers
  - [Game Architecture](https://github.com/huytd/agar.io-clone/wiki/Game-Architecture)
+ - If you want to start your own project, I recommend you use [this template](https://github.com/huytd/node-online-game-template)
 
 ## License
 >You can check out the full license [here](https://github.com/huytd/agar.io-clone/blob/master/LICENSE)
