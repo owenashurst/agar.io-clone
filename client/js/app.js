@@ -148,7 +148,7 @@ function addChatLine(name, text) {
     chatLine.className = (name == player.name)?'me':'friend';
     chatLine.innerHTML = '<b>' + name + '</b>: ' + text;
     var chatList = document.getElementById('chatList');
-    if (chatList.childNodes.length >=5) {
+    if (chatList.childNodes.length >=11) {
         chatList.removeChild(chatList.childNodes[0]);
     }
     chatList.appendChild(chatLine);
@@ -159,7 +159,7 @@ function addSystemLine(text) {
     chatLine.className = 'system';
     chatLine.innerHTML = text;
     var chatList = document.getElementById('chatList');
-    if (chatList.childNodes.length >=5) {
+    if (chatList.childNodes.length >=11) {
         chatList.removeChild(chatList.childNodes[0]);
     }
     chatList.appendChild(chatLine);
@@ -201,23 +201,23 @@ function printHelp() {
     }
 }
 
-registerChatCommand('ping', 'check your latency', function () {
+registerChatCommand('ping', 'Check your latency', function () {
     checkLatency();
 });
 
-registerChatCommand('dark', 'toggle dark mode', function (args) {
+registerChatCommand('dark', 'Toggle dark mode', function (args) {
     toggleDarkMode(args);
 });
 
-registerChatCommand('help', 'show information about chat commands', function () {
+registerChatCommand('help', 'Chat commands information', function () {
     printHelp();
 });
 
-registerChatCommand('login', 'login as an admin using the set admin password', function (args) {
+registerChatCommand('login', 'Login as an admin', function (args) {
     socket.emit('pass', args);
 });
 
-registerChatCommand('kick', 'kick a player', function (args) {
+registerChatCommand('kick', 'Kick a player', function (args) {
     socket.emit('kick', args);
 });
 
