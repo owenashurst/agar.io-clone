@@ -22,14 +22,23 @@
             <b class="input-error">Nick must be alphanumeric characters only!</b>
             <br />
             <button id="startButton">Play</button>
+             <button id="settingsButton" >Settings</button>
             <br/>
-            <h3>Gameplay</h3>
-            <ul>
-                <li>Move your mouse on the screen to move your character</li>
-                <li>Eat food and other players in order to grow your character (food respawns every time a player eats it)</li>
-                <li>A player's mass is the number of food particles eaten</li>
-                <li>Objective: Try to get fat and eat other players</li>
-            </ul>
+            <div id="instructions">
+                <h3>Gameplay</h3>
+                <ul>
+                    <li>Move your mouse on the screen to move your character</li>
+                    <li>Eat food and other players in order to grow your character (food respawns every time a player eats it)</li>
+                    <li>A player's mass is the number of food particles eaten</li>
+                    <li>Objective: Try to get fat and eat other players</li>
+                </ul>
+            </div>
+            <div id="settings">
+                <h3>Settings</h3>
+                <ul>
+                    <label><input id ="visBord" type="checkbox" onchange="visibleBorder()">Visible borders</label>
+                </ul>
+            </div>
         </div>
     </div>
     <script src="/socket.io/socket.io.js"></script>
