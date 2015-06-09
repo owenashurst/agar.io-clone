@@ -494,10 +494,6 @@ function gameLoop() {
             for (var i = 0; i < foods.length; i++) {
                 drawFood(foods[i]);
             }
-    
-            if(borderDraw){
-                drawborder();
-            }
 
             for (i = 0; i < enemies.length; i++) {
                 if (enemies[i].id != player.id) {
