@@ -167,12 +167,12 @@ io.on('connection', function (socket) {
 
     socket.on('pass', function(data) {
         if (data[0] === c.adminPass) {
-            console.log('Someone just logged in as an admin');
+            console.log(currentPlayer.name + " just logged in as an admin");
             socket.emit('serverMSG', 'Welcome back ' + currentPlayer.name);
             socket.broadcast.emit('serverMSG', currentPlayer.name + ' just logged in as admin!');
             currentPlayer.admin = true;
         } else {
-            console.log('Incorrect Admin Password received');
+            console.log(currentPlayer.name + " sent incorrect admin password");
             socket.emit('serverMSG', 'Password incorrect attempt logged.');
             // TODO actually log incorrect passwords
         }
@@ -180,17 +180,39 @@ io.on('connection', function (socket) {
 
     socket.on('kick', function(data) {
         if (currentPlayer.admin) {
+            var reason = "";
+            var worked = false;
             for (var e = 0; e < users.length; e++) {
-                if (users[e].name === data[0]) {
-                    sockets[users[e].id].emit('kick');
-                    sockets[users[e].id].disconnect();
-                    users.splice(e, 1);
-                    console.log('User kicked successfully');
-                    socket.emit('serverMSG', 'User kicked successfully');
+                if (users[e].name === data[0] && !users[e].admin && !worked){
+                    if(data.length > 1){
+                               for (var f = 1; f < data.length; f++) {
+                                    if(f == data.length){
+                                           reason = reason + data[f];
+                                     }
+                                     else{
+                                           reason = reason + data[f] + " ";
+                                     }
+                               }
+                               
+                           }
+                if(reason !== ""){
+                       console.log("User " + users[e].name + " kicked successfully by " + currentPlayer.name + " for reason " + reason);
+                   }
+                   else{
+                       console.log("User " + users[e].name + " kicked successfully by " + currentPlayer.name);
+                   }
+                   socket.emit('serverMSG', "User " + users[e].name + " was kicked by " + currentPlayer.name);
+                   sockets[users[e].id].emit('kick', reason);
+                   sockets[users[e].id].disconnect();
+                   users.splice(e, 1);
+                    worked = true;
                 }
             }
+            if(!worked){
+                       socket.emit('serverMSG', "Could not find user or user is admin");
+           }
         } else {
-            console.log('Trying admin commands without admin privileges');
+            console.log(currentPlayer.name + " is trying to use -kick but isn't admin");
             socket.emit('serverMSG', 'You are not permitted to use this command');
         }
     });
