@@ -11,7 +11,7 @@ function startGame() {
     document.getElementById('gameAreaWrapper').style.display = 'block';
     document.getElementById('startMenuWrapper').style.display = 'none';
     socket = io();
-    SetupSocket(socket);
+    setupSocket(socket);
     animloop();
 }
 
@@ -66,8 +66,8 @@ window.onload = function() {
 // Canvas
 var screenWidth = window.innerWidth;
 var screenHeight = window.innerHeight;
-var gameWidth = screenWidth * 10;
-var gameHeight = screenHeight * 10;
+var gameWidth = 0;
+var gameHeight = 0;
 var xoffset = -gameWidth;
 var yoffset = -gameHeight;
 
@@ -85,11 +85,11 @@ var foodConfig = {
     border: 0,
     borderColor: '#f39c12',
     fillColor: '#f1c40f',
-    size: 10
+    mass: 0.5
 };
 
 var playerConfig = {
-    border: 15,
+    border: 5,
     textColor: '#FFFFFF',
     textBorder: '#000000',
     textBorderSize: 3,
@@ -97,7 +97,7 @@ var playerConfig = {
 };
 
 var enemyConfig = {
-    border: 15,
+    border: 5,
     textColor: '#FFFFFF',
     textBorder: '#000000',
     textBorderSize: 3,
@@ -106,13 +106,10 @@ var enemyConfig = {
 
 var player = {
     id: -1,
-    x: gameWidth / 2, y: gameHeight / 2,
-    mass: 0, speed: 8,
-    //TODO: exclude width and height out of player package
+    x: screenWidth / 2, 
+    y: screenHeight / 2,    
     screenWidth: screenWidth,
     screenHeight: screenHeight,
-    gameWidth: gameWidth,
-    gameHeight: gameHeight
 };
 
 var foods = [];
@@ -125,8 +122,8 @@ c.width = screenWidth; c.height = screenHeight;
 c.addEventListener('mouseout', outOfBounds, false);
 
 // register when the mouse goes off the canvas
-function outOfBounds() {
-    target = { x : screenWidth / 2, y : screenHeight / 2 };
+function outOfBounds() {    
+    target = { x : 0, y: 0 };
 }
 
 function visibleBorder() {
@@ -242,7 +239,7 @@ function sendChat(key) {
     }
 }
 
-function SetupSocket(socket) {
+function setupSocket(socket) {
     // Handle ping
     socket.on('pong', function () {
         var latency = Date.now() - startPingTime;
@@ -263,15 +260,21 @@ function SetupSocket(socket) {
 
     // Handle connection
     socket.on('welcome', function (playerSettings) {
-        player.name = playerName;
-        player.id = playerSettings.id;
-        player.hue = playerSettings.hue;
+        player = playerSettings;        
+        player.name = playerName; 
+        player.screenWidth = screenWidth;
+        player.screenHeight = screenHeight; 
         socket.emit('gotit', player);
         gameStart = true;
         console.log('Game is started: ' + gameStart);
         addSystemLine('Connected to the game!');
         addSystemLine('Type <b>-help</b> for a list of commands');
     });
+
+    socket.on('gameSetup', function(data){
+        gameWidth = data.gameWidth;
+        gameHeight = data.gameHeight;        
+     });
 
     socket.on('playerDisconnect', function (data) {
         enemies = data.playersList;
@@ -302,13 +305,16 @@ function SetupSocket(socket) {
     });
 
     // Handle movement
-    socket.on('serverTellPlayerMove', function (playerData, foodsList) {
-        xoffset += (player.x - playerData.x);
-        yoffset += (player.y - playerData.y);
+    socket.on('serverTellPlayerMove', function (playerData, userData, foodsList) {
+        var xoffset = player.x - playerData.x;
+        var yoffset = player.y - playerData.y;
+        
         player = playerData;
-        if(foodsList !== 0){
+        player.xoffset = isNaN(xoffset) ? 0 : xoffset;
+        player.yoffset = isNaN(yoffset) ? 0 : yoffset;
+
+        enemies = userData;        
         foods = foodsList;
-        }
     });
 
     socket.on('serverUpdateAll', function (players, foodsList) {
@@ -322,7 +328,7 @@ function SetupSocket(socket) {
     socket.on('RIP', function () {
         gameStart = false;
         died = true;
-        socket.close();
+        // socket.close();
     });
 
     socket.on('kick', function (data) {
@@ -333,16 +339,20 @@ function SetupSocket(socket) {
     });
 }
 
-function drawCircle(centerX, centerY, size) {
-    var theta = 0,
-        x = 0,
-        y = 0,
-        radius = size * 1.5;
+function massToRadius(mass){
+    return Math.sqrt(mass / Math.PI) * 10;
+}
+
+function drawCircle(centerX, centerY, mass, sides) {
+    var theta = 0;
+    var x = 0;
+    var y = 0;
+    var radius = massToRadius(mass);
 
     graph.beginPath();
 
-    for (var i = 0; i < size; i++) {
-        theta = (i / size) * 2 * Math.PI;
+    for (var i = 0; i < sides; i++) {
+        theta = (i / sides) * 2 * Math.PI;
         x = centerX + radius * Math.sin(theta);
         y = centerY + radius * Math.cos(theta);
         graph.lineTo(x, y);
@@ -357,7 +367,7 @@ function drawFood(food) {
     graph.strokeStyle = food.color.border || foodConfig.borderColor;
     graph.fillStyle = food.color.fill || foodConfig.fillColor;
     graph.lineWidth = foodConfig.border;
-    drawCircle(food.x - player.x + screenWidth / 2, food.y - player.y + screenHeight / 2, foodConfig.size);
+    drawCircle(food.x - player.x + screenWidth / 2, food.y - player.y + screenHeight / 2, massToRadius(foodConfig.mass), 10);
 }
 
 function drawPlayer() {
@@ -365,11 +375,11 @@ function drawPlayer() {
     graph.fillStyle = 'hsl(' + player.hue + ', 70%, 50%)';
     graph.lineWidth = playerConfig.border;
     graph.beginPath();
-    graph.arc(screenWidth / 2, screenHeight / 2, playerConfig.defaultSize + player.mass, 0, 2 * Math.PI);
+    graph.arc(screenWidth / 2, screenHeight / 2, massToRadius(player.mass), 0, 2 * Math.PI);
     graph.stroke();
     graph.fill();
 
-    var fontSize = (player.mass / 2) + playerConfig.defaultSize;
+    var fontSize = (massToRadius(player.mass) / 2);
     graph.lineWidth = playerConfig.textBorderSize;
     graph.miterLimit = 1;
     graph.lineJoin = 'round';
@@ -387,11 +397,11 @@ function drawEnemy(enemy) {
     graph.fillStyle = 'hsl(' + enemy.hue + ', 70%, 50%)';
     graph.lineWidth = enemyConfig.border;
     graph.beginPath();
-    graph.arc(enemy.x - player.x + screenWidth / 2, enemy.y - player.y + screenHeight / 2, enemyConfig.defaultSize + enemy.mass, 0, 2 * Math.PI);
+    graph.arc(enemy.x - player.x + screenWidth / 2, enemy.y - player.y + screenHeight / 2, massToRadius(enemy.mass), 0, 2 * Math.PI);
     graph.fill();
     graph.stroke();
 
-    var fontSize = (enemy.mass / 2) + enemyConfig.defaultSize;
+    var fontSize = (massToRadius(enemy.mass) / 2);
 
     graph.lineWidth = enemyConfig.textBorderSize;
     graph.textAlign = 'center';
@@ -404,12 +414,12 @@ function drawEnemy(enemy) {
 }
 
 function drawgrid(){
-    for (var x = xoffset; x < screenWidth; x += screenHeight / 20) {
+    for (var x = xoffset - player.x; x < screenWidth; x += screenHeight / 20) {
         graph.moveTo(x, 0);
         graph.lineTo(x, screenHeight);
     }
 
-    for (var y = yoffset ; y < screenHeight; y += screenHeight / 20) {
+    for (var y = yoffset - player.y ; y < screenHeight; y += screenHeight / 20) {
         graph.moveTo(0, y);
         graph.lineTo(screenWidth, y);
     }
@@ -462,8 +472,8 @@ function drawborder() {
 }
 
 function gameInput(mouse) {
-    target.x = mouse.clientX;
-    target.y = mouse.clientY;
+    target.x = mouse.clientX - screenWidth / 2;
+    target.y = mouse.clientY - screenHeight / 2;
 }
 
 window.requestAnimFrame = (function(){
@@ -487,13 +497,9 @@ function gameLoop() {
             graph.fillRect(0, 0, screenWidth, screenHeight);
             drawgrid();
             
-            if(borderDraw){
-                drawborder();
-            }
-            
-            for (var i = 0; i < foods.length; i++) {
-                drawFood(foods[i]);
-            }
+            foods.forEach(function(f){ drawFood(f); });
+    
+            if(borderDraw){ drawborder(); }
 
             for (i = 0; i < enemies.length; i++) {
                 if (enemies[i].id != player.id) {
