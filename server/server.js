@@ -4,6 +4,8 @@ var app = express();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
 var fs = require('fs');
+var md5 = require('MD5');
+
 var SAT = require('sat');
 
 var c = require('./config.json');
@@ -25,7 +27,7 @@ function addFood(toAdd) {
     while(toAdd--){
         food.push({
             // make ids unique
-            id: ((new Date()).getTime() + '' + (new Date()).getMilliseconds() + '' + food.length) >>> 0,
+            id: md5((new Date()).getTime() + '' + (new Date()).getMilliseconds() + '' + food.length),
             x: genPos(0, c.gameWidth),
             y: genPos(0, c.gameHeight),
             color: randomColor(),
@@ -230,12 +232,14 @@ io.on('connection', function (socket) {
                 massToRadius(currentPlayer.mass));
 
             var foodEaten = food
-                .map( function(f) { return SAT.pointInCircle(new V(f.x, f.y), playerCircle); })
+                .map(function(f){ return SAT.pointInCircle(new V(f.x, f.y), playerCircle); })
                 .reduce( function(a, b, c) { return b ? a.concat(c) : a; }, []);
+
+            foodEaten = foodEaten.sort(function (a, b) { return a - b; }).reverse();
 
             foodEaten.forEach( function(f) {
                 food[f] = {};
-                food.splice(f, 1);                
+                food.splice(f, 1);
             });
 
             currentPlayer.mass += c.foodMass * foodEaten.length;

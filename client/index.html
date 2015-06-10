@@ -8,12 +8,13 @@
 </head>
 <body>
     <div id="gameAreaWrapper" style="display:none;">
+        <div id="gameArea"></div>
         <div id="status">Players: 0</div>
         <div class="chatbox">
             <ul id="chatList" class="chat-list"></ul>
             <input id="chatInput" type="text" class="chat-input" placeholder="Chat here..." />
         </div>
-        <canvas tabindex="1" id="cvs"></canvas>
+        <!-- <canvas tabindex="1" id="cvs"></canvas> -->
     </div>
     <div id="startMenuWrapper">
         <div id="startMenu">
@@ -41,7 +42,10 @@
             </div>
         </div>
     </div>
-    <script src="/socket.io/socket.io.js"></script>    
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/bower_components/two/build/two.js"></script>
+    <script src="/bower_components/jquery/dist/jquery.min.js"></script>
+    <script src="vtestout.js"></script>
     <script src="./js/app.js"></script>
 </body>
 </html>

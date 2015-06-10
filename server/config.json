@@ -2,8 +2,8 @@
     "port": 3000,
     "foodMass": 1,
     "defaultPlayerMass": 10,
-    "gameWidth": 5000,
-    "gameHeight": 5000,
+    "gameWidth": 8000,
+    "gameHeight": 8000,
     "adminPass": "DEFAULT",
-    "gameMass": 2000
+    "gameMass": 15000
 }

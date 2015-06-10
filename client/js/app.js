@@ -1,3 +1,4 @@
+var v = require('vectorize');
 var playerName;
 var playerNameInput = document.getElementById('playerNameInput');
 var socket;
@@ -5,14 +6,161 @@ var reason;
 var KEY_ENTER = 13;
 var borderDraw = false;
 
+var screenWidth = window.innerWidth;
+var screenHeight = window.innerHeight;
+var gameWidth = 0;
+var gameHeight = 0;
+var xoffset = -gameWidth;
+var yoffset = -gameHeight;
+
+var gameStart = false;
+var disconnected = false;
+var died = false;
+var kicked = false;
+
+var startPingTime = 0;
+
+var chatCommands = {};
+var backgroundColor = '#EEEEEE';
+
+var foodConfig = {
+    border: 0,
+    borderColor: '#f39c12',
+    fillColor: '#f1c40f',
+    mass: 1.0,
+    radius: massToRadius(1.0)
+};
+
+var playerConfig = {
+    border: 5,
+    textColor: '#FFFFFF',
+    textBorder: '#000000',
+    textBorderSize: 3,
+    defaultSize: 30
+};
+
+var enemyConfig = {
+    border: 5,
+    textColor: '#FFFFFF',
+    textBorder: '#000000',
+    textBorderSize: 3,
+    defaultSize: 30
+};
+
+var player = {
+    id: -1,
+    x: screenWidth / 2, 
+    y: screenHeight / 2,    
+    screenWidth: screenWidth,
+    screenHeight: screenHeight,    
+};
+
+var foods = [];
+var foodObjects = {};
+var enemies = [];
+var target = {x: player.x, y: player.y};
+
+var displayName = null;
+
+var delta = new Two.Vector();
+var mouse = new Two.Vector();
+var drag = 0.33;
+var radius = 10;
+
+var two = new Two({
+    type: Two.Types["webgl"],
+    fullscreen: true,
+    autostart: true
+}).appendTo(document.getElementById('gameArea'));
+
+Two.Resoultion = 32;
+
+var shadow = two.makeCircle(two.width / 2, two.height / 2, radius);
+shadow.noStroke().fill = 'rgba(0, 0, 0, 0.2)';
+shadow.offset = new Two.Vector(- radius / 2, radius * 2);
+shadow.scale = 0.85;
+
+var ball = two.makeCircle(two.width / 2, two.height / 2, radius);
+ball.noStroke().fill = 'white';
+
+_.each(ball.vertices, function(v) {
+    v.origin = new Two.Vector().copy(v);    
+});
+
+var foodGroup = two.makeGroup();
+var group = two.makeGroup(shadow,ball);
+
+function findElement(toFind, toSearch){
+    for(var i = 0; i < toSearch.length; ++i){
+        // coercable '==' is intentional here
+        if(toSearch[i].id == toFind) return i;
+    }
+    return -1;
+}
+
+// register when the mouse goes off the canvas
+function outOfBounds() {    
+    target = { x : 0, y: 0 };
+}
+
+function visibleBorder() {
+        if (document.getElementById('visBord').checked) {
+            borderDraw = true;
+        } else {
+            borderDraw= false;
+        }
+}
+
+// var graph = c.getContext('2d');
+
+var chatInput = document.getElementById('chatInput');
+chatInput.addEventListener('keypress', sendChat);
 
 function startGame() {
     playerName = playerNameInput.value.replace(/(<([^>]+)>)/ig, '');
+
+    var polygons = v.vectorize(playerName, { polygons: true, width: 10, textBaseline: "hanging", font: "sans-serif", size: 128 });
+
+
+    var svg = [];
+    svg.push('<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"  width="500"  height="80" >');
+    polygons.forEach(function(loops) {
+        svg.push('<path d="');
+        loops.forEach(function(loop) {
+            var start = loop[0];
+            svg.push('M ' + start[0] + ' ' + start[1]);
+            for(var i=1; i<loop.length; ++i) {
+                var p = loop[i];
+                svg.push('L ' + p[0] + ' ' + p[1]);
+            }
+            svg.push('L ' + start[0] + ' ' + start[1]);
+        });
+        svg.push('" fill-rule="even-odd" stroke-width="1" fill="red"></path>')
+    });
+    svg.push('</svg>');
+
+    $new = $();
+    $new = $new.add(svg.join(""));
+    displayName = two.interpret($new[0]).addTo(group);
+    displayName.translation.addSelf(ball.translation);
+    displayName.translation.x -= 5;
+    displayName.translation.y -= 2;
+    displayName.fill = 'white';
+    displayName.stroke = 'black';
+    displayName.linewidth = 0.2;
+
+
+    _.each(($.map(displayName.children, function(f){return f;})), function(p, j){
+        _.each(p.vertices, function(v){
+            v.origin = new Two.Vector().copy(v);   
+        });
+    });
+
     document.getElementById('gameAreaWrapper').style.display = 'block';
     document.getElementById('startMenuWrapper').style.display = 'none';
     socket = io();
     setupSocket(socket);
-    animloop();
+    // animloop();
 }
 
 // check if nick is valid alphanumeric characters (and underscores)
@@ -63,81 +211,6 @@ window.onload = function() {
     });
 };
 
-// Canvas
-var screenWidth = window.innerWidth;
-var screenHeight = window.innerHeight;
-var gameWidth = 0;
-var gameHeight = 0;
-var xoffset = -gameWidth;
-var yoffset = -gameHeight;
-
-var gameStart = false;
-var disconnected = false;
-var died = false;
-var kicked = false;
-
-var startPingTime = 0;
-
-var chatCommands = {};
-var backgroundColor = '#EEEEEE';
-
-var foodConfig = {
-    border: 0,
-    borderColor: '#f39c12',
-    fillColor: '#f1c40f',
-    mass: 0.5
-};
-
-var playerConfig = {
-    border: 5,
-    textColor: '#FFFFFF',
-    textBorder: '#000000',
-    textBorderSize: 3,
-    defaultSize: 30
-};
-
-var enemyConfig = {
-    border: 5,
-    textColor: '#FFFFFF',
-    textBorder: '#000000',
-    textBorderSize: 3,
-    defaultSize: 30
-};
-
-var player = {
-    id: -1,
-    x: screenWidth / 2, 
-    y: screenHeight / 2,    
-    screenWidth: screenWidth,
-    screenHeight: screenHeight,
-};
-
-var foods = [];
-var enemies = [];
-var target = {x: player.x, y: player.y};
-
-var c = document.getElementById('cvs');
-c.addEventListener('mousemove', gameInput, false);
-c.width = screenWidth; c.height = screenHeight;
-c.addEventListener('mouseout', outOfBounds, false);
-
-// register when the mouse goes off the canvas
-function outOfBounds() {    
-    target = { x : 0, y: 0 };
-}
-
-function visibleBorder() {
-        if (document.getElementById('visBord').checked) {
-            borderDraw = true;
-        } else {
-            borderDraw= false;
-        }
-}
-
-var graph = c.getContext('2d');
-
-var chatInput = document.getElementById('chatInput');
-chatInput.addEventListener('keypress', sendChat);
 
 // Chat
 function addChatLine(name, text) {
@@ -218,6 +291,10 @@ registerChatCommand('kick', 'Kick a player', function (args) {
     socket.emit('kick', args);
 });
 
+function diffFood(o, n) {
+    return o.filter(function(i) {return n.indexOf(i) < 0;});
+};
+
 function sendChat(key) {
     key = key.which || key.keyCode;
     if (key == KEY_ENTER) {
@@ -265,6 +342,9 @@ function setupSocket(socket) {
         player.screenWidth = screenWidth;
         player.screenHeight = screenHeight; 
         socket.emit('gotit', player);
+        ball.fill = 'hsla(' + player.hue + ',90%,50%,0.9)';
+        ball.linewidth - 0.5;
+        ball.stroke = 'hsla(' + player.hue + ',90%,20%,0.9)';
         gameStart = true;
         console.log('Game is started: ' + gameStart);
         addSystemLine('Connected to the game!');
@@ -313,8 +393,37 @@ function setupSocket(socket) {
         player.xoffset = isNaN(xoffset) ? 0 : xoffset;
         player.yoffset = isNaN(yoffset) ? 0 : yoffset;
 
-        enemies = userData;        
+        enemies = userData;
+
+        var originalFoodsList = foods.map(function(f){ return f.id; });
+        var newFoodsList = foodsList.map(function(f){ return f.id; });
+
+        var newFood = diffFood(newFoodsList, originalFoodsList);
+        var removedFood = diffFood(originalFoodsList,newFoodsList);
+
+        ball.scale = shadow.scale = massToRadius(player.mass) / 10.0;
+
+        for(var key in displayName.children){
+            displayName.children[key].scale = ball.scale;
+        }
+
+        if(newFood.length) {
+            for(var i = 0; i < newFood.length; ++i){
+                var foodID = findElement(newFood[i], foodsList);
+                drawFood(foodsList[foodID]);
+            }
+        }
+
+        if(removedFood.length){
+            for(var i = 0; i < removedFood.length; ++i){
+                foodGroup.remove(foodObjects[removedFood[i]]);
+                delete foodObjects[removedFood[i]];
+            }
+        }
         foods = foodsList;
+
+        foodGroup.translation.x = -player.x + screenWidth/2;
+        foodGroup.translation.y = -player.y + screenHeight/2;
     });
 
     socket.on('serverUpdateAll', function (players, foodsList) {
@@ -343,213 +452,76 @@ function massToRadius(mass){
     return Math.sqrt(mass / Math.PI) * 10;
 }
 
-function drawCircle(centerX, centerY, mass, sides) {
-    var theta = 0;
-    var x = 0;
-    var y = 0;
-    var radius = massToRadius(mass);
-
-    graph.beginPath();
-
-    for (var i = 0; i < sides; i++) {
-        theta = (i / sides) * 2 * Math.PI;
-        x = centerX + radius * Math.sin(theta);
-        y = centerY + radius * Math.cos(theta);
-        graph.lineTo(x, y);
-    }
-
-    graph.closePath();
-    graph.stroke();
-    graph.fill();
-}
-
 function drawFood(food) {
-    graph.strokeStyle = food.color.border || foodConfig.borderColor;
-    graph.fillStyle = food.color.fill || foodConfig.fillColor;
-    graph.lineWidth = foodConfig.border;
-    drawCircle(food.x - player.x + screenWidth / 2, food.y - player.y + screenHeight / 2, massToRadius(foodConfig.mass), 10);
-}
-
-function drawPlayer() {
-    graph.strokeStyle = 'hsl(' + player.hue + ', 80%, 40%)';
-    graph.fillStyle = 'hsl(' + player.hue + ', 70%, 50%)';
-    graph.lineWidth = playerConfig.border;
-    graph.beginPath();
-    graph.arc(screenWidth / 2, screenHeight / 2, massToRadius(player.mass), 0, 2 * Math.PI);
-    graph.stroke();
-    graph.fill();
-
-    var fontSize = (massToRadius(player.mass) / 2);
-    graph.lineWidth = playerConfig.textBorderSize;
-    graph.miterLimit = 1;
-    graph.lineJoin = 'round';
-    graph.textAlign = 'center';
-    graph.fillStyle = playerConfig.textColor;
-    graph.textBaseline = 'middle';
-    graph.strokeStyle = playerConfig.textBorder;
-    graph.font = 'bold ' + fontSize + 'px sans-serif';
-    graph.strokeText(player.name, screenWidth / 2, screenHeight / 2);
-    graph.fillText(player.name, screenWidth / 2, screenHeight / 2);
+    if(!foodObjects.hasOwnProperty(food.id)){
+        var f = two.makeCircle(food.x, food.y, massToRadius(foodConfig.mass));
+        f.fill = food.color.fill;
+        f.stroke = food.color.stroke;
+        f.linewidth = 0.25;
+        foodObjects[food.id] = f;
+        // f.id = food.id;
+        f.addTo(foodGroup);
+    }
 }
 
 function drawEnemy(enemy) {
-    graph.strokeStyle = 'hsl(' + enemy.hue + ', 80%, 40%)';
-    graph.fillStyle = 'hsl(' + enemy.hue + ', 70%, 50%)';
-    graph.lineWidth = enemyConfig.border;
-    graph.beginPath();
-    graph.arc(enemy.x - player.x + screenWidth / 2, enemy.y - player.y + screenHeight / 2, massToRadius(enemy.mass), 0, 2 * Math.PI);
-    graph.fill();
-    graph.stroke();
 
-    var fontSize = (massToRadius(enemy.mass) / 2);
+    // var fontSize = (massToRadius(enemy.mass) / 2);
 
-    graph.lineWidth = enemyConfig.textBorderSize;
-    graph.textAlign = 'center';
-    graph.fillStyle = enemyConfig.textColor;
-    graph.textBaseline = 'middle';
-    graph.strokeStyle = enemyConfig.textBorder;
-    graph.font = 'bold ' + fontSize + 'px sans-serif';
-    graph.strokeText(enemy.name, enemy.x - player.x + screenWidth / 2, enemy.y - player.y + screenHeight / 2);
-    graph.fillText(enemy.name, enemy.x - player.x + screenWidth / 2, enemy.y - player.y + screenHeight / 2);
 }
 
-function drawgrid(){
-    for (var x = xoffset - player.x; x < screenWidth; x += screenHeight / 20) {
-        graph.moveTo(x, 0);
-        graph.lineTo(x, screenHeight);
-    }
+var $window = $(window).bind('mousemove', function(e) {
+    mouse.x = e.clientX;
+    mouse.y = e.clientY;
+    target.x = e.clientX - screenWidth / 2;
+    target.y = e.clientY - screenHeight / 2;
+    shadow.offset.x = 5 * radius * (mouse.x - two.width / 2) / two.width;
+    shadow.offset.y = 5 * radius * (mouse.y - two.height / 2) / two.height;
+})
+.bind('touchstart', function() {
+    e.preventDefault();
+    return false;
+})
+.bind('touchmove', function(e) {
+    e.preventDefault();
+    var touch = e.originalEvent.changedTouches[0];
+    mouse.x = touch.pageX;
+    mouse.y = touch.pageY;
+    shadow.offset.x = 5 * radius * (mouse.x - two.width / 2) / two.width;
+    shadow.offset.y = 5 * radius * (mouse.y - two.height / 2) / two.height;
+    return false;
+});
 
-    for (var y = yoffset - player.y ; y < screenHeight; y += screenHeight / 20) {
-        graph.moveTo(0, y);
-        graph.lineTo(screenWidth, y);
-    }
-
-    graph.strokeStyle = '#ddd';
-    graph.stroke();
-}
-
-function drawborder() {
-    var borderX = 0;
-    var borderY = 0;
-
-    graph.strokeStyle = playerConfig.borderColor;
-
-    // Left-vertical
-    if (player.x <= screenWidth/2) {
-        graph.beginPath();
-        graph.moveTo(screenWidth/2 - player.x, 0 ? player.y > screenHeight/2 : screenHeight/2 - player.y);
-        graph.lineTo(screenWidth/2 - player.x, gameHeight + screenHeight/2 - player.y);
-        graph.strokeStyle = "#000000";
-        graph.stroke();
-    }
-
-    // Top-horizontal
-    if (player.y <= screenHeight/2) {
-        graph.beginPath();
-        graph.moveTo(0 ? player.x > screenWidth/2 : screenWidth/2 - player.x, screenHeight/2 - player.y);
-        graph.lineTo(gameWidth + screenWidth/2 - player.x, screenHeight/2 - player.y);
-        graph.strokeStyle = "#000000";
-        graph.stroke();
-    }
-
-    // Right-vertical
-    if (gameWidth - player.x <= screenWidth/2) {
-        graph.beginPath();
-        graph.moveTo(gameWidth + screenWidth/2 - player.x, screenHeight/2 - player.y);
-        graph.lineTo(gameWidth + screenWidth/2 - player.x, gameHeight + screenHeight/2 - player.y);
-        graph.strokeStyle = "#000000";
-        graph.stroke();
-    }
-
-    // Bottom-horizontal
-    if (gameHeight - player.y <= screenHeight/2) {
-        graph.beginPath();
-        graph.moveTo(gameWidth + screenWidth/2 - player.x, gameHeight + screenHeight/2 - player.y);
-        graph.lineTo(screenWidth/2 - player.x, gameHeight + screenHeight/2 - player.y);
-        graph.strokeStyle = "#000000";
-        graph.stroke();
-    }
-}
-
-function gameInput(mouse) {
-    target.x = mouse.clientX - screenWidth / 2;
-    target.y = mouse.clientY - screenHeight / 2;
-}
-
-window.requestAnimFrame = (function(){
-    return  window.requestAnimationFrame       ||
-            window.webkitRequestAnimationFrame ||
-            window.mozRequestAnimationFrame    ||
-            function( callback ){
-                window.setTimeout(callback, 1000 / 60);
-            };
-})();
-
-function animloop(){
-    requestAnimFrame(animloop);
-    gameLoop();
-}
-
-function gameLoop() {
+two.bind('update', function() {
     if (!disconnected) {
         if (gameStart) {
-            graph.fillStyle = backgroundColor;
-            graph.fillRect(0, 0, screenWidth, screenHeight);
-            drawgrid();
-            
+            _.each(ball.vertices, function(v, i){
+                var toMove = Math.sin(two.frameCount/10 + i);
+                var toMovey = Math.cos(two.frameCount/10 + i);
+                v.x = v.origin.x + (toMovey * (v.origin.x / 10)) / (ball.scale / 2);
+                v.y = v.origin.y + (toMove * (v.origin.y / 10)) / (ball.scale / 2);
+            });
+
+            displayName.translation.x = ball.getBoundingClientRect().left + (ball.getBoundingClientRect().width / 2) - displayName.getBoundingClientRect().width / 2;
+            displayName.translation.y = ball.getBoundingClientRect().top + (ball.getBoundingClientRect().height / 2) - displayName.getBoundingClientRect().height / 2;
+
             foods.forEach(function(f){ drawFood(f); });
     
-            if(borderDraw){ drawborder(); }
-
             for (i = 0; i < enemies.length; i++) {
                 if (enemies[i].id != player.id) {
                     drawEnemy(enemies[i]);
                 }
             }
 
-            drawPlayer();
-
             socket.emit('0', target); // playerSendTarget Heartbeat
-
-        } else {
-            graph.fillStyle = '#333333';
-            graph.fillRect(0, 0, screenWidth, screenHeight);
-
-            graph.textAlign = 'center';
-            graph.fillStyle = '#FFFFFF';
-            graph.font = 'bold 30px sans-serif';
-            graph.fillText('Game Over!', screenWidth / 2, screenHeight / 2);
-        }
-    } else {
-        graph.fillStyle = '#333333';
-        graph.fillRect(0, 0, screenWidth, screenHeight);
-
-        graph.textAlign = 'center';
-        graph.fillStyle = '#FFFFFF';
-        graph.font = 'bold 30px sans-serif';
-
-        if (died) {
-            graph.fillText('You died!', screenWidth / 2, screenHeight / 2);
-        } else {
-            if(kicked){
-                  if(reason !== ""){
-                       graph.fillText('You were kicked for reason ' + reason, screenWidth / 2, screenHeight / 2);
-                 }
-                 else{
-                      graph.fillText('You were kicked!', screenWidth / 2, screenHeight / 2);
-                 }
-            }
-            else{
-                  graph.fillText('Disconnected!', screenWidth / 2, screenHeight / 2);
-            }
 
         }
     }
-}
+});
 
 window.addEventListener('resize', function() {
     screenWidth = window.innerWidth;
     screenHeight = window.innerHeight;
-    player.screenWidth = c.width = screenWidth;
-    player.screenHeight = c.height = screenHeight;
+    player.screenWidth = screenWidth;
+    player.screenHeight = screenHeight;
 }, true);
