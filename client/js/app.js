@@ -81,6 +81,8 @@ var startPingTime = 0;
 var chatCommands = {};
 var backgroundColor = '#EEEEEE';
 
+var toggleMassState = 0;
+
 var foodConfig = {
     border: 0,
     borderColor: '#f39c12',
@@ -198,6 +200,17 @@ function printHelp() {
     }
 }
 
+function toggleMass() {
+	if (toggleMassState === 0) {
+		toggleMassState = 1;
+		addSystemLine('Mass mode activated!');
+	}
+	else {
+		toggleMassState = 0;
+		addSystemLine('Mass mode deactivated!');
+	}
+}
+
 registerChatCommand('ping', 'Check your latency', function () {
     checkLatency();
 });
@@ -216,6 +229,10 @@ registerChatCommand('login', 'Login as an admin', function (args) {
 
 registerChatCommand('kick', 'Kick a player', function (args) {
     socket.emit('kick', args);
+});
+
+registerChatCommand('mass', 'View Mass', function () {
+	toggleMass();
 });
 
 function sendChat(key) {
@@ -388,8 +405,14 @@ function drawPlayer() {
     graph.textBaseline = 'middle';
     graph.strokeStyle = playerConfig.textBorder;
     graph.font = 'bold ' + fontSize + 'px sans-serif';
-    graph.strokeText(player.name, screenWidth / 2, screenHeight / 2);
-    graph.fillText(player.name, screenWidth / 2, screenHeight / 2);
+    if(toggleMassState === 0) {
+    	graph.strokeText(player.name, screenWidth / 2, screenHeight / 2);
+        graph.fillText(player.name, screenWidth / 2, screenHeight / 2);
+ 	}
+ 	else {
+ 	    graph.strokeText(player.name + ' (' + player.mass + ')', screenWidth / 2, screenHeight / 2);
+        graph.fillText(player.name + ' (' + player.mass + ')', screenWidth / 2, screenHeight / 2);
+ 	}
 }
 
 function drawEnemy(enemy) {
@@ -409,8 +432,14 @@ function drawEnemy(enemy) {
     graph.textBaseline = 'middle';
     graph.strokeStyle = enemyConfig.textBorder;
     graph.font = 'bold ' + fontSize + 'px sans-serif';
-    graph.strokeText(enemy.name, enemy.x - player.x + screenWidth / 2, enemy.y - player.y + screenHeight / 2);
-    graph.fillText(enemy.name, enemy.x - player.x + screenWidth / 2, enemy.y - player.y + screenHeight / 2);
+    if(toggleMassState === 0) {
+    	graph.strokeText(enemy.name, enemy.x - player.x + screenWidth / 2, enemy.y - player.y + screenHeight / 2);
+    	graph.fillText(enemy.name, enemy.x - player.x + screenWidth / 2, enemy.y - player.y + screenHeight / 2);
+    }
+    else {
+    	graph.strokeText(enemy.name + ' (' + enemy.mass + ')', enemy.x - player.x + screenWidth / 2, enemy.y - player.y + screenHeight / 2);
+    	graph.fillText(enemy.name + ' (' + enemy.mass + ')', enemy.x - player.x + screenWidth / 2, enemy.y - player.y + screenHeight / 2);
+    }
 }
 
 function drawgrid(){
