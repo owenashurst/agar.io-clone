@@ -8,44 +8,24 @@ var borderDraw = false;
 
 var screenWidth = window.innerWidth;
 var screenHeight = window.innerHeight;
-var gameWidth = 0;
-var gameHeight = 0;
-var xoffset = -gameWidth;
-var yoffset = -gameHeight;
 
 var gameStart = false;
 var disconnected = false;
 var died = false;
 var kicked = false;
 
+var initialX, initialY;
+
 var startPingTime = 0;
 
 var chatCommands = {};
 var backgroundColor = '#EEEEEE';
 
-var foodConfig = {
-    border: 0,
-    borderColor: '#f39c12',
-    fillColor: '#f1c40f',
-    mass: 1.0,
-    radius: massToRadius(1.0)
-};
+// needed for weird two.js svg import weirdness
+var textFix = false;
 
-var playerConfig = {
-    border: 5,
-    textColor: '#FFFFFF',
-    textBorder: '#000000',
-    textBorderSize: 3,
-    defaultSize: 30
-};
-
-var enemyConfig = {
-    border: 5,
-    textColor: '#FFFFFF',
-    textBorder: '#000000',
-    textBorderSize: 3,
-    defaultSize: 30
-};
+// variable g will hold game settings received from server
+var g = {};
 
 var player = {
     id: -1,
@@ -56,16 +36,16 @@ var player = {
 };
 
 var foods = [];
-var foodObjects = {};
 var enemies = [];
 var target = {x: player.x, y: player.y};
 
-var displayName = null;
-
-var delta = new Two.Vector();
-var mouse = new Two.Vector();
-var drag = 0.33;
-var radius = 10;
+// variable t holds all two.js objects
+var t = {
+    foodObjects: {},
+    displayName: null,    
+    mouse: new Two.Vector(),
+    radius: 10
+}
 
 var two = new Two({
     type: Two.Types["webgl"],
@@ -73,22 +53,26 @@ var two = new Two({
     autostart: true
 }).appendTo(document.getElementById('gameArea'));
 
-Two.Resoultion = 32;
+Two.Resolution = 8;
 
-var shadow = two.makeCircle(two.width / 2, two.height / 2, radius);
+var ball = two.makeCircle(0, 0, t.radius);
+
+// make copy of original vertex coordinates for later reference
+_.each(ball.vertices, function(v) { v.origin = new Two.Vector().copy(v); });
+
+var shadow = two.makeCircle(0, 0, t.radius);
+
 shadow.noStroke().fill = 'rgba(0, 0, 0, 0.2)';
-shadow.offset = new Two.Vector(- radius / 2, radius * 2);
+shadow.offset = new Two.Vector(- t.radius / 2, t.radius * 2);
 shadow.scale = 0.85;
 
-var ball = two.makeCircle(two.width / 2, two.height / 2, radius);
-ball.noStroke().fill = 'white';
-
-_.each(ball.vertices, function(v) {
-    v.origin = new Two.Vector().copy(v);    
-});
-
+var gridGroup = two.makeGroup();
 var foodGroup = two.makeGroup();
-var group = two.makeGroup(shadow,ball);
+var playerGroup = two.makeGroup(shadow,ball);
+
+
+playerGroup.translation.x = screenWidth / 2;
+playerGroup.translation.y = screenHeight / 2;
 
 function findElement(toFind, toSearch){
     for(var i = 0; i < toSearch.length; ++i){
@@ -96,6 +80,10 @@ function findElement(toFind, toSearch){
         if(toSearch[i].id == toFind) return i;
     }
     return -1;
+}
+
+function massToRadius(mass){
+    return Math.sqrt(mass / Math.PI) * 10;
 }
 
 // register when the mouse goes off the canvas
@@ -111,16 +99,13 @@ function visibleBorder() {
         }
 }
 
-// var graph = c.getContext('2d');
-
 var chatInput = document.getElementById('chatInput');
 chatInput.addEventListener('keypress', sendChat);
 
 function startGame() {
     playerName = playerNameInput.value.replace(/(<([^>]+)>)/ig, '');
 
-    var polygons = v.vectorize(playerName, { polygons: true, width: 10, textBaseline: "hanging", font: "sans-serif", size: 128 });
-
+    var polygons = v.vectorize(playerName, { polygons: true, width: 15, textBaseline: "hanging", font: "arial", size: 80 });
 
     var svg = [];
     svg.push('<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"  width="500"  height="80" >');
@@ -141,16 +126,14 @@ function startGame() {
 
     $new = $();
     $new = $new.add(svg.join(""));
-    displayName = two.interpret($new[0]).addTo(group);
-    displayName.translation.addSelf(ball.translation);
-    displayName.translation.x -= 5;
-    displayName.translation.y -= 2;
-    displayName.fill = 'white';
-    displayName.stroke = 'black';
-    displayName.linewidth = 0.2;
+    t.displayName = two.interpret($new[0]).addTo(playerGroup);    
+    t.displayName.fill = 'white';
+    t.displayName.stroke = 'black';
+    t.displayName.linewidth = 0.3;
 
+    delete $new;
 
-    _.each(($.map(displayName.children, function(f){return f;})), function(p, j){
+    _.each(($.map(t.displayName.children, function(f){return f;})), function(p, j){
         _.each(p.vertices, function(v){
             v.origin = new Two.Vector().copy(v);   
         });
@@ -160,7 +143,6 @@ function startGame() {
     document.getElementById('startMenuWrapper').style.display = 'none';
     socket = io();
     setupSocket(socket);
-    // animloop();
 }
 
 // check if nick is valid alphanumeric characters (and underscores)
@@ -349,11 +331,12 @@ function setupSocket(socket) {
         console.log('Game is started: ' + gameStart);
         addSystemLine('Connected to the game!');
         addSystemLine('Type <b>-help</b> for a list of commands');
+        initialX = player.x;
+        initialY = player.y;
     });
 
     socket.on('gameSetup', function(data){
-        gameWidth = data.gameWidth;
-        gameHeight = data.gameHeight;        
+        g = data;
      });
 
     socket.on('playerDisconnect', function (data) {
@@ -376,36 +359,37 @@ function setupSocket(socket) {
     });
 
     socket.on('serverMSG', function (data) {
+        
         addSystemLine(data);
     });
 
     // Chat
     socket.on('serverSendPlayerChat', function (data) {
+      
         addChatLine(data.sender, data.message);
     });
 
     // Handle movement
     socket.on('serverTellPlayerMove', function (playerData, userData, foodsList) {
-        var xoffset = player.x - playerData.x;
-        var yoffset = player.y - playerData.y;
         
         player = playerData;
-        player.xoffset = isNaN(xoffset) ? 0 : xoffset;
-        player.yoffset = isNaN(yoffset) ? 0 : yoffset;
-
         enemies = userData;
+
+        var scaleFactor = massToRadius(player.mass) / 10.0;
+
+        for(var key in playerGroup.children){
+            playerGroup.children[key].scale = scaleFactor;
+        }
+
+        for(var key in t.displayName.children){
+            t.displayName.children[key].scale = 1;
+        }
 
         var originalFoodsList = foods.map(function(f){ return f.id; });
         var newFoodsList = foodsList.map(function(f){ return f.id; });
 
         var newFood = diffFood(newFoodsList, originalFoodsList);
         var removedFood = diffFood(originalFoodsList,newFoodsList);
-
-        ball.scale = shadow.scale = massToRadius(player.mass) / 10.0;
-
-        for(var key in displayName.children){
-            displayName.children[key].scale = ball.scale;
-        }
 
         if(newFood.length) {
             for(var i = 0; i < newFood.length; ++i){
@@ -416,8 +400,8 @@ function setupSocket(socket) {
 
         if(removedFood.length){
             for(var i = 0; i < removedFood.length; ++i){
-                foodGroup.remove(foodObjects[removedFood[i]]);
-                delete foodObjects[removedFood[i]];
+                foodGroup.remove(t.foodObjects[removedFood[i]]);
+                delete t.foodObjects[removedFood[i]];
             }
         }
         foods = foodsList;
@@ -448,18 +432,14 @@ function setupSocket(socket) {
     });
 }
 
-function massToRadius(mass){
-    return Math.sqrt(mass / Math.PI) * 10;
-}
-
 function drawFood(food) {
-    if(!foodObjects.hasOwnProperty(food.id)){
-        var f = two.makeCircle(food.x, food.y, massToRadius(foodConfig.mass));
+    if(!t.foodObjects.hasOwnProperty(food.id)){
+        var f = two.makeCircle(food.x, food.y, massToRadius(g.foodMass));
+        // console.log(food.color);
         f.fill = food.color.fill;
-        f.stroke = food.color.stroke;
-        f.linewidth = 0.25;
-        foodObjects[food.id] = f;
-        // f.id = food.id;
+        f.stroke = food.color.border;
+        f.linewidth = 1.0;
+        t.foodObjects[food.id] = f;
         f.addTo(foodGroup);
     }
 }
@@ -471,12 +451,12 @@ function drawEnemy(enemy) {
 }
 
 var $window = $(window).bind('mousemove', function(e) {
-    mouse.x = e.clientX;
-    mouse.y = e.clientY;
+    t.mouse.x = e.clientX;
+    t.mouse.y = e.clientY;
     target.x = e.clientX - screenWidth / 2;
     target.y = e.clientY - screenHeight / 2;
-    shadow.offset.x = 5 * radius * (mouse.x - two.width / 2) / two.width;
-    shadow.offset.y = 5 * radius * (mouse.y - two.height / 2) / two.height;
+    shadow.offset.x = 5 * t.radius * (t.mouse.x - two.width / 2) / two.width;
+    shadow.offset.y = 5 * t.radius * (t.mouse.y - two.height / 2) / two.height;
 })
 .bind('touchstart', function() {
     e.preventDefault();
@@ -485,16 +465,17 @@ var $window = $(window).bind('mousemove', function(e) {
 .bind('touchmove', function(e) {
     e.preventDefault();
     var touch = e.originalEvent.changedTouches[0];
-    mouse.x = touch.pageX;
-    mouse.y = touch.pageY;
-    shadow.offset.x = 5 * radius * (mouse.x - two.width / 2) / two.width;
-    shadow.offset.y = 5 * radius * (mouse.y - two.height / 2) / two.height;
+    t.mouse.x = touch.pageX;
+    t.mouse.y = touch.pageY;
+    shadow.offset.x = 5 * t.radius * (t.mouse.x - two.width / 2) / two.width;
+    shadow.offset.y = 5 * t.radius * (t.mouse.y - two.height / 2) / two.height;
     return false;
 });
 
 two.bind('update', function() {
     if (!disconnected) {
         if (gameStart) {
+            
             _.each(ball.vertices, function(v, i){
                 var toMove = Math.sin(two.frameCount/10 + i);
                 var toMovey = Math.cos(two.frameCount/10 + i);
@@ -502,8 +483,8 @@ two.bind('update', function() {
                 v.y = v.origin.y + (toMove * (v.origin.y / 10)) / (ball.scale / 2);
             });
 
-            displayName.translation.x = ball.getBoundingClientRect().left + (ball.getBoundingClientRect().width / 2) - displayName.getBoundingClientRect().width / 2;
-            displayName.translation.y = ball.getBoundingClientRect().top + (ball.getBoundingClientRect().height / 2) - displayName.getBoundingClientRect().height / 2;
+            t.displayName.translation.x = ball.getBoundingClientRect().left + (ball.getBoundingClientRect().width / 2) - t.displayName.getBoundingClientRect().width / 2 - screenWidth / 2;
+            t.displayName.translation.y = ball.getBoundingClientRect().top + (ball.getBoundingClientRect().height / 2) - t.displayName.getBoundingClientRect().height / 2 - screenHeight /2;
 
             foods.forEach(function(f){ drawFood(f); });
     
@@ -513,7 +494,47 @@ two.bind('update', function() {
                 }
             }
 
+            var playerOffset = new Two.Vector();
+            playerOffset.x =  player.x - initialX;
+            playerOffset.y =  player.y - initialY;
+            
+            gridGroup.translation.set(-playerOffset.x * 0.6, -playerOffset.y * 0.6);
+
+            while(gridObjectH[0].getBoundingClientRect().left < -25){
+                gridObjectH[0].translation.x = gridObjectH[gridObjectH.length-1].translation.x + 15;
+                var a = gridObjectH.shift();
+                gridObjectH.push(a);
+                gridObjectV.forEach(function(g){
+                    g.translation.x += 15;
+                });
+            }
+            while(gridObjectH[gridObjectH.length-1].getBoundingClientRect().right > screenWidth + 25){
+                gridObjectH[gridObjectH.length-1].translation.x = gridObjectH[0].translation.x - 15;
+                var a = gridObjectH.pop();
+                gridObjectH.unshift(a);
+                gridObjectV.forEach(function(g){
+                    g.translation.x -= 15;
+                });
+            }
+
+            while(gridObjectV[0].getBoundingClientRect().top < -25){
+                gridObjectV[0].translation.y = gridObjectV[gridObjectV.length-1].translation.y + 15;
+                var a = gridObjectV.shift();
+                gridObjectV.push(a);
+                gridObjectH.forEach(function(g){
+                    g.translation.y += 15;
+                });
+            }
+            while(gridObjectV[gridObjectV.length-1].getBoundingClientRect().bottom > screenHeight + 25){
+                gridObjectV[gridObjectV.length-1].translation.y = gridObjectV[0].translation.y - 15;
+                var a = gridObjectV.pop();
+                gridObjectV.unshift(a);
+                gridObjectH.forEach(function(g){
+                    g.translation.y -= 15;
+                });
+            }
             socket.emit('0', target); // playerSendTarget Heartbeat
+                
 
         }
     }
@@ -525,3 +546,27 @@ window.addEventListener('resize', function() {
     player.screenWidth = screenWidth;
     player.screenHeight = screenHeight;
 }, true);
+
+
+var gridObjectH = [];
+var gridObjectV = [];
+
+function createGrid(s) {
+
+    var h = two.height;
+    var w = two.width;
+
+    for(var i = -50; i<two.width+50; i += 15){
+        var a = two.makeLine(i, -50, i, h+50).addTo(gridGroup);
+        a.stroke = 'rgba(109, 207, 246, 0.32)';    
+        gridObjectH.push(a);
+    }
+
+    for(var j = -50; j<two.height+50; j +=15){
+        var a = two.makeLine(-50, j, w+50, j).addTo(gridGroup);
+        a.stroke = 'rgba(109, 207, 246, 0.32)';    
+        gridObjectV.push(a);
+    }
+}
+
+createGrid();
