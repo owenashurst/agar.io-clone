@@ -68,35 +68,78 @@ function massToRadius(mass){
     return Math.sqrt(mass / Math.PI) * 10;
 }
 
-function movePlayer(player, target) {
-    var dist = Math.sqrt(Math.pow(target.y, 2) + Math.pow(target.x, 2));
-    var deg = Math.atan2(target.y, target.x);
+function movePlayer(playerObjects, center, target) {
 
-    var slowDown = Math.log(player.mass);
+    var xMin = xMax = playerObjects[0].x;
+    var yMin = yMax = playerObjects[0].y;
 
-    var deltaY = player.speed * Math.sin(deg)/ slowDown;
-    var deltaX = player.speed * Math.cos(deg)/ slowDown;
-
-    if (dist < (50 + player.mass)) {
-        deltaY *= dist / (50 + player.mass);
-        deltaX *= dist / (50 + player.mass);
+    for(var i=1; i < playerObjects.length; ++i)
+    {
+        if(playerObjects[i].x > xMax) xMax = playerObjects[i].x;
+        if(playerObjects[i].x < xMin) xMin = playerObjects[i].x;
+        if(playerObjects[i].y > yMax) yMax = playerObjects[i].y;
+        if(playerObjects[i].y < yMin) yMin = playerObjects[i].y;
     }
 
-    var borderCalc = player.mass - 5;
+    center.x = (xMin + xMax) / 2;
+    center.y = (yMin + yMax) / 2;
 
-    if(!isNaN(deltaY)) player.y += deltaY;
-    if(!isNaN(deltaX)) player.x += deltaX;    
+    var realTarget = { x: center.x + target.x, y: center.y + target.y };
+    
+    playerObjects.forEach(function(blob, i){
+        var dist = Math.sqrt(Math.pow(realTarget.y - blob.y, 2) + Math.pow(realTarget.x - blob.x, 2));
+        var deg = Math.atan2(realTarget.y - blob.y, realTarget.x - blob.x);
+        
+        var slowDown = Math.log(blob.mass);
 
-    if(player.x > c.gameWidth) player.x = c.gameWidth;
-    if(player.y > c.gameHeight) player.y = c.gameHeight;
-    if(player.x < 0) player.x = 0;
-    if(player.y < 0) player.y = 0;
+        var deltaY = blob.speed * Math.sin(deg)/ slowDown;
+        var deltaX = blob.speed * Math.cos(deg)/ slowDown;
+
+        if (dist < (50 + blob.mass)) {
+            deltaY *= dist / (50 + blob.mass);
+            deltaX *= dist / (50 + blob.mass);
+        }
+
+        if(!isNaN(deltaY)) blob.y += deltaY;
+        if(!isNaN(deltaX)) blob.x += deltaX;    
+
+        if(blob.x > c.gameWidth) blob.x = c.gameWidth;
+        if(blob.y > c.gameHeight) blob.y = c.gameHeight;
+        if(blob.x < 0) blob.x = 0;
+        if(blob.y < 0) blob.y = 0;
+
+        var blobCircle = new C(
+                new V(blob.x, blob.y), 
+                massToRadius(blob.mass)); 
+        
+        var otherBlobs = playerObjects.filter(function(b, ii){ return ii != i; });
+
+        otherBlobs.forEach(function(o){
+            var response = new SAT.Response();
+            var collided = SAT.testCircleCircle(blobCircle,
+                new C(new V(o.x, o.y), massToRadius(o.mass)),
+                response);
+
+            if(collided) {
+                blob.x -= response.overlapV.x;
+                blob.y -= response.overlapV.y;
+            }
+        });
+    });
 }
 
 function balanceMass(){    
+    
+    // console.log(users);
+    // console.log(users[0].playerObjects);
+
     var totalMass = food.length * c.foodMass +
-        users.map(function(u){ return u.mass; })
-        .reduce(function(pu,cu){ return pu+cu;});
+        users.map(function(u){ 
+            return u.playerObjects.map(function(p){ 
+                return p.mass;}).reduce(function(pu,cu){ 
+                    return pu+cu;
+                }); 
+            }).reduce(function(pu,cu){ return pu+cu; });
     
     if(totalMass < c.gameMass) {
         console.log('adding ' + (c.gameMass - totalMass) + ' mass to level');
@@ -113,12 +156,23 @@ function balanceMass(){
 io.on('connection', function (socket) {
     console.log('A user connected!');
 
+    var tx = genPos(0, c.gameWidth);
+    var ty = genPos(0, c.gameHeight);
+
     var currentPlayer = {
         id: socket.id,
-        x: genPos(0, c.gameWidth),
-        y: genPos(0, c.gameHeight),
-        mass: c.defaultPlayerMass,        
+        playerObjects: [{
+            // x: genPos(0, c.gameWidth),
+            // y: genPos(0, c.gameHeight),
+            x: tx, y: ty,
+            mass: c.defaultPlayerMass},
+            {
+            // x: genPos(0, c.gameWidth),
+            // y: genPos(0, c.gameHeight),
+            x: tx +200, y: ty+ 200,
+            mass: c.defaultPlayerMass}],
         hue: Math.round(Math.random() * 360),
+        center: {x: tx+100, y: ty+100}
     };
     
     socket.emit('welcome', currentPlayer);
@@ -222,14 +276,15 @@ io.on('connection', function (socket) {
     // Heartbeat function, update everytime
     socket.on('0', function(target) {
         // rebalance mass
-        balanceMass();
-        if (target.x !== currentPlayer.x || target.y !== currentPlayer.y) {
+        balanceMass();        
             
-            movePlayer(currentPlayer, target);
 
+        movePlayer(currentPlayer.playerObjects, currentPlayer.center, target);
+
+        currentPlayer.playerObjects.forEach(function(playerPiece) {
             var playerCircle = new C(
-                new V(currentPlayer.x, currentPlayer.y), 
-                massToRadius(currentPlayer.mass));
+                new V(playerPiece.x, playerPiece.y), 
+                massToRadius(playerPiece.mass));
 
             var foodEaten = food
                 .map(function(f){ return SAT.pointInCircle(new V(f.x, f.y), playerCircle); })
@@ -242,52 +297,53 @@ io.on('connection', function (socket) {
                 food.splice(f, 1);
             });
 
-            currentPlayer.mass += c.foodMass * foodEaten.length;
-            currentPlayer.speed = 10;            
-            playerCircle.r = massToRadius(currentPlayer.mass);
+            playerPiece.mass += c.foodMass * foodEaten.length;
+            playerPiece.speed = 10;            
+            playerCircle.r = massToRadius(playerPiece.mass);
             
-            var otherUsers = users.filter(function(user) { return user.id != currentPlayer.id; });
-            var playerCollisions = [];
+            // var otherUsers = users.filter(function(user) { return user.id != currentPlayer.id; });
+            // var playerCollisions = [];
             
-            otherUsers.forEach(function(user) {
-                var response = new SAT.Response();
-                var collided = SAT.testCircleCircle(playerCircle,
-                    new C(new V(user.x, user.y), massToRadius(user.mass)),
-                    response);
+            // otherUsers.forEach(function(user) {
+            //     var response = new SAT.Response();
+            //     var collided = SAT.testCircleCircle(playerCircle,
+            //         new C(new V(user.x, user.y), massToRadius(user.mass)),
+            //         response);
 
-                if (collided) {
-                    response.aUser = currentPlayer;
-                    response.bUser = user;
-                    playerCollisions.push(response);
-                }
-            });
+            //     if (collided) {
+            //         response.aUser = currentPlayer;
+            //         response.bUser = user;
+            //         playerCollisions.push(response);
+            //     }
+            // });
                                            
-            playerCollisions.forEach(function(collision) {
-                //TODO: make overlap area-based
-                if (collision.aUser.mass >  collision.bUser.mass * 1.25 && collision.overlap > 50) {
-                    console.log('KILLING USER: ' + collision.bUser.id);
-                    console.log('collision info:');
-                    console.log(collision);
+            // playerCollisions.forEach(function(collision) {
+            //     //TODO: make overlap area-based
+            //     if (collision.aUser.mass >  collision.bUser.mass * 1.25 && collision.overlap > 50) {
+            //         console.log('KILLING USER: ' + collision.bUser.id);
+            //         console.log('collision info:');
+            //         console.log(collision);
 
-                    collision.aUser.mass += collision.bUser.mass;
-                    sockets[collision.bUser.id].emit('RIP');
-                    sockets[collision.bUser.id].disconnect();
+            //         collision.aUser.mass += collision.bUser.mass;
+            //         sockets[collision.bUser.id].emit('RIP');
+            //         sockets[collision.bUser.id].disconnect();
+            //     }
+            // });    
+        });
+        // console.log(food);
+        var visibleFood  = food
+            .map(function(f){ 
+                if( f.x > currentPlayer.center.x - currentPlayer.screenWidth / 2 - 20 && 
+                    f.x < currentPlayer.center.x + currentPlayer.screenWidth / 2 + 20 && 
+                    f.y > currentPlayer.center.y - currentPlayer.screenHeight / 2 - 20 && 
+                    f.y < currentPlayer.center.y + currentPlayer.screenHeight / 2 + 20) {
+                return f; 
                 }
-            });    
+            })
+            .filter(function(f){ return f; });
 
-            var visibleFood  = food
-                .map(function(f){ 
-                    if( f.x > currentPlayer.x - currentPlayer.screenWidth/2 - 20 && 
-                        f.x < currentPlayer.x + currentPlayer.screenWidth/2 + 20 && 
-                        f.y > currentPlayer.y - currentPlayer.screenHeight/2 - 20 && 
-                        f.y < currentPlayer.y + currentPlayer.screenHeight/2 + 20) {
-                    return f; 
-                    }
-                })
-                .filter(function(f){ return f; });
+        socket.emit('serverTellPlayerMove', currentPlayer, users, visibleFood);
 
-            socket.emit('serverTellPlayerMove', currentPlayer, users, visibleFood);
-        }
     });
 });
 
