@@ -6,8 +6,9 @@ var io = require('socket.io')(http);
 var fs = require('fs');
 var SAT = require('sat');
 
-var c = require('./config.json');
 
+var c = require('./config.json');
+var initMassLog = Math.log(c.defaultPlayerMass,c.slowDownLog);
 var users = [];
 var food = [];
 var sockets = {};
@@ -73,11 +74,13 @@ function massToRadius(mass){
     return Math.sqrt(mass / Math.PI) * 10;
 }
 
+
+
 function movePlayer(player, target) {
     var dist = Math.sqrt(Math.pow(target.y, 2) + Math.pow(target.x, 2));
     var deg = Math.atan2(target.y, target.x);
 
-    var slowDown = Math.log(player.mass,6);
+    var slowDown = Math.log(player.mass,c.slowDownLog) - initMassLog + 1;
 
     var deltaY = player.speed * Math.sin(deg)/ slowDown;
     var deltaX = player.speed * Math.cos(deg)/ slowDown;
