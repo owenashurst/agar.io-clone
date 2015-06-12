@@ -6,14 +6,22 @@ var io = require('socket.io')(http);
 var fs = require('fs');
 var SAT = require('sat');
 
-var c = require('./config.json');
 
+var c = require('./config.json');
+var initMassLog = Math.log(c.defaultPlayerMass,c.slowDownLog);
 var users = [];
 var food = [];
 var sockets = {};
 
 var V = SAT.Vector;
 var C = SAT.Circle;
+
+Math.log = (function() {
+  var log = Math.log;
+  return function(n, base) {
+    return log(n)/(base ? log(base) : 1);
+  };
+})();
 
 app.use(express.static(__dirname + '/../client'));
 
@@ -66,11 +74,13 @@ function massToRadius(mass){
     return Math.sqrt(mass / Math.PI) * 10;
 }
 
+
+
 function movePlayer(player, target) {
     var dist = Math.sqrt(Math.pow(target.y, 2) + Math.pow(target.x, 2));
     var deg = Math.atan2(target.y, target.x);
 
-    var slowDown = Math.log(player.mass);
+    var slowDown = Math.log(player.mass,c.slowDownLog) - initMassLog + 1;
 
     var deltaY = player.speed * Math.sin(deg)/ slowDown;
     var deltaX = player.speed * Math.cos(deg)/ slowDown;
