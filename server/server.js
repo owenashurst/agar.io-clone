@@ -1,9 +1,10 @@
-var path = require('path');
+/*jslint bitwise: true */
+'use strict';
+
 var express = require('express');
 var app = express();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
-var fs = require('fs');
 var SAT = require('sat');
 
 
@@ -30,7 +31,7 @@ function genPos(from, to) {
 }
 
 function addFood(toAdd) {
-    while(toAdd--){
+    while(toAdd--) {
         food.push({
             // make ids unique
             id: ((new Date()).getTime() + '' + (new Date()).getMilliseconds() + '' + food.length) >>> 0,
@@ -41,8 +42,10 @@ function addFood(toAdd) {
     }
 }
 
-function removeFood(toRem){
-    while(toRem--) food.pop();
+function removeFood(toRem) {
+    while(toRem--) {
+        food.pop();
+    }
 }
 
 function findIndex(arr, id) {
@@ -70,7 +73,7 @@ function randomColor() {
     };
 }
 
-function massToRadius(mass){
+function massToRadius(mass) {
     return Math.sqrt(mass / Math.PI) * 10;
 }
 
@@ -90,28 +93,39 @@ function movePlayer(player, target) {
         deltaX *= dist / (50 + player.mass);
     }
 
-    var borderCalc = player.mass - 5;
+    if(!isNaN(deltaY)) {
+        player.y += deltaY;
+    }
+    if(!isNaN(deltaX)) {
+        player.x += deltaX;
+    }
 
-    if(!isNaN(deltaY)) player.y += deltaY;
-    if(!isNaN(deltaX)) player.x += deltaX;    
-
-    if(player.x > c.gameWidth) player.x = c.gameWidth;
-    if(player.y > c.gameHeight) player.y = c.gameHeight;
-    if(player.x < 0) player.x = 0;
-    if(player.y < 0) player.y = 0;
+    if(player.x > c.gameWidth) {
+        player.x = c.gameWidth;
+    }
+    if(player.y > c.gameHeight) {
+        player.y = c.gameHeight;
+    }
+    if(player.x < 0) {
+        player.x = 0;
+    }
+    if(player.y < 0) {
+        player.y = 0;
+    }
 }
 
-function balanceMass(){    
+function balanceMass() {
     var totalMass = food.length * c.foodMass +
-        users.map(function(u){ return u.mass; })
-        .reduce(function(pu,cu){ return pu+cu;});
-    
+        users
+            .map(function(u) {return u.mass; })
+            .reduce(function(pu,cu) { return pu+cu;});
+
     if(totalMass < c.gameMass) {
         console.log('adding ' + (c.gameMass - totalMass) + ' mass to level');
         addFood(c.gameMass - totalMass);
         console.log('mass rebalanced');
     }
-    else if(totalMass > c.gameMass){
+    else if(totalMass > c.gameMass) {
         console.log('removing ' + (totalMass - c.gameMass) + ' mass from level');
         removeFood(totalMass - c.gameMass);
         console.log('mass rebalanced');
@@ -125,16 +139,16 @@ io.on('connection', function (socket) {
         id: socket.id,
         x: genPos(0, c.gameWidth),
         y: genPos(0, c.gameHeight),
-        mass: c.defaultPlayerMass,        
+        mass: c.defaultPlayerMass,
         hue: Math.round(Math.random() * 360),
     };
-    
+
     socket.emit('welcome', currentPlayer);
 
     socket.on('gotit', function (player) {
         console.log('Player ' + player.id + ' connecting');
 
-        if(sockets[player.id]){
+        if(sockets[player.id]) {
             console.log('That playerID is already connected, kicking');
             socket.disconnect();
         }
@@ -143,12 +157,15 @@ io.on('connection', function (socket) {
             sockets[player.id] = socket;
             currentPlayer = player;
             users.push(currentPlayer);
+
             io.emit('playerJoin', {
-                playersList: users, 
-                connectedName: currentPlayer.name});
+                playersList: users,
+                connectedName: currentPlayer.name
+            });
+
             socket.emit('gameSetup', c);
             console.log('Total player: ' + users.length);
-        }        
+        }
 
     });
 
@@ -180,12 +197,12 @@ io.on('connection', function (socket) {
 
     socket.on('pass', function(data) {
         if (data[0] === c.adminPass) {
-            console.log(currentPlayer.name + " just logged in as an admin");
+            console.log(currentPlayer.name + ' just logged in as an admin');
             socket.emit('serverMSG', 'Welcome back ' + currentPlayer.name);
             socket.broadcast.emit('serverMSG', currentPlayer.name + ' just logged in as admin!');
             currentPlayer.admin = true;
         } else {
-            console.log(currentPlayer.name + " sent incorrect admin password");
+            console.log(currentPlayer.name + ' sent incorrect admin password');
             socket.emit('serverMSG', 'Password incorrect attempt logged.');
             // TODO actually log incorrect passwords
         }
@@ -193,39 +210,38 @@ io.on('connection', function (socket) {
 
     socket.on('kick', function(data) {
         if (currentPlayer.admin) {
-            var reason = "";
+            var reason = '';
             var worked = false;
             for (var e = 0; e < users.length; e++) {
-                if (users[e].name === data[0] && !users[e].admin && !worked){
-                    if(data.length > 1){
-                               for (var f = 1; f < data.length; f++) {
-                                    if(f == data.length){
-                                           reason = reason + data[f];
-                                     }
-                                     else{
-                                           reason = reason + data[f] + " ";
-                                     }
-                               }
-                               
-                           }
-                if(reason !== ""){
-                       console.log("User " + users[e].name + " kicked successfully by " + currentPlayer.name + " for reason " + reason);
-                   }
-                   else{
-                       console.log("User " + users[e].name + " kicked successfully by " + currentPlayer.name);
-                   }
-                   socket.emit('serverMSG', "User " + users[e].name + " was kicked by " + currentPlayer.name);
-                   sockets[users[e].id].emit('kick', reason);
-                   sockets[users[e].id].disconnect();
-                   users.splice(e, 1);
+                if (users[e].name === data[0] && !users[e].admin && !worked) {
+                    if(data.length > 1) {
+                       for (var f = 1; f < data.length; f++) {
+                            if(f === data.length) {
+                                   reason = reason + data[f];
+                             }
+                             else {
+                                   reason = reason + data[f] + ' ';
+                             }
+                       }
+                    }
+                    if(reason !== '') {
+                       console.log('User ' + users[e].name + ' kicked successfully by ' + currentPlayer.name + ' for reason ' + reason);
+                    }
+                    else {
+                       console.log('User ' + users[e].name + ' kicked successfully by ' + currentPlayer.name);
+                    }
+                    socket.emit('serverMSG', 'User ' + users[e].name + ' was kicked by ' + currentPlayer.name);
+                    sockets[users[e].id].emit('kick', reason);
+                    sockets[users[e].id].disconnect();
+                    users.splice(e, 1);
                     worked = true;
                 }
             }
-            if(!worked){
-                       socket.emit('serverMSG', "Could not find user or user is admin");
-           }
+            if(!worked) {
+                socket.emit('serverMSG', 'Could not find user or user is admin');
+            }
         } else {
-            console.log(currentPlayer.name + " is trying to use -kick but isn't admin");
+            console.log(currentPlayer.name + ' is trying to use -kick but isn\'t admin');
             socket.emit('serverMSG', 'You are not permitted to use this command');
         }
     });
@@ -235,11 +251,11 @@ io.on('connection', function (socket) {
         // rebalance mass
         balanceMass();
         if (target.x !== currentPlayer.x || target.y !== currentPlayer.y) {
-            
+
             movePlayer(currentPlayer, target);
 
             var playerCircle = new C(
-                new V(currentPlayer.x, currentPlayer.y), 
+                new V(currentPlayer.x, currentPlayer.y),
                 massToRadius(currentPlayer.mass));
 
             var foodEaten = food
@@ -248,16 +264,18 @@ io.on('connection', function (socket) {
 
             foodEaten.forEach( function(f) {
                 food[f] = {};
-                food.splice(f, 1);                
+                food.splice(f, 1);
             });
 
             currentPlayer.mass += c.foodMass * foodEaten.length;
-            currentPlayer.speed = 10;            
+            currentPlayer.speed = 10;
             playerCircle.r = massToRadius(currentPlayer.mass);
-            
-            var otherUsers = users.filter(function(user) { return user.id != currentPlayer.id; });
+
+            var otherUsers = users.filter(function(user) {
+                return user.id !== currentPlayer.id;
+            });
             var playerCollisions = [];
-            
+
             otherUsers.forEach(function(user) {
                 var response = new SAT.Response();
                 var collided = SAT.testCircleCircle(playerCircle,
@@ -270,7 +288,7 @@ io.on('connection', function (socket) {
                     playerCollisions.push(response);
                 }
             });
-                                           
+
             playerCollisions.forEach(function(collision) {
                 //TODO: make overlap area-based
                 if (collision.aUser.mass >  collision.bUser.mass * 1.25 && collision.overlap > 50) {
@@ -282,18 +300,18 @@ io.on('connection', function (socket) {
                     sockets[collision.bUser.id].emit('RIP');
                     sockets[collision.bUser.id].disconnect();
                 }
-            });    
+            });
 
             var visibleFood  = food
-                .map(function(f){ 
-                    if( f.x > currentPlayer.x - currentPlayer.screenWidth/2 - 20 && 
-                        f.x < currentPlayer.x + currentPlayer.screenWidth/2 + 20 && 
-                        f.y > currentPlayer.y - currentPlayer.screenHeight/2 - 20 && 
+                .map(function(f) {
+                    if( f.x > currentPlayer.x - currentPlayer.screenWidth/2 - 20 &&
+                        f.x < currentPlayer.x + currentPlayer.screenWidth/2 + 20 &&
+                        f.y > currentPlayer.y - currentPlayer.screenHeight/2 - 20 &&
                         f.y < currentPlayer.y + currentPlayer.screenHeight/2 + 20) {
-                    return f; 
+                    return f;
                     }
                 })
-                .filter(function(f){ return f; });
+                .filter(function(f) { return f; });
 
             socket.emit('serverTellPlayerMove', currentPlayer, users, visibleFood);
         }
