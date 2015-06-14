@@ -1,0 +1,7 @@
+{
+  "browser": true,
+  "globals": {
+    "io": true,
+    "console": true
+  }
+}
