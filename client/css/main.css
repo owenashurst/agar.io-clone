@@ -4,42 +4,54 @@
 }
 
 html, body {
-	margin: 0; padding: 0;
-	width: 100%; height: 100%;
+	margin: 0;
+	padding: 0;
+	width: 100%;
+	height: 100%;
 	background-color: #222;
 }
 
 canvas {
-	width: 100%; height: 100%;
-	margin: 0; padding: 0;
+	width: 100%;
+	height: 100%;
+	margin: 0;
+	padding: 0;
 }
 
 #status {
 	position: absolute;
-	padding: 10px; background: rgba(0, 0, 0, 0.7);
-	color: #FFF; font-size: 20px;
-	top: 0; right: 0;
+	padding: 10px;
+	background: rgba(0, 0, 0, 0.7);
+	color: #FFF;
+	font-size: 20px;
+	top: 0;
+	right: 0;
 	text-align: right;
 }
 
 .chatbox {
 	position: absolute;
-	width: 300px; height: 320px;
+	width: 300px;
+	height: 320px;
 	background: rgba(255, 255, 255, 0.7);
-	bottom: 5px; left: 5px;
+	bottom: 5px;
+	left: 5px;
 	border-radius: 5px;
 	pointer-events: none;
 }
 
 .chatbox .chat-list {
-	padding: 5px; margin: 0;
+	padding: 5px;
+	margin: 0;
 	list-style: none;
 	box-sizing: border-box;
-	height: 285px; overflow: hidden;
+	height: 285px;
+	overflow: hidden;
 }
 
 .chatbox .chat-list li {
-	padding: 2px; margin: 3px;
+	padding: 2px;
+	margin: 3px;
 }
 
 .chatbox .chat-list li.me b {
@@ -61,9 +73,9 @@ canvas {
 
 .chatbox .chat-input {
 	pointer-events: all;
-	box-sizing:border-box;
-	width:100%;
-	padding:8px;
+	box-sizing: border-box;
+	width: 100%;
+	padding: 8px;
 	background: transparent;
 	border: none;
 	border-top: 1px solid #DDD;
@@ -71,20 +83,20 @@ canvas {
 }
 
 #startMenu {
-	margin:auto;
-	margin-top:100px;
+	margin: auto;
+	margin-top: 100px;
 	width: 350px;
 	padding: 20px;
-	border-radius: 5px 5px 5px 5px;
-	-moz-border-radius: 5px 5px 5px 5px;
-	-webkit-border-radius: 5px 5px 5px 5px;
+	border-radius: 5px;
+	-moz-border-radius: 5px;
+	-webkit-border-radius: 5px;
 	background-color: white;
 	box-sizing: border-box;
 }
 
 #startMenu p {
 	padding: 0;
-	text-align:center;
+	text-align: center;
 	font-size: x-large;
 	font-weight: bold;
 }
@@ -96,9 +108,9 @@ canvas {
 	border: solid 1px #dcdcdc;
 	transition: box-shadow 0.3s, border 0.3s;
 	box-sizing: border-box;
-	border-radius: 5px 5px 5px 5px;
-	-moz-border-radius: 5px 5px 5px 5px;
-	-webkit-border-radius: 5px 5px 5px 5px;
+	border-radius: 5px;
+	-moz-border-radius: 5px;
+	-webkit-border-radius: 5px;
 	margin-bottom: 10px;
 	outline: none;
 }
@@ -125,9 +137,9 @@ canvas {
 	cursor: pointer;
 	-webkit-box-shadow: inset 0 -2px #28be68;
 	box-shadow: inset 0 -2px #28be68;
-	border-radius: 5px 5px 5px 5px;
-	-moz-border-radius: 5px 5px 5px 5px;
-	-webkit-border-radius: 5px 5px 5px 5px;
+	border-radius: 5px;
+	-moz-border-radius: 5px;
+	-webkit-border-radius: 5px;
 	margin-bottom: 10px;
 }
 
@@ -156,9 +168,9 @@ canvas {
 	cursor: pointer;
 	-webkit-box-shadow: inset 0 -2px #28be68;
 	box-shadow: inset 0 -2px #28be68;
-	border-radius: 5px 5px 5px 5px;
-	-moz-border-radius: 5px 5px 5px 5px;
-	-webkit-border-radius: 5px 5px 5px 5px;
+	border-radius: 5px;
+	-moz-border-radius: 5px;
+	-webkit-border-radius: 5px;
 	margin-bottom: 10px;
 }
 
@@ -180,12 +192,13 @@ canvas {
 }
 
 #startMenu ul {
-	margin: 10px; padding: 10px;
+	margin: 10px;
+	padding: 10px;
 	margin-top: 0;
 }
 
 #startMenu .input-error {
-  color : red;
+  color: red;
   display: none;
   font-size : 12px;
 }
