@@ -22,10 +22,14 @@ gulp.task('move-client', function () {
     .pipe(gulp.dest('./bin/client/'));
 });
 
-gulp.task('build-server', ['move-server'], function () {
+gulp.task('lint-server', function () {
   return gulp.src('server/*.js')
     .pipe(jshint())
-    .pipe(jshint.reporter('default', { verbose: true }))
+    .pipe(jshint.reporter('default', { verbose: true}));
+});
+
+gulp.task('build-server', ['lint-server', 'move-server'], function () {
+  return gulp.src('server/*.js')
     .pipe(gulp.dest('bin/server/'));
 });
 
