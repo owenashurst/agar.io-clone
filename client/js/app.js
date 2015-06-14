@@ -1,5 +1,6 @@
+/* global io */
 (function() {
-    "use strict";
+    'use strict';
 
     var playerName;
     var playerNameInput = document.getElementById('playerNameInput');
@@ -139,12 +140,15 @@
     }
 
     function visibleBorder() {
-            if (document.getElementById('visBord').checked) {
-                borderDraw = true;
-            } else {
-                borderDraw = false;
-            }
+        if (document.getElementById('visBord').checked) {
+            borderDraw = true;
+        } else {
+            borderDraw = false;
+        }
     }
+
+    var visibleBorderSetting = document.getElementById('visBord');
+    visibleBorderSetting.onchange = visibleBorder;
 
     var graph = c.getContext('2d');
 
@@ -220,6 +224,9 @@
     		addSystemLine('Mass mode deactivated!');
     	}
     }
+
+    var showMassSetting = document.getElementById('showMass');
+    showMassSetting.onchange = toggleMass;
 
     registerChatCommand('ping', 'Check your latency', function () {
         checkLatency();
@@ -467,8 +474,6 @@
     }
 
     function drawborder() {
-        var borderX = 0;
-        var borderY = 0;
 
         graph.strokeStyle = playerConfig.borderColor;
 
