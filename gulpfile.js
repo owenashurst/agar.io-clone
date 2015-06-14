@@ -5,10 +5,14 @@ var nodemon = require('gulp-nodemon');
 
 gulp.task('build', ['build-client', 'build-server']);
 
-gulp.task('build-client', ['move-client'], function () {
+gulp.task('lint-client', function () {
   return gulp.src('client/js/*.js')
     .pipe(jshint())
-    .pipe(jshint.reporter('default', { verbose: true}))
+    .pipe(jshint.reporter('default', { verbose: true}));
+});
+
+gulp.task('build-client', ['lint-client', 'move-client'], function () {
+  return gulp.src('client/js/*.js')
     .pipe(babel())
     .pipe(gulp.dest('bin/client/js/'));
 });
