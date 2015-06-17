@@ -8,6 +8,8 @@
     var reason;
     var KEY_ENTER = 13;
     var borderDraw = false;
+    var wiggle = 0;
+    var inc = +1;
 
 
     var debug = function(args) {
@@ -404,32 +406,97 @@
     }
 
     function drawPlayer() {
-        graph.strokeStyle = 'hsl(' + player.hue + ', 80%, 40%)';
-        graph.fillStyle = 'hsl(' + player.hue + ', 70%, 50%)';
-        graph.lineWidth = playerConfig.border;
+
+    var radius = massToRadius(player.mass);
+    var p = {};
+    var q = {};
+    var rad1 = 0;
+    var  rad2= -2;
+    var wall = 0;
+    var circle = {
+        x: screenWidth / 2,
+        y: screenHeight / 2
+    };
+
+    graph.strokeStyle = 'hsl(' + player.hue + ', 80%, 40%)';
+    graph.fillStyle = 'hsl(' + player.hue + ', 70%, 50%)';
+    graph.lineWidth = playerConfig.border;
+    
+    if (player.x > gameWidth - radius) {
+        wall = ((player.x - (gameWidth - radius)) / radius);
+        rad1 = rad1 + (wall / 2);
+        rad2 = rad2 - (wall / 2);
+    }
+
+    if (player.y > gameHeight - radius) {
+        wall = ((player.y - (gameHeight - radius)) / radius);
+        rad1 = -2.5 + (wall / 2);
+        rad2 = -0.5 - (wall / 2);
+    }
+
+    if (player.y < radius) {
+        if (player.y == 0) {
+            rad1 = -1;
+            rad2 = -2;
+        } else {
+            wall = 1 - (player.y / radius);
+            rad1 = -1.5 + (wall / 2);
+            rad2 = 0.5 - (wall / 2);
+        }
+    }
+
+    if (player.x < radius) {
+        if (player.x == 0) {
+            rad1 = -0.5;
+            rad2 = -1.5;
+        } else {
+            var wall = 1 - (player.x / radius);
+            rad1 = -0.999 + wall / 2;
+            rad2 = -1 - wall / 2;
+        }
+    }
+
+    p.x = circle.x + radius * Math.cos(rad1 * Math.PI);
+    p.y = circle.y - radius * Math.sin(rad1 * Math.PI);
+    q.x = circle.x + radius * Math.cos(rad2 * Math.PI);
+    q.y = circle.y - radius * Math.sin(rad2 * Math.PI);
+
+    graph.lineJoin = 'round';
+    graph.lineCap = 'round';
+    graph.beginPath();
+    graph.arc(circle.x, circle.y, radius, -rad2 * Math.PI, -rad1 * Math.PI);
+    graph.fill();
+    graph.stroke();
+    
+    if (p.x > 0 || p.y > 0) {
+        if (wiggle == 4) inc = -1;
+        if (wiggle == -4) inc = +1;
+        wiggle += inc;
         graph.beginPath();
-        graph.arc(screenWidth / 2, screenHeight / 2, massToRadius(player.mass), 0, 2 * Math.PI);
+        graph.lineJoin = 'round';
+        graph.moveTo(p.x, p.y);
+        graph.bezierCurveTo(p.x + wiggle / 4, p.y - wiggle / 3, q.x + wiggle / 4, q.y + wiggle / 3, q.x, q.y);
         graph.stroke();
         graph.fill();
-
-        var fontSize = (massToRadius(player.mass) / 2);
-        graph.lineWidth = playerConfig.textBorderSize;
-        graph.miterLimit = 1;
-        graph.lineJoin = 'round';
-        graph.textAlign = 'center';
-        graph.fillStyle = playerConfig.textColor;
-        graph.textBaseline = 'middle';
-        graph.strokeStyle = playerConfig.textBorder;
-        graph.font = 'bold ' + fontSize + 'px sans-serif';
-        if(toggleMassState === 0) {
-        	graph.strokeText(player.name, screenWidth / 2, screenHeight / 2);
-            graph.fillText(player.name, screenWidth / 2, screenHeight / 2);
-     	}
-     	else {
-     	    graph.strokeText(player.name + ' (' + player.mass + ')', screenWidth / 2, screenHeight / 2);
-            graph.fillText(player.name + ' (' + player.mass + ')', screenWidth / 2, screenHeight / 2);
-     	}
     }
+
+    var fontSize = (massToRadius(player.mass) / 2);
+    graph.lineWidth = playerConfig.textBorderSize;
+    graph.miterLimit = 1;
+    graph.lineJoin = 'round';
+    graph.textAlign = 'center';
+    graph.fillStyle = playerConfig.textColor;
+    graph.textBaseline = 'middle';
+    graph.strokeStyle = playerConfig.textBorder;
+    graph.font = 'bold ' + fontSize + 'px sans-serif';
+    if (toggleMassState === 0) {
+        graph.strokeText(player.name, screenWidth / 2, screenHeight / 2);
+        graph.fillText(player.name, screenWidth / 2, screenHeight / 2);
+    } else {
+        graph.strokeText(player.name + ' (' + player.mass + ')', screenWidth / 2, screenHeight / 2);
+        graph.fillText(player.name + ' (' + player.mass + ')', screenWidth / 2, screenHeight / 2);
+    }
+}
 
     function drawEnemy(enemy) {
         graph.strokeStyle = 'hsl(' + enemy.hue + ', 80%, 40%)';

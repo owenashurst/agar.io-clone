@@ -100,17 +100,19 @@ function movePlayer(player, target) {
         player.x += deltaX;
     }
 
-    if(player.x > c.gameWidth) {
-        player.x = c.gameWidth;
+    var borderCalc = player.mass / 4;
+
+    if(player.x > c.gameWidth - borderCalc) {
+        player.x = c.gameWidth - borderCalc;
     }
-    if(player.y > c.gameHeight) {
-        player.y = c.gameHeight;
+    if(player.y > c.gameHeight - borderCalc) {
+        player.y = c.gameHeight - borderCalc;
     }
-    if(player.x < 0) {
-        player.x = 0;
+    if(player.x <  borderCalc) {
+        player.x = borderCalc;
     }
-    if(player.y < 0) {
-        player.y = 0;
+    if(player.y <  borderCalc) {
+        player.y = borderCalc;
     }
 }
 
