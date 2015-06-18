@@ -437,13 +437,13 @@
     if (player.y > gameHeight - radius) {
         diff = Math.acos((gameHeight - player.y) / radius) / 3;
         if (isNaN(diff)) diff = 0;
-        rad1 = 0.5 + diff;
-        rad2 = -1.5 - diff;
+        rad1 = -0.5 + diff;
+        rad2 = 1.5 - diff;
     } else if (player.y < radius) {
         diff = Math.asin(player.y / radius) / 3;
         if (isNaN(diff)) diff = 0;
-        rad1 = 0 - diff;
-        rad2 = 1 + diff;
+        rad1 = -1 - diff;
+        rad2 = diff;
     }
 
     p.x = circle.x + radius * Math.cos(rad1 * Math.PI);
