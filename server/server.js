@@ -293,7 +293,7 @@ io.on('connection', function (socket) {
 
             playerCollisions.forEach(function(collision) {
                 //TODO: make overlap area-based
-                if (collision.aUser.mass >  collision.bUser.mass * 1.25 && collision.overlap > 50) {
+                if (collision.aUser.mass > collision.bUser.mass * 1.1 && massToRadius(collision.aUser.mass) > Math.sqrt(Math.pow(collision.aUser.x - collision.bUser.x, 2) + Math.pow(collision.aUser.y - collision.bUser.y, 2))) {
                     console.log('KILLING USER: ' + collision.bUser.id);
                     console.log('collision info:');
                     console.log(collision);
