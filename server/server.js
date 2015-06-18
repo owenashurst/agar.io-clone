@@ -31,12 +31,13 @@ function genPos(from, to) {
 }
 
 function addFood(toAdd) {
+    var radius = massToRadius(c.foodMass);
     while(toAdd--) {
         food.push({
             // make ids unique
             id: ((new Date()).getTime() + '' + (new Date()).getMilliseconds() + '' + food.length) >>> 0,
-            x: genPos(0, c.gameWidth),
-            y: genPos(0, c.gameHeight),
+            x: genPos(radius, c.gameWidth - radius),
+            y: genPos(radius, c.gameHeight - radius),
             color: randomColor(),
         });
     }
