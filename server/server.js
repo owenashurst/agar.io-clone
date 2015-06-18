@@ -1,4 +1,4 @@
-/*jslint bitwise: true */
+/*jslint bitwise: true, node: true */
 'use strict';
 
 var express = require('express');
