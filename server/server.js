@@ -104,7 +104,7 @@ function movePlayer(player, target) {
         player.x += deltaX;
     }
 
-    var borderCalc = player.mass / 4;
+    var borderCalc = massToRadius(player.mass) / 4;
 
     if(player.x > c.gameWidth - borderCalc) {
         player.x = c.gameWidth - borderCalc;
