@@ -1,4 +1,4 @@
-/*jslint bitwise: true */
+/*jslint bitwise: true, node: true */
 'use strict';
 
 var express = require('express');
@@ -34,12 +34,13 @@ function genPos(from, to) {
 }
 
 function addFood(toAdd) {
+    var radius = massToRadius(c.foodMass);
     while(toAdd--) {
         food.push({
             // make ids unique
             id: ((new Date()).getTime() + '' + (new Date()).getMilliseconds() + '' + food.length) >>> 0,
-            x: genPos(0, c.gameWidth),
-            y: genPos(0, c.gameHeight),
+            x: genPos(radius, c.gameWidth - radius),
+            y: genPos(radius, c.gameHeight - radius),
             color: randomColor(),
         });
     }
@@ -296,7 +297,7 @@ io.on('connection', function (socket) {
 
             playerCollisions.forEach(function(collision) {
                 //TODO: make overlap area-based
-                if (collision.aUser.mass >  collision.bUser.mass * 1.25 && collision.overlap > 50) {
+                if (collision.aUser.mass > collision.bUser.mass * 1.1 && massToRadius(collision.aUser.mass) > Math.sqrt(Math.pow(collision.aUser.x - collision.bUser.x, 2) + Math.pow(collision.aUser.y - collision.bUser.y, 2))) {
                     console.log('KILLING USER: ' + collision.bUser.id);
                     console.log('collision info:');
                     console.log(collision);

@@ -411,8 +411,8 @@
     var p = {};
     var q = {};
     var rad1 = 0;
-    var  rad2= -2;
-    var wall = 0;
+    var rad2 = -2;
+    var diff = 0;
     var circle = {
         x: screenWidth / 2,
         y: screenHeight / 2
@@ -421,39 +421,29 @@
     graph.strokeStyle = 'hsl(' + player.hue + ', 80%, 40%)';
     graph.fillStyle = 'hsl(' + player.hue + ', 70%, 50%)';
     graph.lineWidth = playerConfig.border;
-    
+
     if (player.x > gameWidth - radius) {
-        wall = ((player.x - (gameWidth - radius)) / radius);
-        rad1 = rad1 + (wall / 2);
-        rad2 = rad2 - (wall / 2);
+        diff = Math.asin((gameWidth - player.x) / radius) / 3;
+        if (isNaN(diff)) diff = 0;
+        rad1 = 0.5 - diff;
+        rad2 = -0.5 + diff;
+    } else if (player.x < radius) {
+        diff = Math.acos(player.x / radius) / 3;
+        if (isNaN(diff)) diff = 0;
+        rad1 = -1 + diff;
+        rad2 = 1 - diff;
     }
 
     if (player.y > gameHeight - radius) {
-        wall = ((player.y - (gameHeight - radius)) / radius);
-        rad1 = -2.5 + (wall / 2);
-        rad2 = -0.5 - (wall / 2);
-    }
-
-    if (player.y < radius) {
-        if (player.y == 0) {
-            rad1 = -1;
-            rad2 = -2;
-        } else {
-            wall = 1 - (player.y / radius);
-            rad1 = -1.5 + (wall / 2);
-            rad2 = 0.5 - (wall / 2);
-        }
-    }
-
-    if (player.x < radius) {
-        if (player.x == 0) {
-            rad1 = -0.5;
-            rad2 = -1.5;
-        } else {
-            var wall = 1 - (player.x / radius);
-            rad1 = -0.999 + wall / 2;
-            rad2 = -1 - wall / 2;
-        }
+        diff = Math.acos((gameHeight - player.y) / radius) / 3;
+        if (isNaN(diff)) diff = 0;
+        rad1 = -0.5 + diff;
+        rad2 = 1.5 - diff;
+    } else if (player.y < radius) {
+        diff = Math.asin(player.y / radius) / 3;
+        if (isNaN(diff)) diff = 0;
+        rad1 = -1 - diff;
+        rad2 = diff;
     }
 
     p.x = circle.x + radius * Math.cos(rad1 * Math.PI);
@@ -469,13 +459,13 @@
     graph.stroke();
     
     if (p.x > 0 || p.y > 0) {
-        if (wiggle == 4) inc = -1;
-        if (wiggle == -4) inc = +1;
+        if (wiggle >= radius / 3) inc = -1;
+        if (wiggle <= radius / -3) inc = +1;
         wiggle += inc;
         graph.beginPath();
         graph.lineJoin = 'round';
         graph.moveTo(p.x, p.y);
-        graph.bezierCurveTo(p.x + wiggle / 4, p.y - wiggle / 3, q.x + wiggle / 4, q.y + wiggle / 3, q.x, q.y);
+        graph.bezierCurveTo(p.x + wiggle / 3, p.y - wiggle / 3, q.x - wiggle / 3, q.y + wiggle / 3, q.x, q.y);
         graph.stroke();
         graph.fill();
     }
