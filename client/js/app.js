@@ -305,6 +305,7 @@
             debug('Game is started: ' + gameStart);
             addSystemLine('Connected to the game!');
             addSystemLine('Type <b>-help</b> for a list of commands');
+            document.getElementById('chatInput').select();
         });
 
         socket.on('gameSetup', function(data) {
