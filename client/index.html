@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="css/main.css" />
 </head>
 <body>
-    <div id="gameAreaWrapper" style="display:none;">
+    <div id="gameAreaWrapper" style="opacity: 0;">
         <div id="status">Players: 0</div>
         <div class="chatbox">
             <ul id="chatList" class="chat-list"></ul>
@@ -15,15 +15,22 @@
         </div>
         <canvas tabindex="1" id="cvs"></canvas>
     </div>
-    <div id="startMenuWrapper">
+    <div id="startMenuWrapper" style="z-index: 2">
         <div id="startMenu">
             <p>Open Agar</p>
             <input type="text" tabindex="0" autofocus placeholder="Enter your name here" id="playerNameInput" />
             <b class="input-error">Nick must be alphanumeric characters only!</b>
-            <br />
+            <br/>
             <button id="startButton">Play</button>
                 <button id="settingsButton">Settings</button>
             <br/>
+            <div id="settings" style="max-height: 0">
+                <h3>Settings</h3>
+                <ul>
+                    <label><input id="visBord" type="checkbox">Show borders</label>
+                    <label><input id="showMass" type="checkbox">Show mass</label>
+                </ul>
+            </div>
             <div id="instructions">
                 <h3>Gameplay</h3>
                 <ul>
@@ -31,13 +38,6 @@
                     <li>Eat food and other players in order to grow your character (food respawns every time a player eats it)</li>
                     <li>A player's mass is the number of food particles eaten</li>
                     <li>Objective: Try to get fat and eat other players</li>
-                </ul>
-            </div>
-            <div id="settings">
-                <h3>Settings</h3>
-                <ul>
-                    <label><input id="visBord" type="checkbox">Show borders</label>
-                    <label><input id="showMass" type="checkbox">Show mass</label>
                 </ul>
             </div>
         </div>

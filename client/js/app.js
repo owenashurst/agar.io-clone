@@ -21,8 +21,8 @@
 
     function startGame() {
         playerName = playerNameInput.value.replace(/(<([^>]+)>)/ig, '');
-        document.getElementById('gameAreaWrapper').style.display = 'block';
-        document.getElementById('startMenuWrapper').style.display = 'none';
+        document.getElementById('startMenuWrapper').style.maxHeight = '0px';
+        document.getElementById('gameAreaWrapper').style.opacity = 1;
         if(!socket) {
             socket = io();
             setupSocket(socket);
@@ -48,9 +48,10 @@
 
             // check if the nick is valid
             if (validNick()) {
+                nickErrorText.style.opacity = 0;
                 startGame();
             } else {
-                nickErrorText.style.display = 'inline';
+                nickErrorText.style.opacity = 1;
             }
         };
 
@@ -59,12 +60,10 @@
         var instructions = document.getElementById('instructions');
 
         settingsMenu.onclick = function () {
-            if (settings.style.display !== 'block') {
-                instructions.style.display = 'none';
-                settings.style.display = 'block';
+            if (settings.style.maxHeight == '0px') {
+                settings.style.maxHeight = '300px';
             } else {
-                instructions.style.display = 'block';
-                settings.style.display = 'none';
+                settings.style.maxHeight = '0px';
             }
         };
 
@@ -73,9 +72,10 @@
 
             if (key === KEY_ENTER) {
                 if (validNick()) {
+                    nickErrorText.style.opacity = 0;
                     startGame();
                 } else {
-                    nickErrorText.style.display = 'inline';
+                    nickErrorText.style.opacity = 1;
                 }
             }
         });
@@ -370,8 +370,8 @@
             gameStart = false;
             died = true;
             window.setTimeout(function() {
-                document.getElementById('gameAreaWrapper').style.display = 'none';
-                document.getElementById('startMenuWrapper').style.display = 'block';
+                document.getElementById('gameAreaWrapper').style.opacity = 0;
+                document.getElementById('startMenuWrapper').style.maxHeight = '1000px';
                 died = false;
                 if(animLoopHandle) {
                     window.cancelAnimationFrame(animLoopHandle);
