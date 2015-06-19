@@ -92,9 +92,10 @@ function movePlayer(player, target) {
     var deltaY = player.speed * Math.sin(deg)/ slowDown;
     var deltaX = player.speed * Math.cos(deg)/ slowDown;
 
-    if (dist < (50 + player.mass)) {
-        deltaY *= dist / (50 + player.mass);
-        deltaX *= dist / (50 + player.mass);
+    var radius = massToRadius(player.mass);
+    if (dist < (50 + radius)) {
+        deltaY *= dist / (50 + radius);
+        deltaX *= dist / (50 + radius);
     }
 
     if(!isNaN(deltaY)) {
@@ -104,7 +105,7 @@ function movePlayer(player, target) {
         player.x += deltaX;
     }
 
-    var borderCalc = massToRadius(player.mass) / 3;
+    var borderCalc = radius / 3;
 
     if(player.x > c.gameWidth - borderCalc) {
         player.x = c.gameWidth - borderCalc;
@@ -165,8 +166,6 @@ io.on('connection', function (socket) {
             player.mass = c.defaultPlayerMass;
             currentPlayer = player;
             users.push(currentPlayer);
-
-            console.log(users);
 
             io.emit('playerJoin', {
                 playersList: users,
@@ -313,7 +312,8 @@ io.on('connection', function (socket) {
                     console.log('collision info:');
                     console.log(collision);
 
-                    users.splice(findIndex(users, collision.bUser.id), 1);
+                    if(findIndex(users, collision.aUser.id) > -1)
+                        users.splice(findIndex(users, collision.bUser.id), 1);
 
                     io.emit('playerDied',
                         {
@@ -330,7 +330,8 @@ io.on('connection', function (socket) {
                     console.log('collision info:');
                     console.log(collision);
 
-                    users.splice(findIndex(users, collision.aUser.id), 1);
+                    if(findIndex(users, collision.aUser.id) > -1)
+                        users.splice(findIndex(users, collision.aUser.id), 1);
 
                     io.emit('playerDied',
                         {

@@ -10,7 +10,7 @@
     var borderDraw = false;
     var wiggle = 0;
     var inc = +1;
-    var gameLoopHandle;
+    var animLoopHandle;
 
 
     var debug = function(args) {
@@ -27,7 +27,8 @@
             socket = io();
             setupSocket(socket);
         }
-        animloop();
+        if(!animLoopHandle)
+            animloop();
         socket.emit('respawn');
     }
 
@@ -368,12 +369,14 @@
         socket.on('RIP', function () {
             gameStart = false;
             died = true;
-            if(gameLoopHandle)
-                window.clearTimeout(gameLoopHandle);
             window.setTimeout(function() {
                 document.getElementById('gameAreaWrapper').style.display = 'none';
                 document.getElementById('startMenuWrapper').style.display = 'block';
                 died = false;
+                if(animLoopHandle) {
+                    window.cancelAnimationFrame(animLoopHandle);
+                    animLoopHandle = undefined;
+                }
             }, 2500);
         });
 
@@ -591,13 +594,19 @@
         return  window.requestAnimationFrame       ||
                 window.webkitRequestAnimationFrame ||
                 window.mozRequestAnimationFrame    ||
+                window.msRequestAnimationFrame     ||
                 function( callback ) {
-                    gameLoopHandle = window.setTimeout(callback, 1000 / 60);
+                    window.setTimeout(callback, 1000 / 60);
                 };
     })();
 
+    window.cancelAnimFrame = (function(handle) {
+        return window.cancelAnimationFrame     ||
+               window.mozCancelAnimationFrame;
+    })();
+
     function animloop() {
-        window.requestAnimFrame(animloop);
+        animLoopHandle = window.requestAnimFrame(animloop);
         gameLoop();
     }
 
