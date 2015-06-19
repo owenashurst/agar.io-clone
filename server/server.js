@@ -124,7 +124,7 @@ function balanceMass() {
     var totalMass = food.length * c.foodMass +
         users
             .map(function(u) {return u.mass; })
-            .reduce(function(pu,cu) { return pu+cu;});
+            .reduce(function(pu,cu) { return pu+cu;}, 0);
 
     if(totalMass < c.gameMass) {
         console.log('adding ' + (c.gameMass - totalMass) + ' mass to level');
@@ -149,20 +149,24 @@ io.on('connection', function (socket) {
         hue: Math.round(Math.random() * 360),
     };
 
-    socket.emit('welcome', currentPlayer);
-
     socket.on('gotit', function (player) {
         console.log('Player ' + player.id + ' connecting');
 
-        if(sockets[player.id]) {
+        if(findIndex(users, player.id) > -1) {
             console.log('That playerID is already connected, kicking');
             socket.disconnect();
         }
         else {
             console.log('Player ' + player.id + ' connected!');
             sockets[player.id] = socket;
+
+            player.x = genPos(0, c.gameWidth);
+            player.y = genPos(0, c.gameHeight);
+            player.mass = c.defaultPlayerMass;
             currentPlayer = player;
             users.push(currentPlayer);
+
+            console.log(users);
 
             io.emit('playerJoin', {
                 playersList: users,
@@ -177,6 +181,13 @@ io.on('connection', function (socket) {
 
     socket.on('ping', function () {
         socket.emit('pong');
+    });
+
+    socket.on('respawn', function () {
+        if(findIndex(users, currentPlayer.id) > -1)
+            users.splice(findIndex(users, currentPlayer.id), 1);
+        socket.emit('welcome', currentPlayer);
+        console.log('User #' + currentPlayer.id + ' respawned');
     });
 
     socket.on('disconnect', function () {

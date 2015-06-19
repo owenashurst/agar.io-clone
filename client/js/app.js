@@ -10,6 +10,7 @@
     var borderDraw = false;
     var wiggle = 0;
     var inc = +1;
+    var gameLoopHandle;
 
 
     var debug = function(args) {
@@ -22,9 +23,12 @@
         playerName = playerNameInput.value.replace(/(<([^>]+)>)/ig, '');
         document.getElementById('gameAreaWrapper').style.display = 'block';
         document.getElementById('startMenuWrapper').style.display = 'none';
-        socket = io();
-        setupSocket(socket);
+        if(!socket) {
+            socket = io();
+            setupSocket(socket);
+        }
         animloop();
+        socket.emit('respawn');
     }
 
     // check if nick is valid alphanumeric characters (and underscores)
@@ -364,6 +368,13 @@
         socket.on('RIP', function () {
             gameStart = false;
             died = true;
+            if(gameLoopHandle)
+                window.clearTimeout(gameLoopHandle);
+            window.setTimeout(function() {
+                document.getElementById('gameAreaWrapper').style.display = 'none';
+                document.getElementById('startMenuWrapper').style.display = 'block';
+                died = false;
+            }, 2500);
         });
 
         socket.on('kick', function (data) {
@@ -581,7 +592,7 @@
                 window.webkitRequestAnimationFrame ||
                 window.mozRequestAnimationFrame    ||
                 function( callback ) {
-                    window.setTimeout(callback, 1000 / 60);
+                    gameLoopHandle = window.setTimeout(callback, 1000 / 60);
                 };
     })();
 
@@ -591,7 +602,16 @@
     }
 
     function gameLoop() {
-        if (!disconnected) {
+        if (died) {
+            graph.fillStyle = '#333333';
+            graph.fillRect(0, 0, screenWidth, screenHeight);
+
+            graph.textAlign = 'center';
+            graph.fillStyle = '#FFFFFF';
+            graph.font = 'bold 30px sans-serif';
+            graph.fillText('You died!', screenWidth / 2, screenHeight / 2);
+        }
+        else if (!disconnected) {
             if (gameStart) {
                 graph.fillStyle = backgroundColor;
                 graph.fillRect(0, 0, screenWidth, screenHeight);
@@ -631,22 +651,16 @@
             graph.textAlign = 'center';
             graph.fillStyle = '#FFFFFF';
             graph.font = 'bold 30px sans-serif';
-
-            if (died) {
-                graph.fillText('You died!', screenWidth / 2, screenHeight / 2);
-            } else {
-                if(kicked) {
-                      if(reason !== '') {
-                           graph.fillText('You were kicked for reason ' + reason, screenWidth / 2, screenHeight / 2);
-                     }
-                     else {
-                          graph.fillText('You were kicked!', screenWidth / 2, screenHeight / 2);
-                     }
-                }
-                else {
-                      graph.fillText('Disconnected!', screenWidth / 2, screenHeight / 2);
-                }
-
+            if(kicked) {
+                  if(reason !== '') {
+                       graph.fillText('You were kicked for reason ' + reason, screenWidth / 2, screenHeight / 2);
+                 }
+                 else {
+                      graph.fillText('You were kicked!', screenWidth / 2, screenHeight / 2);
+                 }
+            }
+            else {
+                  graph.fillText('Disconnected!', screenWidth / 2, screenHeight / 2);
             }
         }
     }
