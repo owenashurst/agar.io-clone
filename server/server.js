@@ -9,7 +9,7 @@ var SAT = require('sat');
 
 
 var c = require('./config.json');
-var initMassLog = Math.log(c.defaultPlayerMass,c.slowDownLog);
+
 var users = [];
 var food = [];
 var sockets = {};
@@ -23,6 +23,9 @@ Math.log = (function() {
     return log(n)/(base ? log(base) : 1);
   };
 })();
+
+
+var initMassLog = Math.log(c.defaultPlayerMass, c.slowBase);
 
 app.use(express.static(__dirname + '/../client'));
 
@@ -83,7 +86,7 @@ function movePlayer(player, target) {
     var dist = Math.sqrt(Math.pow(target.y, 2) + Math.pow(target.x, 2));
     var deg = Math.atan2(target.y, target.x);
 
-    var slowDown = Math.log(player.mass,c.slowDownLog) - initMassLog + 1;
+    var slowDown = Math.log(player.mass, c.slowBase) - initMassLog + 1;
 
     var deltaY = player.speed * Math.sin(deg)/ slowDown;
     var deltaX = player.speed * Math.cos(deg)/ slowDown;

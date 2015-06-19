@@ -6,6 +6,6 @@
     "gameHeight": 5000,
     "adminPass": "DEFAULT",
     "gameMass": 2000,
-    "slowDownLog": 2.5,
+    "slowBase": 4,
     "logChat": 0
 }
