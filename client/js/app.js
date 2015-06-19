@@ -234,13 +234,15 @@
         }
     }
 
-    function toggleMass() {
-        if (toggleMassState === 0) {
-            toggleMassState = 1;
+    function toggleMass(args) {
+        var on = args[0] === 'on';
+        var off = args[0] === 'off';
+
+        if (on || (!off && !toggleMassState)) {
+            borderDraw = true;
             addSystemLine('Mass mode activated!');
-        }
-        else {
-            toggleMassState = 0;
+        } else {
+            borderDraw = false;
             addSystemLine('Mass mode deactivated!');
         }
     }
@@ -273,7 +275,7 @@
     });
 
     registerChatCommand('mass', 'View Mass', function () {
-        toggleMass();
+        toggleMass(args);
     });
 
     function sendChat(key) {
