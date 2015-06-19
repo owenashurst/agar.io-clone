@@ -297,7 +297,6 @@ io.on('connection', function (socket) {
             });
 
             playerCollisions.forEach(function(collision) {
-                //TODO: make overlap area-based
                 if (collision.aUser.mass > collision.bUser.mass * 1.1 && massToRadius(collision.aUser.mass) > Math.sqrt(Math.pow(collision.aUser.x - collision.bUser.x, 2) + Math.pow(collision.aUser.y - collision.bUser.y, 2))) {
                     console.log('KILLING USER: ' + collision.bUser.id);
                     console.log('collision info:');
@@ -314,7 +313,23 @@ io.on('connection', function (socket) {
 
                     collision.aUser.mass += collision.bUser.mass;
                     sockets[collision.bUser.id].emit('RIP');
-                    //sockets[collision.bUser.id].disconnect();
+                }
+                else if (collision.bUser.mass > collision.aUser.mass * 1.1 && massToRadius(collision.bUser.mass) > Math.sqrt(Math.pow(collision.bUser.x - collision.aUser.x, 2) + Math.pow(collision.bUser.y - collision.aUser.y, 2))) {
+                    console.log('KILLING USER: ' + collision.aUser.id);
+                    console.log('collision info:');
+                    console.log(collision);
+
+                    users.splice(findIndex(users, collision.aUser.id), 1);
+
+                    io.emit('playerDied',
+                        {
+                            playersList: users,
+                            disconnectName: collision.aUser.name
+                        }
+                    );
+
+                    collision.bUser.mass += collision.aUser.mass;
+                    sockets[collision.aUser.id].emit('RIP');
                 }
             });
 
