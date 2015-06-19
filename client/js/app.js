@@ -14,7 +14,7 @@
 
 
     var debug = function(args) {
-        if(console && console.log) {
+        if (console && console.log) {
             console.log(args);
         }
     };
@@ -23,11 +23,11 @@
         playerName = playerNameInput.value.replace(/(<([^>]+)>)/ig, '');
         document.getElementById('startMenuWrapper').style.maxHeight = '0px';
         document.getElementById('gameAreaWrapper').style.opacity = 1;
-        if(!socket) {
+        if (!socket) {
             socket = io();
             setupSocket(socket);
         }
-        if(!animLoopHandle)
+        if (!animLoopHandle)
             animloop();
         socket.emit('respawn');
     }
@@ -222,14 +222,14 @@
     }
 
     function toggleMass() {
-    	if (toggleMassState === 0) {
-    		toggleMassState = 1;
-    		addSystemLine('Mass mode activated!');
-    	}
-    	else {
-    		toggleMassState = 0;
-    		addSystemLine('Mass mode deactivated!');
-    	}
+        if (toggleMassState === 0) {
+            toggleMassState = 1;
+            addSystemLine('Mass mode activated!');
+        }
+        else {
+            toggleMassState = 0;
+            addSystemLine('Mass mode deactivated!');
+        }
     }
 
     var showMassSetting = document.getElementById('showMass');
@@ -256,7 +256,7 @@
     });
 
     registerChatCommand('mass', 'View Mass', function () {
-    	toggleMass();
+        toggleMass();
     });
 
     function sendChat(key) {
@@ -316,7 +316,7 @@
         socket.on('gameSetup', function(data) {
             gameWidth = data.gameWidth;
             gameHeight = data.gameHeight;
-         });
+        });
 
         socket.on('playerDied', function (data) {
             enemies = data.playersList;
@@ -360,7 +360,7 @@
 
         socket.on('serverUpdateAll', function (players, foodsList) {
             enemies = players;
-            if(foodsList !== 0) {
+            if (foodsList !== 0) {
                 foods = foodsList;
             }
         });
@@ -373,7 +373,7 @@
                 document.getElementById('gameAreaWrapper').style.opacity = 0;
                 document.getElementById('startMenuWrapper').style.maxHeight = '1000px';
                 died = false;
-                if(animLoopHandle) {
+                if (animLoopHandle) {
                     window.cancelAnimationFrame(animLoopHandle);
                     animLoopHandle = undefined;
                 }
@@ -657,8 +657,8 @@
     })();
 
     window.cancelAnimFrame = (function(handle) {
-        return window.cancelAnimationFrame     ||
-               window.mozCancelAnimationFrame;
+        return  window.cancelAnimationFrame     ||
+                window.mozCancelAnimationFrame;
     })();
 
     function animloop() {
@@ -686,7 +686,7 @@
                     drawFood(food);
                 });
 
-                if(borderDraw) {
+                if (borderDraw) {
                     drawborder();
                 }
 
@@ -716,13 +716,13 @@
             graph.textAlign = 'center';
             graph.fillStyle = '#FFFFFF';
             graph.font = 'bold 30px sans-serif';
-            if(kicked) {
-                  if(reason !== '') {
-                       graph.fillText('You were kicked for reason ' + reason, screenWidth / 2, screenHeight / 2);
-                 }
-                 else {
-                      graph.fillText('You were kicked!', screenWidth / 2, screenHeight / 2);
-                 }
+            if (kicked) {
+                if (reason !== '') {
+                    graph.fillText('You were kicked for reason ' + reason, screenWidth / 2, screenHeight / 2);
+                }
+                else {
+                    graph.fillText('You were kicked!', screenWidth / 2, screenHeight / 2);
+                }
             }
             else {
                   graph.fillText('Disconnected!', screenWidth / 2, screenHeight / 2);
