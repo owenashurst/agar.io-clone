@@ -113,10 +113,10 @@ function movePlayer(player, target) {
     if(player.y > c.gameHeight - borderCalc) {
         player.y = c.gameHeight - borderCalc;
     }
-    if(player.x <  borderCalc) {
+    if(player.x < borderCalc) {
         player.x = borderCalc;
     }
-    if(player.y <  borderCalc) {
+    if(player.y < borderCalc) {
         player.y = borderCalc;
     }
 }
