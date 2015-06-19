@@ -9,6 +9,10 @@
     "watch": "node ./node_modules/gulp/bin/gulp.js watch",
     "test": "node ./node_modules/jshint/bin/jshint ."
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/huytd/agar.io-clone.git"
+  },
   "author": "Huy Tran",
   "contributors": [
     "Igor Antun <igorantunc@hotmail.com> (https://github.com/IgorAntun)",
@@ -20,7 +24,8 @@
     "Ariamiro <dossantosgusmaosavio@gmail.com> (https://github.com/Ariamiro)",
     "VILLERS Mickaël <mickael.villers@epitech.eu> (https://github.com/villers)",
     "Dan Prince <dan@astrealdynamics.co.uk> (https://github.com/danprince)",
-    "Kostas Bariotis <konmpar@gmail.com> (https://github.com/kbariotis)"
+    "Kostas Bariotis <konmpar@gmail.com> (https://github.com/kbariotis)",
+    "Jerry Xu <jerryxu23@gmail.com> (https://github.com/abalabahaha)"
   ],
   "dependencies": {
     "bower": "^1.4.1",
