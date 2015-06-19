@@ -139,6 +139,11 @@ function balanceMass() {
     }
 }
 
+function validNick(player) {
+    var regex = /^\w*$/;
+    return regex.exec(player.name) !== null;
+}
+
 io.on('connection', function (socket) {
     console.log('A user connected!');
 
@@ -156,8 +161,10 @@ io.on('connection', function (socket) {
         if (findIndex(users, player.id) > -1) {
             console.log('That playerID is already connected, kicking');
             socket.disconnect();
-        }
-        else {
+        } else if (!validNick(player)) {
+            socket.emit('kick', 'Invalid username');
+            socket.disconnect();
+        } else {
             console.log('Player ' + player.id + ' connected!');
             sockets[player.id] = socket;
 

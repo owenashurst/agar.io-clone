@@ -188,6 +188,10 @@ html, body, canvas {
     overflow: hidden;
 }
 
+#settings {
+    max-height: 0;
+}
+
 #startMenu h3 {
     padding-bottom: 0;
     margin-bottom: 0;
@@ -201,12 +205,17 @@ html, body, canvas {
 
 #startMenu .input-error {
     color: red;
-    display: none;
+    opacity: 0;
     font-size : 12px;
+}
+
+#startMenuWrapper {
+    z-index: 2;
 }
 
 #gameAreaWrapper {
     position: absolute !important;
     top: 0;
     left: 0;
+    opacity: 0;
 }

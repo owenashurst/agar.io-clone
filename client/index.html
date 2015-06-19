@@ -6,7 +6,7 @@
     <link rel="stylesheet" href="css/main.css" />
 </head>
 <body>
-    <div id="gameAreaWrapper" style="opacity: 0;">
+    <div id="gameAreaWrapper">
         <div id="status">Players: 0</div>
         <div class="chatbox">
             <ul id="chatList" class="chat-list"></ul>
@@ -14,7 +14,7 @@
         </div>
         <canvas tabindex="1" id="cvs"></canvas>
     </div>
-    <div id="startMenuWrapper" style="z-index: 2">
+    <div id="startMenuWrapper">
         <div id="startMenu">
             <p>Open Agar</p>
             <input type="text" tabindex="0" autofocus placeholder="Enter your name here" id="playerNameInput" />
@@ -23,7 +23,7 @@
             <button id="startButton">Play</button>
             <button id="settingsButton">Settings</button>
             <br />
-            <div id="settings" style="max-height: 0">
+            <div id="settings">
                 <h3>Settings</h3>
                 <ul>
                     <label><input id="visBord" type="checkbox">Show borders</label>
