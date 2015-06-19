@@ -358,13 +358,6 @@
             foods = foodsList;
         });
 
-        socket.on('serverUpdateAll', function (players, foodsList) {
-            enemies = players;
-            if (foodsList !== 0) {
-                foods = foodsList;
-            }
-        });
-
         // Die
         socket.on('RIP', function () {
             gameStart = false;
