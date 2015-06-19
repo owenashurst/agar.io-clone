@@ -312,16 +312,16 @@
             gameHeight = data.gameHeight;
          });
 
-        socket.on('playerDisconnect', function (data) {
-            enemies = data.playersList;
-            document.getElementById('status').innerHTML = 'Players: ' + enemies.length;
-            addSystemLine('Player <b>' + data.disconnectName + '</b> disconnected!');
-        });
-
         socket.on('playerDied', function (data) {
             enemies = data.playersList;
             document.getElementById('status').innerHTML = 'Players: ' + enemies.length;
             addSystemLine('Player <b>' + data.disconnectName + '</b> died!');
+        });
+
+        socket.on('playerDisconnect', function (data) {
+            enemies = data.playersList;
+            document.getElementById('status').innerHTML = 'Players: ' + enemies.length;
+            addSystemLine('Player <b>' + data.disconnectName + '</b> disconnected!');
         });
 
         socket.on('playerJoin', function (data) {
@@ -363,7 +363,6 @@
         socket.on('RIP', function () {
             gameStart = false;
             died = true;
-            // socket.close();
         });
 
         socket.on('kick', function (data) {

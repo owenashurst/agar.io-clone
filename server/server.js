@@ -104,7 +104,7 @@ function movePlayer(player, target) {
         player.x += deltaX;
     }
 
-    var borderCalc = massToRadius(player.mass) / 4;
+    var borderCalc = massToRadius(player.mass) / 3;
 
     if(player.x > c.gameWidth - borderCalc) {
         player.x = c.gameWidth - borderCalc;
@@ -180,7 +180,8 @@ io.on('connection', function (socket) {
     });
 
     socket.on('disconnect', function () {
-        users.splice(findIndex(users, currentPlayer.id), 1);
+        if(findIndex(users, currentPlayer.id) > -1)
+            users.splice(findIndex(users, currentPlayer.id), 1);
         console.log('User #' + currentPlayer.id + ' disconnected');
 
         socket.broadcast.emit(
@@ -302,9 +303,18 @@ io.on('connection', function (socket) {
                     console.log('collision info:');
                     console.log(collision);
 
+                    users.splice(findIndex(users, collision.bUser.id), 1);
+
+                    io.emit('playerDied',
+                        {
+                            playersList: users,
+                            disconnectName: collision.bUser.name
+                        }
+                    );
+
                     collision.aUser.mass += collision.bUser.mass;
                     sockets[collision.bUser.id].emit('RIP');
-                    sockets[collision.bUser.id].disconnect();
+                    //sockets[collision.bUser.id].disconnect();
                 }
             });
 
