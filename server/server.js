@@ -172,7 +172,10 @@ io.on('connection', function (socket) {
                 connectedName: currentPlayer.name
             });
 
-            socket.emit('gameSetup', c);
+            socket.emit('gameSetup', {
+                gameWidth: c.gameWidth,
+                gameHeight: c.gameHeight
+            });
             console.log('Total player: ' + users.length);
         }
 
