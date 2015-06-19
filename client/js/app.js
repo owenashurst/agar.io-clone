@@ -525,7 +525,7 @@
         var circle = {
             x: enemy.x - player.x + screenWidth / 2,
             y: enemy.y - player.y + screenHeight / 2
-        }
+        };
 
         graph.strokeStyle = 'hsl(' + enemy.hue + ', 80%, 40%)';
         graph.fillStyle = 'hsl(' + enemy.hue + ', 70%, 50%)';
