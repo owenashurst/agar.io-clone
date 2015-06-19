@@ -213,6 +213,19 @@
         }
     }
 
+    function toggleBorder(args) {
+        var on = args[0] === 'on';
+        var off = args[0] === 'off';
+
+        if (on || (!off && !borderDraw)) {
+            borderDraw = true;
+            addSystemLine('Showing border');
+        } else {
+            borderDraw = false;
+            addSystemLine('Hiding border');
+        }
+    }
+
     function printHelp() {
         for (var command in chatCommands) {
             if (chatCommands.hasOwnProperty(command)) {
@@ -241,6 +254,10 @@
 
     registerChatCommand('dark', 'Toggle dark mode', function (args) {
         toggleDarkMode(args);
+    });
+
+    registerChatCommand('border', 'Toggle border', function (args) {
+        toggleBorder(args);
     });
 
     registerChatCommand('help', 'Chat commands information', function () {
