@@ -196,6 +196,11 @@ io.on('connection', function (socket) {
         socket.emit('pong');
     });
 
+    socket.on('windowResized', function (data) {
+        currentPlayer.screenWidth = data.screenWidth;
+        currentPlayer.screenHeight = data.screenHeight;
+    });
+
     socket.on('respawn', function () {
         if (findIndex(users, currentPlayer.id) > -1)
             users.splice(findIndex(users, currentPlayer.id), 1);
@@ -362,7 +367,7 @@ function tickPlayer(currentPlayer) {
                 f.x < currentPlayer.x + currentPlayer.screenWidth/2 + 20 &&
                 f.y > currentPlayer.y - currentPlayer.screenHeight/2 - 20 &&
                 f.y < currentPlayer.y + currentPlayer.screenHeight/2 + 20) {
-            return f;
+                return f;
             }
         })
         .filter(function(f) { return f; });
@@ -374,7 +379,14 @@ function tickPlayer(currentPlayer) {
                 f.y > currentPlayer.y - currentPlayer.screenHeight/2 - 20 &&
                 f.y < currentPlayer.y + currentPlayer.screenHeight/2 + 20 &&
                 f.id !== currentPlayer.id) {
-            return f;
+                return {
+                    id: f.id,
+                    x: f.x,
+                    y: f.y,
+                    mass: f.mass,
+                    hue: enemy.hue,
+                    name: enemy.name
+                };
             }
         })
         .filter(function(f) { return f; });

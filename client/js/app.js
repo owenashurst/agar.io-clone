@@ -746,9 +746,8 @@
     }
 
     window.addEventListener('resize', function() {
-        screenWidth = window.innerWidth;
-        screenHeight = window.innerHeight;
-        player.screenWidth = c.width = screenWidth;
-        player.screenHeight = c.height = screenHeight;
+        player.screenWidth = c.width = screenWidth = window.innerWidth;
+        player.screenHeight = c.height = screenHeight = window.innerHeight;
+        socket.emit('windowResized', { screenWidth: screenWidth, screenHeight: screenHeight });
     }, true);
 })();
