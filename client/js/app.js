@@ -136,6 +136,7 @@
 
     var foods = [];
     var enemies = [];
+    var leaderboard = [];
     var target = {x: player.x, y: player.y};
 
     var c = document.getElementById('cvs');
@@ -371,21 +372,29 @@
         });
 
         socket.on('playerDied', function (data) {
-            enemies = data.playersList;
-            document.getElementById('status').innerHTML = 'Players: ' + enemies.length;
             addSystemLine('Player <b>' + data.disconnectName + '</b> died!');
         });
 
         socket.on('playerDisconnect', function (data) {
-            enemies = data.playersList;
-            document.getElementById('status').innerHTML = 'Players: ' + enemies.length;
             addSystemLine('Player <b>' + data.disconnectName + '</b> disconnected!');
         });
 
         socket.on('playerJoin', function (data) {
-            enemies = data.playersList;
-            document.getElementById('status').innerHTML = 'Players: ' + enemies.length;
             addSystemLine('Player <b>' + data.connectedName + '</b> joined!');
+        });
+
+        socket.on('leaderboard', function (data) {
+            console.log("a");
+            leaderboard = data.leaderboard;
+            var status = 'Players: ' + data.players;
+            for (var i = 0; i < leaderboard.length; i++) {
+                status += '<br />';
+                if (leaderboard[i].id == player.id)
+                    status += '<span class="me">' + (i + 1) + '. ' + leaderboard[i].name + "</span>";
+                else
+                    status += (i + 1) + '. ' + leaderboard[i].name;
+            }
+            document.getElementById('status').innerHTML = status;
         });
 
         socket.on('serverMSG', function (data) {
@@ -740,9 +749,7 @@
                 }
 
                 for (var i = 0; i < enemies.length; i++) {
-                    if (enemies[i].id !== player.id) {
-                        drawEnemy(enemies[i]);
-                    }
+                    drawEnemy(enemies[i]);
                 }
 
                 drawPlayer();
@@ -767,7 +774,8 @@
             graph.font = 'bold 30px sans-serif';
             if (kicked) {
                 if (reason !== '') {
-                    graph.fillText('You were kicked for reason: ' + reason, screenWidth / 2, screenHeight / 2);
+                    graph.fillText('You were kicked for reason:', screenWidth / 2, screenHeight / 2 - 20);
+                    graph.fillText(reason, screenWidth / 2, screenHeight / 2 + 20);
                 }
                 else {
                     graph.fillText('You were kicked!', screenWidth / 2, screenHeight / 2);

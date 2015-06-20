@@ -14,6 +14,9 @@ var users = [];
 var food = [];
 var sockets = {};
 
+var leaderboard = [];
+var leaderboardChanged = false;
+
 var V = SAT.Vector;
 var C = SAT.Circle;
 
@@ -38,7 +41,7 @@ function addFood(toAdd) {
     while (toAdd--) {
         food.push({
             // make ids unique
-            id: ((new Date()).getTime() + '' + (new Date()).getMilliseconds() + '' + food.length) >>> 0,
+            id: ((new Date()).getTime() + '' + food.length) >>> 0,
             x: genPos(radius, c.gameWidth - radius),
             y: genPos(radius, c.gameHeight - radius),
             color: randomColor(),
@@ -180,10 +183,7 @@ io.on('connection', function (socket) {
             currentPlayer.lastHeartbeat = new Date().getTime();
             users.push(currentPlayer);
 
-            io.emit('playerJoin', {
-                playersList: users,
-                connectedName: currentPlayer.name
-            });
+            io.emit('playerJoin', { connectedName: currentPlayer.name });
 
             socket.emit('gameSetup', {
                 gameWidth: c.gameWidth,
@@ -215,10 +215,7 @@ io.on('connection', function (socket) {
             users.splice(findIndex(users, currentPlayer.id), 1);
         console.log('User #' + currentPlayer.id + ' disconnected');
 
-        socket.broadcast.emit('playerDisconnect', {
-            playersList: users,
-            disconnectName: currentPlayer.name
-        });
+        socket.broadcast.emit('playerDisconnect', { connectedName: currentPlayer.name });
     });
 
     socket.on('playerChat', function(data) {
@@ -359,10 +356,7 @@ function tickPlayer(currentPlayer) {
             if (findIndex(users, collision.aUser.id) > -1)
                 users.splice(findIndex(users, collision.aUser.id), 1);
 
-            io.emit('playerDied', {
-                playersList: users,
-                disconnectName: collision.aUser.name
-            });
+            io.emit('playerDied', { connectedName: currentPlayer.name });
 
             collision.bUser.mass += collision.aUser.mass;
             sockets[collision.aUser.id].emit('RIP');
@@ -372,11 +366,32 @@ function tickPlayer(currentPlayer) {
 
 function gameloop() {
 
-    for (var i = 0; i < users.length; i++)
+    for (var i = 0; i < users.length; i++) {
         tickPlayer(users[i]);
+    }
 
-    // rebalance mass
-    balanceMass();
+    if (users.length > 0) {
+        var topUsers = users;
+        topUsers.sort( function(a, b) { return b.mass - a.mass; });
+        if (topUsers.length > 10)
+            topUsers.splice(10, topUsers.length - 10);
+        if (isNaN(leaderboard) || leaderboard.length !== topUsers.length) {
+            leaderboard = topUsers;
+            leaderboardChanged = true;
+        }
+        else {
+            for (i = 0; i < leaderboard.length; i++) {
+                if (leaderboard[i].id !== topUsers[i].id) {
+                    leaderboard = topUsers;
+                    leaderboardChanged = true;
+                    break;
+                }
+            }
+        }
+
+        // rebalance mass
+        balanceMass();
+    }
 }
 
 function sendUpdates() {
@@ -416,7 +431,14 @@ function sendUpdates() {
             y: u.y,
             mass: u.mass
         }, visibleEnemies, visibleFood);
+        if (leaderboardChanged) {
+            sockets[u.id].emit('leaderboard', {
+                players: users.length,
+                leaderboard: leaderboard
+            });
+        }
     });
+    leaderboardChanged = false;
 }
 
 setInterval(gameloop, 1000 / 60);
