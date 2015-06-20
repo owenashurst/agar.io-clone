@@ -7,5 +7,6 @@
     "adminPass": "DEFAULT",
     "gameMass": 2000,
     "slowBase": 4,
-    "logChat": 0
+    "logChat": 0,
+    "networkUpdateFactor": 40
 }

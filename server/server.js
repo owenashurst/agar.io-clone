@@ -360,42 +360,6 @@ function tickPlayer(currentPlayer) {
             sockets[collision.aUser.id].emit('RIP');
         }
     });
-
-    var visibleFood  = food
-        .map(function(f) {
-            if ( f.x > currentPlayer.x - currentPlayer.screenWidth/2 - 20 &&
-                f.x < currentPlayer.x + currentPlayer.screenWidth/2 + 20 &&
-                f.y > currentPlayer.y - currentPlayer.screenHeight/2 - 20 &&
-                f.y < currentPlayer.y + currentPlayer.screenHeight/2 + 20) {
-                return f;
-            }
-        })
-        .filter(function(f) { return f; });
-
-    var visibleEnemies  = users
-        .map(function(f) {
-            if ( f.x > currentPlayer.x - currentPlayer.screenWidth/2 - 20 &&
-                f.x < currentPlayer.x + currentPlayer.screenWidth/2 + 20 &&
-                f.y > currentPlayer.y - currentPlayer.screenHeight/2 - 20 &&
-                f.y < currentPlayer.y + currentPlayer.screenHeight/2 + 20 &&
-                f.id !== currentPlayer.id) {
-                return {
-                    id: f.id,
-                    x: f.x,
-                    y: f.y,
-                    mass: f.mass,
-                    hue: enemy.hue,
-                    name: enemy.name
-                };
-            }
-        })
-        .filter(function(f) { return f; });
-
-    sockets[currentPlayer.id].emit('serverTellPlayerMove', {
-        x: currentPlayer.x,
-        y: currentPlayer.y,
-        mass: currentPlayer.mass
-    }, visibleEnemies, visibleFood);
 }
 
 function gameloop() {
@@ -407,7 +371,48 @@ function gameloop() {
     balanceMass();
 }
 
+function sendUpdates() {
+    users.forEach( function(u) {
+        var visibleFood  = food
+            .map(function(f) {
+                if ( f.x > u.x - u.screenWidth/2 - 20 &&
+                    f.x < u.x + u.screenWidth/2 + 20 &&
+                    f.y > u.y - u.screenHeight/2 - 20 &&
+                    f.y < u.y + u.screenHeight/2 + 20) {
+                    return f;
+                }
+            })
+            .filter(function(f) { return f; });
+
+        var visibleEnemies  = users
+            .map(function(f) {
+                if ( f.x > u.x - u.screenWidth/2 - 20 &&
+                    f.x < u.x + u.screenWidth/2 + 20 &&
+                    f.y > u.y - u.screenHeight/2 - 20 &&
+                    f.y < u.y + u.screenHeight/2 + 20 &&
+                    f.id !== u.id) {
+                    return {
+                        id: f.id,
+                        x: f.x,
+                        y: f.y,
+                        mass: f.mass,
+                        hue: f.hue,
+                        name: f.name
+                    };
+                }
+            })
+            .filter(function(f) { return f; });
+
+        sockets[u.id].emit('serverTellPlayerMove', {
+            x: u.x,
+            y: u.y,
+            mass: u.mass
+        }, visibleEnemies, visibleFood);
+    });
+}
+
 setInterval(gameloop, 1000 / 60);
+setInterval(sendUpdates, 1000 / c.networkUpdateFactor);
 
 // Don't touch on ip
 var ipaddress = process.env.OPENSHIFT_NODEJS_IP || process.env.IP || '127.0.0.1';
