@@ -239,10 +239,10 @@
         var off = args[0] === 'off';
 
         if (on || (!off && !toggleMassState)) {
-            borderDraw = true;
+            toggleMassState = true;
             addSystemLine('Mass mode activated!');
         } else {
-            borderDraw = false;
+            toggleMassState = false;
             addSystemLine('Mass mode deactivated!');
         }
     }
@@ -274,7 +274,7 @@
         socket.emit('kick', args);
     });
 
-    registerChatCommand('mass', 'View Mass', function () {
+    registerChatCommand('mass', 'View Mass', function (args) {
         toggleMass(args);
     });
 
