@@ -367,7 +367,23 @@ function tickPlayer(currentPlayer) {
         })
         .filter(function(f) { return f; });
 
-    sockets[currentPlayer.id].emit('serverTellPlayerMove', currentPlayer, users, visibleFood);
+    var visibleEnemies  = users
+        .map(function(f) {
+            if ( f.x > currentPlayer.x - currentPlayer.screenWidth/2 - 20 &&
+                f.x < currentPlayer.x + currentPlayer.screenWidth/2 + 20 &&
+                f.y > currentPlayer.y - currentPlayer.screenHeight/2 - 20 &&
+                f.y < currentPlayer.y + currentPlayer.screenHeight/2 + 20 &&
+                f.id !== currentPlayer.id) {
+            return f;
+            }
+        })
+        .filter(function(f) { return f; });
+
+    sockets[currentPlayer.id].emit('serverTellPlayerMove', {
+        x: currentPlayer.x,
+        y: currentPlayer.y,
+        mass: currentPlayer.mass
+    }, visibleEnemies, visibleFood);
 }
 
 function gameloop() {
@@ -377,10 +393,9 @@ function gameloop() {
 
     // rebalance mass
     balanceMass();
-    setTimeout(gameloop, 1000/50);
 }
 
-gameloop();
+setInterval(gameloop, 1000 / 60);
 
 // Don't touch on ip
 var ipaddress = process.env.OPENSHIFT_NODEJS_IP || process.env.IP || '127.0.0.1';
