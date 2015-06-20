@@ -153,6 +153,7 @@ io.on('connection', function (socket) {
         y: genPos(0, c.gameHeight),
         mass: c.defaultPlayerMass,
         hue: Math.round(Math.random() * 360),
+        lastHeartbeat: new Date().getTime(),
         target: {
             x: 0,
             y: 0
@@ -176,6 +177,7 @@ io.on('connection', function (socket) {
             player.y = genPos(0, c.gameHeight);
             player.mass = c.defaultPlayerMass;
             currentPlayer = player;
+            currentPlayer.lastHeartbeat = new Date().getTime();
             users.push(currentPlayer);
 
             io.emit('playerJoin', {
@@ -281,6 +283,7 @@ io.on('connection', function (socket) {
 
     // Heartbeat function, update everytime
     socket.on('0', function(target) {
+        currentPlayer.lastHeartbeat = new Date().getTime();
         if (target.x !== currentPlayer.x || target.y !== currentPlayer.y) {
             currentPlayer.target = target;
         }
@@ -288,6 +291,11 @@ io.on('connection', function (socket) {
 });
 
 function tickPlayer(currentPlayer) {
+
+    if(currentPlayer.lastHeartbeat < new Date().getTime() - c.maxHeartbeatInterval) {
+        sockets[currentPlayer.id].emit('kick', 'Last heartbeat received over ' + c.maxHeartbeatInterval + ' ago.');
+        sockets[currentPlayer.id].disconnect();
+    }
 
     movePlayer(currentPlayer);
 
