@@ -17,12 +17,17 @@ html, body, canvas {
 #status {
     position: absolute;
     padding: 10px;
-    background: rgba(0, 0, 0, 0.7);
+    background: rgba(0, 0, 0, 0.6);
     color: #FFF;
-    font-size: 20px;
+    font-size: 18px;
     top: 0;
     right: 0;
     text-align: right;
+}
+
+#status .me {
+    color: #FF3838;
+    font-size: 22px;
 }
 
 .chatbox {

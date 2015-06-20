@@ -94,6 +94,8 @@
     var died = false;
     var kicked = false;
 
+    var continuity = false;
+
     var startPingTime = 0;
 
     var chatCommands = {};
@@ -130,10 +132,12 @@
         y: screenHeight / 2,
         screenWidth: screenWidth,
         screenHeight: screenHeight,
+        target: {x: screenWidth / 2, y: screenHeight / 2}
     };
 
     var foods = [];
     var enemies = [];
+    var leaderboard = [];
     var target = {x: player.x, y: player.y};
 
     var c = document.getElementById('cvs');
@@ -143,19 +147,19 @@
 
     // register when the mouse goes off the canvas
     function outOfBounds() {
-        target = { x : 0, y: 0 };
-    }
-
-    function visibleBorder() {
-        if (document.getElementById('visBord').checked) {
-            borderDraw = true;
-        } else {
-            borderDraw = false;
+        if (!continuity) {
+            target = { x : 0, y: 0 };
         }
     }
 
     var visibleBorderSetting = document.getElementById('visBord');
-    visibleBorderSetting.onchange = visibleBorder;
+    visibleBorderSetting.onchange = toggleBorder;
+
+    var showMassSetting = document.getElementById('showMass');
+    showMassSetting.onchange = toggleMass;
+
+    var continuitySetting = document.getElementById('continuity');
+    continuitySetting.onchange = toggleContinuity;
 
     var graph = c.getContext('2d');
 
@@ -201,8 +205,12 @@
     function toggleDarkMode(args) {
         var LIGHT = '#EEEEEE';
         var DARK = '#181818';
-        var on = args[0] === 'on';
-        var off = args[0] === 'off';
+        var on = false;
+        var off = false;
+        if (!isNaN(args)) {
+            on = args[0] === 'on';
+            off = args[0] === 'off';
+        }
 
         if (on || (!off && backgroundColor === LIGHT)) {
             backgroundColor = DARK;
@@ -214,8 +222,12 @@
     }
 
     function toggleBorder(args) {
-        var on = args[0] === 'on';
-        var off = args[0] === 'off';
+        var on = false;
+        var off = false;
+        if (!isNaN(args)) {
+            on = args[0] === 'on';
+            off = args[0] === 'off';
+        }
 
         if (on || (!off && !borderDraw)) {
             borderDraw = true;
@@ -226,17 +238,13 @@
         }
     }
 
-    function printHelp() {
-        for (var command in chatCommands) {
-            if (chatCommands.hasOwnProperty(command)) {
-                addSystemLine('-' + command + ': ' + chatCommands[command].description);
-            }
-        }
-    }
-
     function toggleMass(args) {
-        var on = args[0] === 'on';
-        var off = args[0] === 'off';
+        var on = false;
+        var off = false;
+        if (!isNaN(args)) {
+            on = args[0] === 'on';
+            off = args[0] === 'off';
+        }
 
         if (on || (!off && !toggleMassState)) {
             toggleMassState = true;
@@ -247,8 +255,30 @@
         }
     }
 
-    var showMassSetting = document.getElementById('showMass');
-    showMassSetting.onchange = toggleMass;
+    function toggleContinuity(args) {
+        var on = false;
+        var off = false;
+        if (!isNaN(args)) {
+            on = args[0] === 'on';
+            off = args[0] === 'off';
+        }
+
+        if (on || (!off && !continuity)) {
+            continuity = true;
+            addSystemLine('Continuity activated!');
+        } else {
+            continuity = false;
+            addSystemLine('Continuity deactivated!');
+        }
+    }
+
+    function printHelp() {
+        for (var command in chatCommands) {
+            if (chatCommands.hasOwnProperty(command)) {
+                addSystemLine('-' + command + ': ' + chatCommands[command].description);
+            }
+        }
+    }
 
     registerChatCommand('ping', 'Check your latency', function () {
         checkLatency();
@@ -262,6 +292,14 @@
         toggleBorder(args);
     });
 
+    registerChatCommand('mass', 'View mass', function (args) {
+        toggleMass(args);
+    });
+
+    registerChatCommand('continuity', 'Toggle continuity', function (args) {
+        toggleContinuity(args);
+    });
+
     registerChatCommand('help', 'Chat commands information', function () {
         printHelp();
     });
@@ -272,10 +310,6 @@
 
     registerChatCommand('kick', 'Kick a player', function (args) {
         socket.emit('kick', args);
-    });
-
-    registerChatCommand('mass', 'View Mass', function (args) {
-        toggleMass(args);
     });
 
     function sendChat(key) {
@@ -324,6 +358,7 @@
             player.name = playerName;
             player.screenWidth = screenWidth;
             player.screenHeight = screenHeight;
+            player.target = target;
             socket.emit('gotit', player);
             gameStart = true;
             debug('Game is started: ' + gameStart);
@@ -338,21 +373,29 @@
         });
 
         socket.on('playerDied', function (data) {
-            enemies = data.playersList;
-            document.getElementById('status').innerHTML = 'Players: ' + enemies.length;
-            addSystemLine('Player <b>' + data.disconnectName + '</b> died!');
+            addSystemLine('Player <b>' + data.name + '</b> died!');
         });
 
         socket.on('playerDisconnect', function (data) {
-            enemies = data.playersList;
-            document.getElementById('status').innerHTML = 'Players: ' + enemies.length;
-            addSystemLine('Player <b>' + data.disconnectName + '</b> disconnected!');
+            addSystemLine('Player <b>' + data.name + '</b> disconnected!');
         });
 
         socket.on('playerJoin', function (data) {
-            enemies = data.playersList;
-            document.getElementById('status').innerHTML = 'Players: ' + enemies.length;
-            addSystemLine('Player <b>' + data.connectedName + '</b> joined!');
+            addSystemLine('Player <b>' + data.name + '</b> joined!');
+        });
+
+        socket.on('leaderboard', function (data) {
+            console.log("a");
+            leaderboard = data.leaderboard;
+            var status = 'Players: ' + data.players;
+            for (var i = 0; i < leaderboard.length; i++) {
+                status += '<br />';
+                if (leaderboard[i].id == player.id)
+                    status += '<span class="me">' + (i + 1) + '. ' + leaderboard[i].name + "</span>";
+                else
+                    status += (i + 1) + '. ' + leaderboard[i].name;
+            }
+            document.getElementById('status').innerHTML = status;
         });
 
         socket.on('serverMSG', function (data) {
@@ -369,7 +412,9 @@
             var xoffset = player.x - playerData.x;
             var yoffset = player.y - playerData.y;
 
-            player = playerData;
+            player.x = playerData.x;
+            player.y = playerData.y;
+            player.mass = playerData.mass;
             player.xoffset = isNaN(xoffset) ? 0 : xoffset;
             player.yoffset = isNaN(yoffset) ? 0 : yoffset;
 
@@ -472,28 +517,30 @@
             rad2 = diff;
         }
 
-        p.x = circle.x + radius * Math.cos(rad1 * Math.PI);
-        p.y = circle.y - radius * Math.sin(rad1 * Math.PI);
-        q.x = circle.x + radius * Math.cos(rad2 * Math.PI);
-        q.y = circle.y - radius * Math.sin(rad2 * Math.PI);
-
         graph.lineJoin = 'round';
         graph.lineCap = 'round';
         graph.beginPath();
         graph.arc(circle.x, circle.y, radius, -rad2 * Math.PI, -rad1 * Math.PI);
         graph.fill();
         graph.stroke();
-        
-        if (p.x > 0 || p.y > 0) {
-            if (wiggle >= radius / 3) inc = -1;
-            if (wiggle <= radius / -3) inc = +1;
-            wiggle += inc;
-            graph.beginPath();
-            graph.lineJoin = 'round';
-            graph.moveTo(p.x, p.y);
-            graph.bezierCurveTo(p.x + wiggle / 3, p.y - wiggle / 3, q.x - wiggle / 3, q.y + wiggle / 3, q.x, q.y);
-            graph.stroke();
-            graph.fill();
+
+        if (rad1 !== 0 && rad2 !== -2) {
+            p.x = circle.x + radius * Math.cos(rad1 * Math.PI);
+            p.y = circle.y - radius * Math.sin(rad1 * Math.PI);
+            q.x = circle.x + radius * Math.cos(rad2 * Math.PI);
+            q.y = circle.y - radius * Math.sin(rad2 * Math.PI);
+            
+            if (p.x > 0 || p.y > 0) {
+                if (wiggle >= radius / 3) inc = -1;
+                if (wiggle <= radius / -3) inc = +1;
+                wiggle += inc;
+                graph.beginPath();
+                graph.lineJoin = 'round';
+                graph.moveTo(p.x, p.y);
+                graph.bezierCurveTo(p.x + wiggle / 3, p.y - wiggle / 3, q.x - wiggle / 3, q.y + wiggle / 3, q.x, q.y);
+                graph.stroke();
+                graph.fill();
+            }
         }
 
         var fontSize = (massToRadius(player.mass) / 2);
@@ -703,9 +750,7 @@
                 }
 
                 for (var i = 0; i < enemies.length; i++) {
-                    if (enemies[i].id !== player.id) {
-                        drawEnemy(enemies[i]);
-                    }
+                    drawEnemy(enemies[i]);
                 }
 
                 drawPlayer();
@@ -730,7 +775,8 @@
             graph.font = 'bold 30px sans-serif';
             if (kicked) {
                 if (reason !== '') {
-                    graph.fillText('You were kicked for reason: ' + reason, screenWidth / 2, screenHeight / 2);
+                    graph.fillText('You were kicked for reason:', screenWidth / 2, screenHeight / 2 - 20);
+                    graph.fillText(reason, screenWidth / 2, screenHeight / 2 + 20);
                 }
                 else {
                     graph.fillText('You were kicked!', screenWidth / 2, screenHeight / 2);
@@ -743,9 +789,8 @@
     }
 
     window.addEventListener('resize', function() {
-        screenWidth = window.innerWidth;
-        screenHeight = window.innerHeight;
-        player.screenWidth = c.width = screenWidth;
-        player.screenHeight = c.height = screenHeight;
+        player.screenWidth = c.width = screenWidth = window.innerWidth;
+        player.screenHeight = c.height = screenHeight = window.innerHeight;
+        socket.emit('windowResized', { screenWidth: screenWidth, screenHeight: screenHeight });
     }, true);
 })();
