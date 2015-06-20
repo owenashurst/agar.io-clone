@@ -364,7 +364,7 @@ function tickPlayer(currentPlayer) {
 
 function gameloop() {
 
-    for(var i = 0; i < users.length; i++)
+    for (var i = 0; i < users.length; i++)
         tickPlayer(users[i]);
 
     // rebalance mass

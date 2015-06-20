@@ -94,6 +94,8 @@
     var died = false;
     var kicked = false;
 
+    var continuity = false;
+
     var startPingTime = 0;
 
     var chatCommands = {};
@@ -143,19 +145,19 @@
 
     // register when the mouse goes off the canvas
     function outOfBounds() {
-        target = { x : 0, y: 0 };
-    }
-
-    function visibleBorder() {
-        if (document.getElementById('visBord').checked) {
-            borderDraw = true;
-        } else {
-            borderDraw = false;
+        if (!continuity) {
+            target = { x : 0, y: 0 };
         }
     }
 
     var visibleBorderSetting = document.getElementById('visBord');
-    visibleBorderSetting.onchange = visibleBorder;
+    visibleBorderSetting.onchange = toggleBorder;
+
+    var showMassSetting = document.getElementById('showMass');
+    showMassSetting.onchange = toggleMass;
+
+    var continuitySetting = document.getElementById('continuity');
+    continuitySetting.onchange = toggleContinuity;
 
     var graph = c.getContext('2d');
 
@@ -201,8 +203,12 @@
     function toggleDarkMode(args) {
         var LIGHT = '#EEEEEE';
         var DARK = '#181818';
-        var on = args[0] === 'on';
-        var off = args[0] === 'off';
+        var on = false;
+        var off = false;
+        if (!isNaN(args)) {
+            on = args[0] === 'on';
+            off = args[0] === 'off';
+        }
 
         if (on || (!off && backgroundColor === LIGHT)) {
             backgroundColor = DARK;
@@ -214,8 +220,12 @@
     }
 
     function toggleBorder(args) {
-        var on = args[0] === 'on';
-        var off = args[0] === 'off';
+        var on = false;
+        var off = false;
+        if (!isNaN(args)) {
+            on = args[0] === 'on';
+            off = args[0] === 'off';
+        }
 
         if (on || (!off && !borderDraw)) {
             borderDraw = true;
@@ -226,17 +236,13 @@
         }
     }
 
-    function printHelp() {
-        for (var command in chatCommands) {
-            if (chatCommands.hasOwnProperty(command)) {
-                addSystemLine('-' + command + ': ' + chatCommands[command].description);
-            }
-        }
-    }
-
     function toggleMass(args) {
-        var on = args[0] === 'on';
-        var off = args[0] === 'off';
+        var on = false;
+        var off = false;
+        if (!isNaN(args)) {
+            on = args[0] === 'on';
+            off = args[0] === 'off';
+        }
 
         if (on || (!off && !toggleMassState)) {
             toggleMassState = true;
@@ -247,8 +253,30 @@
         }
     }
 
-    var showMassSetting = document.getElementById('showMass');
-    showMassSetting.onchange = toggleMass;
+    function toggleContinuity(args) {
+        var on = false;
+        var off = false;
+        if (!isNaN(args)) {
+            on = args[0] === 'on';
+            off = args[0] === 'off';
+        }
+
+        if (on || (!off && !continuity)) {
+            continuity = true;
+            addSystemLine('Continuity activated!');
+        } else {
+            continuity = false;
+            addSystemLine('Continuity deactivated!');
+        }
+    }
+
+    function printHelp() {
+        for (var command in chatCommands) {
+            if (chatCommands.hasOwnProperty(command)) {
+                addSystemLine('-' + command + ': ' + chatCommands[command].description);
+            }
+        }
+    }
 
     registerChatCommand('ping', 'Check your latency', function () {
         checkLatency();
@@ -262,6 +290,14 @@
         toggleBorder(args);
     });
 
+    registerChatCommand('mass', 'View mass', function (args) {
+        toggleMass(args);
+    });
+
+    registerChatCommand('continuity', 'Toggle continuity', function (args) {
+        toggleContinuity(args);
+    });
+
     registerChatCommand('help', 'Chat commands information', function () {
         printHelp();
     });
@@ -272,10 +308,6 @@
 
     registerChatCommand('kick', 'Kick a player', function (args) {
         socket.emit('kick', args);
-    });
-
-    registerChatCommand('mass', 'View Mass', function (args) {
-        toggleMass(args);
     });
 
     function sendChat(key) {
@@ -482,7 +514,7 @@
         graph.fill();
         graph.stroke();
 
-        if(rad1 !== 0 && rad2 !== -2) {
+        if (rad1 !== 0 && rad2 !== -2) {
             p.x = circle.x + radius * Math.cos(rad1 * Math.PI);
             p.y = circle.y - radius * Math.sin(rad1 * Math.PI);
             q.x = circle.x + radius * Math.cos(rad2 * Math.PI);
