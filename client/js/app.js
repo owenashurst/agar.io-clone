@@ -372,15 +372,15 @@
         });
 
         socket.on('playerDied', function (data) {
-            addSystemLine('Player <b>' + data.disconnectName + '</b> died!');
+            addSystemLine('Player <b>' + data.name + '</b> died!');
         });
 
         socket.on('playerDisconnect', function (data) {
-            addSystemLine('Player <b>' + data.disconnectName + '</b> disconnected!');
+            addSystemLine('Player <b>' + data.name + '</b> disconnected!');
         });
 
         socket.on('playerJoin', function (data) {
-            addSystemLine('Player <b>' + data.connectedName + '</b> joined!');
+            addSystemLine('Player <b>' + data.name + '</b> joined!');
         });
 
         socket.on('leaderboard', function (data) {

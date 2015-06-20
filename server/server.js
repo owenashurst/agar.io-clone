@@ -183,7 +183,7 @@ io.on('connection', function (socket) {
             currentPlayer.lastHeartbeat = new Date().getTime();
             users.push(currentPlayer);
 
-            io.emit('playerJoin', { connectedName: currentPlayer.name });
+            io.emit('playerJoin', { name: currentPlayer.name });
 
             socket.emit('gameSetup', {
                 gameWidth: c.gameWidth,
@@ -215,7 +215,7 @@ io.on('connection', function (socket) {
             users.splice(findIndex(users, currentPlayer.id), 1);
         console.log('User #' + currentPlayer.id + ' disconnected');
 
-        socket.broadcast.emit('playerDisconnect', { connectedName: currentPlayer.name });
+        socket.broadcast.emit('playerDisconnect', { name: currentPlayer.name });
     });
 
     socket.on('playerChat', function(data) {
@@ -340,10 +340,7 @@ function tickPlayer(currentPlayer) {
             if (findIndex(users, collision.aUser.id) > -1)
                 users.splice(findIndex(users, collision.bUser.id), 1);
 
-            io.emit('playerDied', {
-                playersList: users,
-                disconnectName: collision.bUser.name
-            });
+            io.emit('playerDied', { name: collision.bUser.name });
 
             collision.aUser.mass += collision.bUser.mass;
             sockets[collision.bUser.id].emit('RIP');
@@ -356,7 +353,7 @@ function tickPlayer(currentPlayer) {
             if (findIndex(users, collision.aUser.id) > -1)
                 users.splice(findIndex(users, collision.aUser.id), 1);
 
-            io.emit('playerDied', { connectedName: currentPlayer.name });
+            io.emit('playerDied', { name: collision.aUser.name });
 
             collision.bUser.mass += collision.aUser.mass;
             sockets[collision.aUser.id].emit('RIP');
