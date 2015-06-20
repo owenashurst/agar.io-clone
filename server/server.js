@@ -83,9 +83,9 @@ function massToRadius(mass) {
 
 
 
-function movePlayer(player, target) {
-    var dist = Math.sqrt(Math.pow(target.y, 2) + Math.pow(target.x, 2));
-    var deg = Math.atan2(target.y, target.x);
+function movePlayer(player) {
+    var dist = Math.sqrt(Math.pow(player.target.y, 2) + Math.pow(player.target.x, 2));
+    var deg = Math.atan2(player.target.y, player.target.x);
 
     var slowDown = Math.log(player.mass, c.slowBase) - initMassLog + 1;
 
@@ -153,6 +153,10 @@ io.on('connection', function (socket) {
         y: genPos(0, c.gameHeight),
         mass: c.defaultPlayerMass,
         hue: Math.round(Math.random() * 360),
+        target: {
+            x: 0,
+            y: 0
+        }
     };
 
     socket.on('gotit', function (player) {
@@ -272,97 +276,111 @@ io.on('connection', function (socket) {
 
     // Heartbeat function, update everytime
     socket.on('0', function(target) {
-        // rebalance mass
-        balanceMass();
         if (target.x !== currentPlayer.x || target.y !== currentPlayer.y) {
-
-            movePlayer(currentPlayer, target);
-
-            var playerCircle = new C(
-                new V(currentPlayer.x, currentPlayer.y),
-                massToRadius(currentPlayer.mass));
-
-            var foodEaten = food
-                .map( function(f) { return SAT.pointInCircle(new V(f.x, f.y), playerCircle); })
-                .reduce( function(a, b, c) { return b ? a.concat(c) : a; }, []);
-
-            foodEaten.forEach( function(f) {
-                food[f] = {};
-                food.splice(f, 1);
-            });
-
-            currentPlayer.mass += c.foodMass * foodEaten.length;
-            currentPlayer.speed = 10;
-            playerCircle.r = massToRadius(currentPlayer.mass);
-
-            var otherUsers = users.filter(function(user) {
-                return user.id !== currentPlayer.id;
-            });
-            var playerCollisions = [];
-
-            otherUsers.forEach(function(user) {
-                var response = new SAT.Response();
-                var collided = SAT.testCircleCircle(playerCircle,
-                    new C(new V(user.x, user.y), massToRadius(user.mass)),
-                    response);
-
-                if (collided) {
-                    response.aUser = currentPlayer;
-                    response.bUser = user;
-                    playerCollisions.push(response);
-                }
-            });
-
-            playerCollisions.forEach(function(collision) {
-                if (collision.aUser.mass > collision.bUser.mass * 1.1 && massToRadius(collision.aUser.mass) > Math.sqrt(Math.pow(collision.aUser.x - collision.bUser.x, 2) + Math.pow(collision.aUser.y - collision.bUser.y, 2))) {
-                    console.log('KILLING USER: ' + collision.bUser.id);
-                    console.log('collision info:');
-                    console.log(collision);
-
-                    if (findIndex(users, collision.aUser.id) > -1)
-                        users.splice(findIndex(users, collision.bUser.id), 1);
-
-                    io.emit('playerDied', {
-                        playersList: users,
-                        disconnectName: collision.bUser.name
-                    });
-
-                    collision.aUser.mass += collision.bUser.mass;
-                    sockets[collision.bUser.id].emit('RIP');
-                }
-                else if (collision.bUser.mass > collision.aUser.mass * 1.1 && massToRadius(collision.bUser.mass) > Math.sqrt(Math.pow(collision.bUser.x - collision.aUser.x, 2) + Math.pow(collision.bUser.y - collision.aUser.y, 2))) {
-                    console.log('KILLING USER: ' + collision.aUser.id);
-                    console.log('collision info:');
-                    console.log(collision);
-
-                    if (findIndex(users, collision.aUser.id) > -1)
-                        users.splice(findIndex(users, collision.aUser.id), 1);
-
-                    io.emit('playerDied', {
-                        playersList: users,
-                        disconnectName: collision.aUser.name
-                    });
-
-                    collision.bUser.mass += collision.aUser.mass;
-                    sockets[collision.aUser.id].emit('RIP');
-                }
-            });
-
-            var visibleFood  = food
-                .map(function(f) {
-                    if ( f.x > currentPlayer.x - currentPlayer.screenWidth/2 - 20 &&
-                        f.x < currentPlayer.x + currentPlayer.screenWidth/2 + 20 &&
-                        f.y > currentPlayer.y - currentPlayer.screenHeight/2 - 20 &&
-                        f.y < currentPlayer.y + currentPlayer.screenHeight/2 + 20) {
-                    return f;
-                    }
-                })
-                .filter(function(f) { return f; });
-
-            socket.emit('serverTellPlayerMove', currentPlayer, users, visibleFood);
+            currentPlayer.target = target;
         }
     });
 });
+
+function tickPlayer(currentPlayer) {
+
+    movePlayer(currentPlayer);
+
+    var playerCircle = new C(
+        new V(currentPlayer.x, currentPlayer.y),
+        massToRadius(currentPlayer.mass));
+
+    var foodEaten = food
+        .map( function(f) { return SAT.pointInCircle(new V(f.x, f.y), playerCircle); })
+        .reduce( function(a, b, c) { return b ? a.concat(c) : a; }, []);
+
+    foodEaten.forEach( function(f) {
+        food[f] = {};
+        food.splice(f, 1);
+    });
+
+    currentPlayer.mass += c.foodMass * foodEaten.length;
+    currentPlayer.speed = 10;
+    playerCircle.r = massToRadius(currentPlayer.mass);
+
+    var otherUsers = users.filter(function(user) {
+        return user.id !== currentPlayer.id;
+    });
+    var playerCollisions = [];
+
+    otherUsers.forEach(function(user) {
+        var response = new SAT.Response();
+        var collided = SAT.testCircleCircle(playerCircle,
+            new C(new V(user.x, user.y), massToRadius(user.mass)),
+            response);
+
+        if (collided) {
+            response.aUser = currentPlayer;
+            response.bUser = user;
+            playerCollisions.push(response);
+        }
+    });
+
+    playerCollisions.forEach(function(collision) {
+        if (collision.aUser.mass > collision.bUser.mass * 1.1 && massToRadius(collision.aUser.mass) > Math.sqrt(Math.pow(collision.aUser.x - collision.bUser.x, 2) + Math.pow(collision.aUser.y - collision.bUser.y, 2))) {
+            console.log('KILLING USER: ' + collision.bUser.id);
+            console.log('collision info:');
+            console.log(collision);
+
+            if (findIndex(users, collision.aUser.id) > -1)
+                users.splice(findIndex(users, collision.bUser.id), 1);
+
+            io.emit('playerDied', {
+                playersList: users,
+                disconnectName: collision.bUser.name
+            });
+
+            collision.aUser.mass += collision.bUser.mass;
+            sockets[collision.bUser.id].emit('RIP');
+        }
+        else if (collision.bUser.mass > collision.aUser.mass * 1.1 && massToRadius(collision.bUser.mass) > Math.sqrt(Math.pow(collision.bUser.x - collision.aUser.x, 2) + Math.pow(collision.bUser.y - collision.aUser.y, 2))) {
+            console.log('KILLING USER: ' + collision.aUser.id);
+            console.log('collision info:');
+            console.log(collision);
+
+            if (findIndex(users, collision.aUser.id) > -1)
+                users.splice(findIndex(users, collision.aUser.id), 1);
+
+            io.emit('playerDied', {
+                playersList: users,
+                disconnectName: collision.aUser.name
+            });
+
+            collision.bUser.mass += collision.aUser.mass;
+            sockets[collision.aUser.id].emit('RIP');
+        }
+    });
+
+    var visibleFood  = food
+        .map(function(f) {
+            if ( f.x > currentPlayer.x - currentPlayer.screenWidth/2 - 20 &&
+                f.x < currentPlayer.x + currentPlayer.screenWidth/2 + 20 &&
+                f.y > currentPlayer.y - currentPlayer.screenHeight/2 - 20 &&
+                f.y < currentPlayer.y + currentPlayer.screenHeight/2 + 20) {
+            return f;
+            }
+        })
+        .filter(function(f) { return f; });
+
+    sockets[currentPlayer.id].emit('serverTellPlayerMove', currentPlayer, users, visibleFood);
+}
+
+function gameloop() {
+
+    for(var i = 0; i < users.length; i++)
+        tickPlayer(users[i]);
+
+    // rebalance mass
+    balanceMass();
+    setTimeout(gameloop, 1000/50);
+}
+
+gameloop();
 
 // Don't touch on ip
 var ipaddress = process.env.OPENSHIFT_NODEJS_IP || process.env.IP || '127.0.0.1';

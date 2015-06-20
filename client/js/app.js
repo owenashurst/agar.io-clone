@@ -324,6 +324,7 @@
             player.name = playerName;
             player.screenWidth = screenWidth;
             player.screenHeight = screenHeight;
+            player.target = target;
             socket.emit('gotit', player);
             gameStart = true;
             debug('Game is started: ' + gameStart);
@@ -369,7 +370,9 @@
             var xoffset = player.x - playerData.x;
             var yoffset = player.y - playerData.y;
 
-            player = playerData;
+            player.x = playerData.x;
+            player.y = playerData.y;
+            player.mass = playerData.mass;
             player.xoffset = isNaN(xoffset) ? 0 : xoffset;
             player.yoffset = isNaN(yoffset) ? 0 : yoffset;
 
