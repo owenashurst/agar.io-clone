@@ -363,18 +363,20 @@ function tickPlayer(currentPlayer) {
     });
 }
 
-function gameloop() {
-
+function moveloop() {
     for (var i = 0; i < users.length; i++) {
         tickPlayer(users[i]);
     }
+}
 
+
+function gameloop() {
     if (users.length > 0) {
         users.sort( function(a, b) { return b.mass - a.mass; });
 
         var topUsers = [];
 
-        for (i = 0; i < Math.min(10, users.length); i++) {
+        for (var i = 0; i < Math.min(10, users.length); i++) {
             topUsers.push({
                 id: users[i].id,
                 name: users[i].name
@@ -399,6 +401,7 @@ function gameloop() {
         balanceMass();
     }
 }
+
 
 function sendUpdates() {
     users.forEach( function(u) {
@@ -447,7 +450,8 @@ function sendUpdates() {
     leaderboardChanged = false;
 }
 
-setInterval(gameloop, 1000 / 60);
+setInterval(moveloop, 1000 / 60);
+setInterval(gameloop, 1000);
 setInterval(sendUpdates, 1000 / c.networkUpdateFactor);
 
 // Don't touch on ip
