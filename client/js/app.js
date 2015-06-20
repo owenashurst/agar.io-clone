@@ -475,28 +475,30 @@
             rad2 = diff;
         }
 
-        p.x = circle.x + radius * Math.cos(rad1 * Math.PI);
-        p.y = circle.y - radius * Math.sin(rad1 * Math.PI);
-        q.x = circle.x + radius * Math.cos(rad2 * Math.PI);
-        q.y = circle.y - radius * Math.sin(rad2 * Math.PI);
-
         graph.lineJoin = 'round';
         graph.lineCap = 'round';
         graph.beginPath();
         graph.arc(circle.x, circle.y, radius, -rad2 * Math.PI, -rad1 * Math.PI);
         graph.fill();
         graph.stroke();
-        
-        if (p.x > 0 || p.y > 0) {
-            if (wiggle >= radius / 3) inc = -1;
-            if (wiggle <= radius / -3) inc = +1;
-            wiggle += inc;
-            graph.beginPath();
-            graph.lineJoin = 'round';
-            graph.moveTo(p.x, p.y);
-            graph.bezierCurveTo(p.x + wiggle / 3, p.y - wiggle / 3, q.x - wiggle / 3, q.y + wiggle / 3, q.x, q.y);
-            graph.stroke();
-            graph.fill();
+
+        if(rad1 !== 0 && rad2 !== -2) {
+            p.x = circle.x + radius * Math.cos(rad1 * Math.PI);
+            p.y = circle.y - radius * Math.sin(rad1 * Math.PI);
+            q.x = circle.x + radius * Math.cos(rad2 * Math.PI);
+            q.y = circle.y - radius * Math.sin(rad2 * Math.PI);
+            
+            if (p.x > 0 || p.y > 0) {
+                if (wiggle >= radius / 3) inc = -1;
+                if (wiggle <= radius / -3) inc = +1;
+                wiggle += inc;
+                graph.beginPath();
+                graph.lineJoin = 'round';
+                graph.moveTo(p.x, p.y);
+                graph.bezierCurveTo(p.x + wiggle / 3, p.y - wiggle / 3, q.x - wiggle / 3, q.y + wiggle / 3, q.x, q.y);
+                graph.stroke();
+                graph.fill();
+            }
         }
 
         var fontSize = (massToRadius(player.mass) / 2);
