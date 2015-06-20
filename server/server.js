@@ -178,6 +178,8 @@ io.on('connection', function (socket) {
 
             player.x = genPos(0, c.gameWidth);
             player.y = genPos(0, c.gameHeight);
+            player.target.x = player.x;
+            player.target.y = player.y;
             player.mass = c.defaultPlayerMass;
             currentPlayer = player;
             currentPlayer.lastHeartbeat = new Date().getTime();
@@ -368,10 +370,17 @@ function gameloop() {
     }
 
     if (users.length > 0) {
-        var topUsers = users;
-        topUsers.sort( function(a, b) { return b.mass - a.mass; });
-        if (topUsers.length > 10)
-            topUsers.splice(10, topUsers.length - 10);
+        users.sort( function(a, b) { return b.mass - a.mass; });
+
+        var topUsers = [];
+
+        for (i = 0; i < Math.min(10, users.length); i++) {
+            topUsers.push({
+                id: users[i].id,
+                name: users[i].name
+            });
+        }
+
         if (isNaN(leaderboard) || leaderboard.length !== topUsers.length) {
             leaderboard = topUsers;
             leaderboardChanged = true;

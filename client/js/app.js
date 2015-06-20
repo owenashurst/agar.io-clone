@@ -132,6 +132,7 @@
         y: screenHeight / 2,
         screenWidth: screenWidth,
         screenHeight: screenHeight,
+        target: {x: screenWidth / 2, y: screenHeight / 2}
     };
 
     var foods = [];
