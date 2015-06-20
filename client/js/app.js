@@ -12,6 +12,9 @@
     var inc = +1;
     var animLoopHandle;
 
+    var spin = -Math.PI;
+
+
 
     var debug = function(args) {
         if (console && console.log) {
@@ -434,67 +437,55 @@
     function drawPlayer() {
 
         var radius = massToRadius(player.mass);
-        var p = {};
-        var q = {};
-        var rad1 = 0;
-        var rad2 = -2;
-        var diff = 0;
+        var x = 0;
+        var y = 0;
         var circle = {
             x: screenWidth / 2,
             y: screenHeight / 2
         };
+        var points = 9;
+        var increase = Math.PI * 2 / points;
 
         graph.strokeStyle = 'hsl(' + player.hue + ', 80%, 40%)';
         graph.fillStyle = 'hsl(' + player.hue + ', 70%, 50%)';
         graph.lineWidth = playerConfig.border;
 
-        if (player.x > gameWidth - radius) {
-            diff = Math.asin((gameWidth - player.x) / radius) / 3;
-            if (isNaN(diff)) diff = 0;
-            rad1 = 0.5 - diff;
-            rad2 = -0.5 + diff;
-        } else if (player.x < radius) {
-            diff = Math.acos(player.x / radius) / 3;
-            if (isNaN(diff)) diff = 0;
-            rad1 = -1 + diff;
-            rad2 = 1 - diff;
-        }
+        var xstore = [];
+        var ystore = [];
 
-        if (player.y > gameHeight - radius) {
-            diff = Math.acos((gameHeight - player.y) / radius) / 3;
-            if (isNaN(diff)) diff = 0;
-            rad1 = -0.5 + diff;
-            rad2 = 1.5 - diff;
-        } else if (player.y < radius) {
-            diff = Math.asin(player.y / radius) / 3;
-            if (isNaN(diff)) diff = 0;
-            rad1 = -1 - diff;
-            rad2 = diff;
-        }
+        spin += 0.01;
 
-        p.x = circle.x + radius * Math.cos(rad1 * Math.PI);
-        p.y = circle.y - radius * Math.sin(rad1 * Math.PI);
-        q.x = circle.x + radius * Math.cos(rad2 * Math.PI);
-        q.y = circle.y - radius * Math.sin(rad2 * Math.PI);
+        for (var i = 0; i < points; i++) {
 
-        graph.lineJoin = 'round';
-        graph.lineCap = 'round';
-        graph.beginPath();
-        graph.arc(circle.x, circle.y, radius, -rad2 * Math.PI, -rad1 * Math.PI);
-        graph.fill();
-        graph.stroke();
-        
-        if (p.x > 0 || p.y > 0) {
-            if (wiggle >= radius / 3) inc = -1;
-            if (wiggle <= radius / -3) inc = +1;
-            wiggle += inc;
-            graph.beginPath();
+            x = radius * Math.cos(spin) + circle.x;
+            y = radius * Math.sin(spin) + circle.y;
+            x = contain(-player.x + screenWidth / 2, gameWidth - player.x + screenWidth / 2, x);
+            y = contain(-player.y + screenHeight / 2, gameHeight - player.y + screenHeight / 2, y);
+
+            spin += increase;
+
             graph.lineJoin = 'round';
-            graph.moveTo(p.x, p.y);
-            graph.bezierCurveTo(p.x + wiggle / 3, p.y - wiggle / 3, q.x - wiggle / 3, q.y + wiggle / 3, q.x, q.y);
-            graph.stroke();
+            graph.lineCap = 'round';
+
+            xstore[i] = x;
+            ystore[i] = y;
+            if (i > 0) {
+
+
+                graph.lineTo(x, y);
+
+            } else {
+                graph.beginPath();
+                graph.moveTo(xstore[i], ystore[i]);
+
+            }
+            if (i == points - 1) {
+                graph.lineTo(xstore[0], ystore[0]);
+            }
             graph.fill();
+            graph.stroke();
         }
+        
 
         var fontSize = (massToRadius(player.mass) / 2);
         graph.lineWidth = playerConfig.textBorderSize;
@@ -513,6 +504,10 @@
             graph.fillText(player.name + ' (' + player.mass + ')', screenWidth / 2, screenHeight / 2);
         }
     }
+
+    function contain( min, max, value ) {
+  return Math.min( max, Math.max( min, value ) );
+}
 
     function drawEnemy(enemy) {
 
