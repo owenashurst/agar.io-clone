@@ -32,6 +32,47 @@ var initMassLog = Math.log(c.defaultPlayerMass, c.slowBase);
 
 app.use(express.static(__dirname + '/../client'));
 
+function getDistance(p1, p2) {
+    return Math.sqrt(Math.pow(p2.x-p1.x, 2) + Math.pow(p2.y-p1.y, 2)) - p1.radius - p2.radius;
+}
+
+function uniformPosition(points, radius) {
+    var bestCandidate, maxDistance = 0;
+    var numberOfCandidates = 10;
+
+    if (points.length === 0) {
+        bestCandidate = randomPosition(radius);
+    }
+
+    // Generate the cadidates
+    for (var ci = 0; ci < numberOfCandidates; ci++) {
+        var minDistance = Infinity;
+        var candidate = randomPosition(radius);
+        candidate.radius = radius;
+
+        for (var pi = 0; pi < points.length; pi++) {
+            var distance = getDistance(candidate, points[pi]);
+            if (distance < minDistance) {
+                minDistance = distance;
+            }
+        }
+
+        if (minDistance > maxDistance) {
+            bestCandidate = candidate;
+            maxDistance = minDistance;
+        }
+    }
+
+    return bestCandidate;
+}
+
+function randomPosition(radius) {
+    return {
+        x: genPos(radius, c.gameWidth - radius),
+        y: genPos(radius, c.gameHeight - radius)
+    };
+}
+
 function genPos(from, to) {
     return Math.floor(Math.random() * (to - from)) + from;
 }
@@ -39,12 +80,15 @@ function genPos(from, to) {
 function addFood(toAdd) {
     var radius = massToRadius(c.foodMass);
     while (toAdd--) {
+        var position = c.foodUniformDisposition ? uniformPosition(food, radius) : randomPosition(radius);
+
         food.push({
             // make ids unique
             id: ((new Date()).getTime() + '' + food.length) >>> 0,
-            x: genPos(radius, c.gameWidth - radius),
-            y: genPos(radius, c.gameHeight - radius),
-            color: randomColor(),
+            x: position.x,
+            y: position.y,
+            radius: radius,
+            color: randomColor()
         });
     }
 }
@@ -150,10 +194,14 @@ function validNick(player) {
 io.on('connection', function (socket) {
     console.log('A user connected!');
 
+    var radius = massToRadius(c.defaultPlayerMass);
+    var position = c.newPlayerInitialPosition == 'farthest' ? uniformPosition(users, radius) : randomPosition(radius);
+
     var currentPlayer = {
         id: socket.id,
-        x: genPos(0, c.gameWidth),
-        y: genPos(0, c.gameHeight),
+        x: position.x,
+        y: position.y,
+        radius: radius,
         mass: c.defaultPlayerMass,
         hue: Math.round(Math.random() * 360),
         lastHeartbeat: new Date().getTime(),
@@ -176,8 +224,12 @@ io.on('connection', function (socket) {
             console.log('Player ' + player.id + ' connected!');
             sockets[player.id] = socket;
 
-            player.x = genPos(0, c.gameWidth);
-            player.y = genPos(0, c.gameHeight);
+            var radius = massToRadius(c.defaultPlayerMass);
+            var position = c.newPlayerInitialPosition == 'farthest' ? uniformPosition(users, radius) : randomPosition(radius);
+
+            player.x = position.x;
+            player.y = position.y;
+            player.radius = radius;
             player.target.x = player.x;
             player.target.y = player.y;
             player.mass = c.defaultPlayerMass;
@@ -312,6 +364,7 @@ function tickPlayer(currentPlayer) {
     });
 
     currentPlayer.mass += c.foodMass * foodEaten.length;
+    currentPlayer.radius = massToRadius(currentPlayer.mass);
     currentPlayer.speed = 10;
     playerCircle.r = massToRadius(currentPlayer.mass);
 
