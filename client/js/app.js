@@ -443,7 +443,7 @@
             x: screenWidth / 2,
             y: screenHeight / 2
         };
-        var points = 9;
+        var points = 15;
         var increase = Math.PI * 2 / points;
 
         graph.strokeStyle = 'hsl(' + player.hue + ', 80%, 40%)';
@@ -469,22 +469,28 @@
 
             xstore[i] = x;
             ystore[i] = y;
-            if (i > 0) {
+           
+        }
+        
+        for (var i = 0; i < points; i++){
+             if (i > 0 && i < points - 1) {
 
 
-                graph.lineTo(x, y);
+                graph.quadraticCurveTo(xstore[i], ystore[i], (xstore[i] + xstore[i+1])/2, (ystore[i] + ystore[i+1])/2);
 
-            } else {
+            } else if (i == points - 1) {
+                graph.quadraticCurveTo(xstore[i], ystore[i], (xstore[i] + xstore[0])/2, (ystore[i] + ystore[0])/2);
+                graph.quadraticCurveTo(xstore[0], ystore[0], xstore[1], ystore[1]);
+                //graph.lineTo(xstore[0],ystore[0])
+            }
+            else {
                 graph.beginPath();
                 graph.moveTo(xstore[i], ystore[i]);
-
+                graph.quadraticCurveTo(xstore[i], ystore[i], (xstore[i] + xstore[i+1])/2, (ystore[i] + ystore[i+1])/2);
             }
-            if (i == points - 1) {
-                graph.lineTo(xstore[0], ystore[0]);
-            }
+        }
             graph.fill();
             graph.stroke();
-        }
         
 
         var fontSize = (massToRadius(player.mass) / 2);
