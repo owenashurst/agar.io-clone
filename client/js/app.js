@@ -453,7 +453,7 @@
         var xstore = [];
         var ystore = [];
 
-        spin += 0.01;
+        spin += 0.00;
 
         for (var i = 0; i < points; i++) {
 
