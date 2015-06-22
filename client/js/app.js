@@ -449,11 +449,10 @@
         return Math.sqrt(mass / Math.PI) * 10;
     }
 
-    function drawCircle(centerX, centerY, mass, sides) {
+    function drawCircle(centerX, centerY, radius, sides) {
         var theta = 0;
         var x = 0;
         var y = 0;
-        var radius = massToRadius(mass);
 
         graph.beginPath();
 
