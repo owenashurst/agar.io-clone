@@ -175,13 +175,15 @@ function balanceMass() {
             .reduce(function(pu,cu) { return pu+cu;}, 0);
 
     if (totalMass < c.gameMass) {
-        console.log('adding ' + (c.gameMass - totalMass) + ' mass to level');
-        addFood(c.gameMass - totalMass);
+        var missingMass = c.gameMass - totalMass;
+        console.log('adding ' + missingMass + ' mass to level');
+        addFood(parseInt(missingMass / c.foodMass));
         console.log('mass rebalanced');
     }
     else if (totalMass > c.gameMass) {
-        console.log('removing ' + (totalMass - c.gameMass) + ' mass from level');
-        removeFood(totalMass - c.gameMass);
+        var excessMass = totalMass - c.gameMass;
+        console.log('removing ' + excessMass + ' mass from level');
+        removeFood(parseInt(excessMass / c.foodMass));
         console.log('mass rebalanced');
     }
 }
