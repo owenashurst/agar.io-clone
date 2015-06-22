@@ -58,6 +58,7 @@
             }
         };
 
+
         var settingsMenu = document.getElementById('settingsButton');
         var settings = document.getElementById('settings');
         var instructions = document.getElementById('instructions');
@@ -138,6 +139,7 @@
     var foods = [];
     var enemies = [];
     var target = {x: player.x, y: player.y};
+    var counter = 0;
 
     var c = document.getElementById('cvs');
     c.addEventListener('mousemove', gameInput, false);
@@ -164,6 +166,13 @@
 
     var chatInput = document.getElementById('chatInput');
     chatInput.addEventListener('keypress', sendChat);
+
+    var eject = false;
+    c.onkeyup = function(e){
+    if(e.keyCode == 32){
+        eject = true;
+    }
+}
 
     // Chat
     function addChatLine(name, text) {
@@ -426,24 +435,15 @@
         graph.stroke();
         graph.fill();
     }
-
-    function drawFood(food) {
-        graph.strokeStyle = food.color.border || foodConfig.borderColor;
-        graph.fillStyle = food.color.fill || foodConfig.fillColor;
-        graph.lineWidth = foodConfig.border;
-        drawCircle(food.x - player.x + screenWidth / 2, food.y - player.y + screenHeight / 2, massToRadius(foodConfig.mass), 10);
-    }
-
-    function drawPlayer() {
-
-        var radius = massToRadius(player.mass);
+    function ejectMass() {
+       var radius = massToRadius(10);
         var x = 0;
         var y = 0;
         var circle = {
-            x: screenWidth / 2,
-            y: screenHeight / 2
+            x: screenWidth / 2 + radius * 10 + counter,
+            y: screenHeight / 2 +radius * 10 + counter
         };
-        var points = 15;
+        var points = 10;
         var increase = Math.PI * 2 / points;
 
         graph.strokeStyle = 'hsl(' + player.hue + ', 80%, 40%)';
@@ -453,7 +453,11 @@
         var xstore = [];
         var ystore = [];
 
-        spin += 0.00;
+        spin += 0.01;
+        if (counter < 100) {
+            counter ++;
+        } 
+
 
         for (var i = 0; i < points; i++) {
 
@@ -488,6 +492,76 @@
                 graph.moveTo(xstore[i], ystore[i]);
                 graph.quadraticCurveTo(xstore[i], ystore[i], (xstore[i] + xstore[i+1])/2, (ystore[i] + ystore[i+1])/2);
             }
+        }
+            graph.fill();
+            graph.stroke();
+    }
+
+    function drawFood(food) {
+        graph.strokeStyle = food.color.border || foodConfig.borderColor;
+        graph.fillStyle = food.color.fill || foodConfig.fillColor;
+        graph.lineWidth = foodConfig.border;
+        drawCircle(food.x - player.x + screenWidth / 2, food.y - player.y + screenHeight / 2, massToRadius(foodConfig.mass), 10);
+    }
+
+    function drawPlayer() {
+
+        var radius = massToRadius(player.mass);
+        var x = 0;
+        var y = 0;
+        var circle = {
+            x: screenWidth / 2,
+            y: screenHeight / 2
+        };
+        var points = 10;
+        var increase = Math.PI * 2 / points;
+
+        graph.strokeStyle = 'hsl(' + player.hue + ', 80%, 40%)';
+        graph.fillStyle = 'hsl(' + player.hue + ', 70%, 50%)';
+        graph.lineWidth = playerConfig.border;
+
+        var xstore = [];
+        var ystore = [];
+
+        spin += 0.1;
+
+        for (var i = 0; i < points; i++) {
+
+            x = radius * Math.cos(spin) + circle.x;
+            y = radius * Math.sin(spin) + circle.y;
+            x = contain(-player.x + screenWidth / 2, gameWidth - player.x + screenWidth / 2, x);
+            y = contain(-player.y + screenHeight / 2, gameHeight - player.y + screenHeight / 2, y);
+
+            spin += increase;
+
+            graph.lineJoin = 'round';
+            graph.lineCap = 'round';
+
+            xstore[i] = x;
+            ystore[i] = y;
+           
+        }
+        
+        for (var i = 0; i < points ; ++i){
+             console.log("x: "+xstore[i]);
+             console.log(" y: " +ystore[i]);
+             if (i == 0) {
+                graph.beginPath();
+                graph.moveTo(xstore[i], ystore[i]);
+                //graph.quadraticCurveTo(xstore[i], ystore[i], (xstore[i] + xstore[i+1])/2, (ystore[i] + ystore[i+1])/2);
+            }
+            else if (i > 0 && i < points-1) {
+
+
+                graph.quadraticCurveTo(xstore[i], ystore[i], (xstore[i] + xstore[i+1])/2, (ystore[i] + ystore[i+1])/2);
+
+            } else {
+                graph.quadraticCurveTo(xstore[i], ystore[i], (xstore[i] + xstore[0])/2, (ystore[i] + ystore[0])/2);
+                graph.quadraticCurveTo(xstore[0], ystore[0], xstore[1] , ystore[1]);
+                //graph.arc(circle.x, circle.y, radius, 0, 2 * Math.PI);
+                //graph.lineTo(xstore[0],ystore[0])
+            }
+            
         }
             graph.fill();
             graph.stroke();
@@ -694,7 +768,10 @@
                 graph.fillStyle = backgroundColor;
                 graph.fillRect(0, 0, screenWidth, screenHeight);
                 drawgrid();
-
+                 if (eject) {
+                    ejectMass();
+                }
+                
                 foods.forEach(function(food) {
                     drawFood(food);
                 });
