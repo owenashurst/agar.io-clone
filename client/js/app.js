@@ -517,9 +517,8 @@
          *if (wiggle <= radius / -3) inc = +1;
          *wiggle += inc;
          */
-        for (var i = 0; i < points; ++i) {
-
-            if (i == 0) {
+        for (i = 0; i < points; ++i) {
+            if (i === 0) {
                 graph.beginPath();
                 graph.moveTo(xstore[i], ystore[i]);
             } else if (i > 0 && i < points - 1) {
