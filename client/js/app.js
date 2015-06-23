@@ -486,7 +486,6 @@
             y: screenHeight / 2
         };
         var points = 30 + ~~(player.mass/5);
-        console.log(points);
         var increase = Math.PI * 2 / points;
 
         graph.strokeStyle = 'hsl(' + player.hue + ', 80%, 40%)';
