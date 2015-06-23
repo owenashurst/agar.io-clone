@@ -174,16 +174,16 @@ function balanceMass() {
             .map(function(u) {return u.mass; })
             .reduce(function(pu,cu) { return pu+cu;}, 0);
 
-    if (totalMass < c.gameMass) {
-        var missingMass = c.gameMass - totalMass;
-        console.log('adding ' + missingMass + ' mass to level');
-        addFood(parseInt(missingMass / c.foodMass));
+    if (food.length < c.maxFood && totalMass + (c.maxFood - food.length) * c.foodMass < c.gameMass) {
+        var missingFood = c.maxFood - food.length;
+        console.log('adding ' + missingFood + ' food to level');
+        addFood(c.maxFood - food.length);
         console.log('mass rebalanced');
     }
     else if (totalMass > c.gameMass) {
-        var excessMass = totalMass - c.gameMass;
-        console.log('removing ' + excessMass + ' mass from level');
-        removeFood(parseInt(excessMass / c.foodMass));
+        var excessFood = parseInt((totalMass - c.gameMass) / food.length);
+        console.log('removing ' + excessFood + ' food from level');
+        removeFood(excessFood);
         console.log('mass rebalanced');
     }
 }
@@ -452,9 +452,11 @@ function gameloop() {
             }
         }
 
-        // rebalance mass
-        balanceMass();
+        for (i = 0; i < users.length; i++) {
+            users[i].mass = users[i].mass * (1 - (c.massLossRate / 1000));
+        }
     }
+    balanceMass();
 }
 
 
@@ -482,7 +484,7 @@ function sendUpdates() {
                         id: f.id,
                         x: f.x,
                         y: f.y,
-                        mass: f.mass,
+                        mass: Math.round(f.mass),
                         hue: f.hue,
                         name: f.name
                     };
@@ -493,7 +495,7 @@ function sendUpdates() {
         sockets[u.id].emit('serverTellPlayerMove', {
             x: u.x,
             y: u.y,
-            mass: u.mass
+            mass: Math.round(u.mass)
         }, visibleEnemies, visibleFood);
         if (leaderboardChanged) {
             sockets[u.id].emit('leaderboard', {
