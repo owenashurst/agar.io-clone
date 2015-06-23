@@ -11,8 +11,7 @@
     var wiggle = 0;
     var inc = +1;
     var animLoopHandle;
-
-      var spin = -Math.PI;
+    var spin = -Math.PI;
 
     var debug = function(args) {
         if (console && console.log) {
@@ -486,7 +485,8 @@
             x: screenWidth / 2,
             y: screenHeight / 2
         };
-        var points = player.mass + 10;
+        var points = 30 + ~~(player.mass/5);
+        console.log(points);
         var increase = Math.PI * 2 / points;
 
         graph.strokeStyle = 'hsl(' + player.hue + ', 80%, 40%)';
