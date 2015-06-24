@@ -5,11 +5,13 @@
     "gameWidth": 5000,
     "gameHeight": 5000,
     "adminPass": "DEFAULT",
-    "gameMass": 2000,
+    "gameMass": 20000,
+    "maxFood": 1000,
     "slowBase": 4,
     "logChat": 0,
     "networkUpdateFactor": 40,
     "maxHeartbeatInterval": 5000,
     "foodUniformDisposition": true,
-    "newPlayerInitialPosition": "farthest"
+    "newPlayerInitialPosition": "farthest",
+    "massLossRate": 10
 }
