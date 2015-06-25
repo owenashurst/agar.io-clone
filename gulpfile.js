@@ -34,13 +34,13 @@ gulp.task('build-server', ['lint-server', 'move-server'], function () {
 });
 
 gulp.task('move-server', function () {
-  return gulp.src(['server/**/*.*', '!server/**/*.js'])
+  return gulp.src(['server/**/*.*', 'server/**/*.js'])
     .pipe(gulp.dest('./bin/server/'));
 });
 
 gulp.task('watch', ["build"], function () {
   gulp.watch('client/**/*.*', ['build-client', 'move-client']);
-  gulp.watch('server/*.*', ['build-server']);
+  gulp.watch('server/*.*', 'server/**/*.js', ['build-server']);
   gulp.start("run");
 });
 
