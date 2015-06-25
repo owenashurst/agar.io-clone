@@ -7,8 +7,10 @@ var http = require('http').Server(app);
 var io = require('socket.io')(http);
 var SAT = require('sat');
 
+var c = require('./config.json'),
 
-var c = require('./config.json');
+    // import utilities
+    util = require('./lib/util');
 
 var users = [];
 var food = [];
@@ -20,38 +22,27 @@ var leaderboardChanged = false;
 var V = SAT.Vector;
 var C = SAT.Circle;
 
-Math.log = (function() {
-    var log = Math.log;
-    return function(n, base) {
-        return log(n)/(base ? log(base) : 1);
-    };
-})();
-
-
-var initMassLog = Math.log(c.defaultPlayerMass, c.slowBase);
+var initMassLog = util.log(c.defaultPlayerMass, c.slowBase);
 
 app.use(express.static(__dirname + '/../client'));
 
-function getDistance(p1, p2) {
-    return Math.sqrt(Math.pow(p2.x-p1.x, 2) + Math.pow(p2.y-p1.y, 2)) - p1.radius - p2.radius;
-}
 
 function uniformPosition(points, radius) {
     var bestCandidate, maxDistance = 0;
     var numberOfCandidates = 10;
 
     if (points.length === 0) {
-        bestCandidate = randomPosition(radius);
+        bestCandidate = util.randomPosition(radius);
     }
 
     // Generate the cadidates
     for (var ci = 0; ci < numberOfCandidates; ci++) {
         var minDistance = Infinity;
-        var candidate = randomPosition(radius);
+        var candidate = util.randomPosition(radius);
         candidate.radius = radius;
 
         for (var pi = 0; pi < points.length; pi++) {
-            var distance = getDistance(candidate, points[pi]);
+            var distance = util.getDistance(candidate, points[pi]);
             if (distance < minDistance) {
                 minDistance = distance;
             }
@@ -66,21 +57,11 @@ function uniformPosition(points, radius) {
     return bestCandidate;
 }
 
-function randomPosition(radius) {
-    return {
-        x: genPos(radius, c.gameWidth - radius),
-        y: genPos(radius, c.gameHeight - radius)
-    };
-}
-
-function genPos(from, to) {
-    return Math.floor(Math.random() * (to - from)) + from;
-}
 
 function addFood(toAdd) {
-    var radius = massToRadius(c.foodMass);
+    var radius = util.massToRadius(c.foodMass);
     while (toAdd--) {
-        var position = c.foodUniformDisposition ? uniformPosition(food, radius) : randomPosition(radius);
+        var position = c.foodUniformDisposition ? uniformPosition(food, radius) : util.randomPosition(radius);
 
         food.push({
             // make ids unique
@@ -124,22 +105,17 @@ function randomColor() {
     };
 }
 
-function massToRadius(mass) {
-    return Math.sqrt(mass / Math.PI) * 10;
-}
-
-
-
+// implement player movement in the direction of the target
 function movePlayer(player) {
     var dist = Math.sqrt(Math.pow(player.target.y, 2) + Math.pow(player.target.x, 2));
     var deg = Math.atan2(player.target.y, player.target.x);
 
-    var slowDown = Math.log(player.mass, c.slowBase) - initMassLog + 1;
+    var slowDown = util.log(player.mass, c.slowBase) - initMassLog + 1;
 
     var deltaY = player.speed * Math.sin(deg)/ slowDown;
     var deltaX = player.speed * Math.cos(deg)/ slowDown;
 
-    var radius = massToRadius(player.mass);
+    var radius = util.massToRadius(player.mass);
     if (dist < (50 + radius)) {
         deltaY *= dist / (50 + radius);
         deltaX *= dist / (50 + radius);
@@ -196,8 +172,8 @@ function validNick(player) {
 io.on('connection', function (socket) {
     console.log('A user connected!');
 
-    var radius = massToRadius(c.defaultPlayerMass);
-    var position = c.newPlayerInitialPosition == 'farthest' ? uniformPosition(users, radius) : randomPosition(radius);
+    var radius = util.massToRadius(c.defaultPlayerMass);
+    var position = c.newPlayerInitialPosition == 'farthest' ? uniformPosition(users, radius) : util.randomPosition(radius);
 
     var currentPlayer = {
         id: socket.id,
@@ -226,8 +202,8 @@ io.on('connection', function (socket) {
             console.log('Player ' + player.id + ' connected!');
             sockets[player.id] = socket;
 
-            var radius = massToRadius(c.defaultPlayerMass);
-            var position = c.newPlayerInitialPosition == 'farthest' ? uniformPosition(users, radius) : randomPosition(radius);
+            var radius = util.massToRadius(c.defaultPlayerMass);
+            var position = c.newPlayerInitialPosition == 'farthest' ? uniformPosition(users, radius) : util.randomPosition(radius);
 
             player.x = position.x;
             player.y = position.y;
@@ -354,7 +330,7 @@ function tickPlayer(currentPlayer) {
 
     var playerCircle = new C(
         new V(currentPlayer.x, currentPlayer.y),
-        massToRadius(currentPlayer.mass));
+        util.massToRadius(currentPlayer.mass));
 
     var foodEaten = food
         .map( function(f) { return SAT.pointInCircle(new V(f.x, f.y), playerCircle); })
@@ -366,9 +342,9 @@ function tickPlayer(currentPlayer) {
     });
 
     currentPlayer.mass += c.foodMass * foodEaten.length;
-    currentPlayer.radius = massToRadius(currentPlayer.mass);
+    currentPlayer.radius = util.massToRadius(currentPlayer.mass);
     currentPlayer.speed = 10;
-    playerCircle.r = massToRadius(currentPlayer.mass);
+    playerCircle.r = util.massToRadius(currentPlayer.mass);
 
     var otherUsers = users.filter(function(user) {
         return user.id !== currentPlayer.id;
@@ -378,7 +354,7 @@ function tickPlayer(currentPlayer) {
     otherUsers.forEach(function(user) {
         var response = new SAT.Response();
         var collided = SAT.testCircleCircle(playerCircle,
-            new C(new V(user.x, user.y), massToRadius(user.mass)),
+            new C(new V(user.x, user.y), util.massToRadius(user.mass)),
             response);
 
         if (collided) {
@@ -389,7 +365,7 @@ function tickPlayer(currentPlayer) {
     });
 
     playerCollisions.forEach(function(collision) {
-        if (collision.aUser.mass > collision.bUser.mass * 1.1 && massToRadius(collision.aUser.mass) > Math.sqrt(Math.pow(collision.aUser.x - collision.bUser.x, 2) + Math.pow(collision.aUser.y - collision.bUser.y, 2))) {
+        if (collision.aUser.mass > collision.bUser.mass * 1.1 && util.massToRadius(collision.aUser.mass) > Math.sqrt(Math.pow(collision.aUser.x - collision.bUser.x, 2) + Math.pow(collision.aUser.y - collision.bUser.y, 2))) {
             console.log('KILLING USER: ' + collision.bUser.id);
             console.log('collision info:');
             console.log(collision);
@@ -402,7 +378,7 @@ function tickPlayer(currentPlayer) {
             collision.aUser.mass += collision.bUser.mass;
             sockets[collision.bUser.id].emit('RIP');
         }
-        else if (collision.bUser.mass > collision.aUser.mass * 1.1 && massToRadius(collision.bUser.mass) > Math.sqrt(Math.pow(collision.bUser.x - collision.aUser.x, 2) + Math.pow(collision.bUser.y - collision.aUser.y, 2))) {
+        else if (collision.bUser.mass > collision.aUser.mass * 1.1 && util.massToRadius(collision.bUser.mass) > Math.sqrt(Math.pow(collision.bUser.x - collision.aUser.x, 2) + Math.pow(collision.bUser.y - collision.aUser.y, 2))) {
             console.log('KILLING USER: ' + collision.aUser.id);
             console.log('collision info:');
             console.log(collision);
