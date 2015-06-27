@@ -115,10 +115,9 @@ function movePlayer(player) {
     var deltaY = player.speed * Math.sin(deg)/ slowDown;
     var deltaX = player.speed * Math.cos(deg)/ slowDown;
 
-    var radius = util.massToRadius(player.mass);
-    if (dist < (50 + radius)) {
-        deltaY *= dist / (50 + radius);
-        deltaX *= dist / (50 + radius);
+    if (dist < (50 + player.radius)) {
+        deltaY *= dist / (50 + player.radius);
+        deltaX *= dist / (50 + player.radius);
     }
 
     if (!isNaN(deltaY)) {
@@ -128,7 +127,7 @@ function movePlayer(player) {
         player.x += deltaX;
     }
 
-    var borderCalc = radius / 3;
+    var borderCalc = player.radius / 3;
 
     if (player.x > c.gameWidth - borderCalc) {
         player.x = c.gameWidth - borderCalc;
@@ -207,10 +206,10 @@ io.on('connection', function (socket) {
 
             player.x = position.x;
             player.y = position.y;
-            player.radius = radius;
             player.target.x = player.x;
             player.target.y = player.y;
             player.mass = c.defaultPlayerMass;
+            player.radius = radius;
             currentPlayer = player;
             currentPlayer.lastHeartbeat = new Date().getTime();
             users.push(currentPlayer);
@@ -330,7 +329,8 @@ function tickPlayer(currentPlayer) {
 
     var playerCircle = new C(
         new V(currentPlayer.x, currentPlayer.y),
-        util.massToRadius(currentPlayer.mass));
+        currentPlayer.radius
+    );
 
     var foodEaten = food
         .map( function(f) { return SAT.pointInCircle(new V(f.x, f.y), playerCircle); })
@@ -341,10 +341,10 @@ function tickPlayer(currentPlayer) {
         food.splice(f, 1);
     });
 
-    currentPlayer.mass += c.foodMass * foodEaten.length;
-    currentPlayer.radius = util.massToRadius(currentPlayer.mass);
     currentPlayer.speed = 10;
-    playerCircle.r = util.massToRadius(currentPlayer.mass);
+    currentPlayer.mass += foodEaten.length * c.foodMass;
+    currentPlayer.radius = util.massToRadius(currentPlayer.mass);
+    playerCircle.r = currentPlayer.radius;
 
     var otherUsers = users.filter(function(user) {
         return user.id !== currentPlayer.id;
@@ -354,7 +354,7 @@ function tickPlayer(currentPlayer) {
     otherUsers.forEach(function(user) {
         var response = new SAT.Response();
         var collided = SAT.testCircleCircle(playerCircle,
-            new C(new V(user.x, user.y), util.massToRadius(user.mass)),
+            new C(new V(user.x, user.y), user.radius),
             response);
 
         if (collided) {
@@ -365,7 +365,7 @@ function tickPlayer(currentPlayer) {
     });
 
     playerCollisions.forEach(function(collision) {
-        if (collision.aUser.mass > collision.bUser.mass * 1.1 && util.massToRadius(collision.aUser.mass) > Math.sqrt(Math.pow(collision.aUser.x - collision.bUser.x, 2) + Math.pow(collision.aUser.y - collision.bUser.y, 2))) {
+        if (collision.aUser.mass > collision.bUser.mass * 1.1) {
             console.log('KILLING USER: ' + collision.bUser.id);
             console.log('collision info:');
             console.log(collision);
@@ -378,7 +378,7 @@ function tickPlayer(currentPlayer) {
             collision.aUser.mass += collision.bUser.mass;
             sockets[collision.bUser.id].emit('RIP');
         }
-        else if (collision.bUser.mass > collision.aUser.mass * 1.1 && util.massToRadius(collision.bUser.mass) > Math.sqrt(Math.pow(collision.bUser.x - collision.aUser.x, 2) + Math.pow(collision.bUser.y - collision.aUser.y, 2))) {
+        else if (collision.bUser.mass > collision.aUser.mass * 1.1) {
             console.log('KILLING USER: ' + collision.aUser.id);
             console.log('collision info:');
             console.log(collision);
@@ -399,7 +399,6 @@ function moveloop() {
         tickPlayer(users[i]);
     }
 }
-
 
 function gameloop() {
     if (users.length > 0) {
@@ -435,7 +434,6 @@ function gameloop() {
     balanceMass();
 }
 
-
 function sendUpdates() {
     users.forEach( function(u) {
         var visibleFood  = food
@@ -461,6 +459,7 @@ function sendUpdates() {
                         x: f.x,
                         y: f.y,
                         mass: Math.round(f.mass),
+                        radius: Math.round(f.radius),
                         hue: f.hue,
                         name: f.name
                     };
@@ -471,6 +470,7 @@ function sendUpdates() {
         sockets[u.id].emit('serverTellPlayerMove', {
             x: u.x,
             y: u.y,
+            radius: Math.round(u.radius),
             mass: Math.round(u.mass)
         }, visibleEnemies, visibleFood);
         if (leaderboardChanged) {
