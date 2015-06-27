@@ -429,7 +429,9 @@ function gameloop() {
         }
 
         for (i = 0; i < users.length; i++) {
+            if (users[i].mass >= 10){
             users[i].mass = users[i].mass * (1 - (c.massLossRate / 1000));
+            }
         }
     }
     balanceMass();
