@@ -7,7 +7,7 @@
     "adminPass": "DEFAULT",
     "gameMass": 20000,
     "maxFood": 1000,
-    "slowBase": 4,
+    "slowBase": 4.5,
     "logChat": 0,
     "networkUpdateFactor": 40,
     "maxHeartbeatInterval": 5000,

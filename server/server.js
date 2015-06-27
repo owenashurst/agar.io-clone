@@ -69,6 +69,7 @@ function addFood(toAdd) {
             x: position.x,
             y: position.y,
             radius: radius,
+            mass: Math.random() * 0.35 + 0.4,
             color: randomColor()
         });
     }
@@ -343,7 +344,7 @@ function tickPlayer(currentPlayer) {
 
     currentPlayer.mass += c.foodMass * foodEaten.length;
     currentPlayer.radius = util.massToRadius(currentPlayer.mass);
-    currentPlayer.speed = 10;
+    currentPlayer.speed = 6.25;
     playerCircle.r = util.massToRadius(currentPlayer.mass);
 
     var otherUsers = users.filter(function(user) {
