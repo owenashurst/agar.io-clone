@@ -445,10 +445,6 @@
         });
     }
 
-    function massToRadius(mass) {
-        return Math.sqrt(mass / Math.PI) * 11.5;
-    }
-
     function drawCircle(centerX, centerY, radius, sides) {
         var theta = 0;
         var x = 0;
