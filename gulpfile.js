@@ -2,6 +2,7 @@ var gulp = require('gulp');
 var babel = require('gulp-babel');
 var jshint = require('gulp-jshint');
 var nodemon = require('gulp-nodemon');
+var uglify = require('gulp-uglify');
 
 gulp.task('build', ['build-client', 'build-server']);
 
@@ -12,8 +13,9 @@ gulp.task('lint-client', function () {
 });
 
 gulp.task('build-client', ['lint-client', 'move-client'], function () {
-  return gulp.src('client/js/*.js')
+  return gulp.src(['client/js/*.js'])
     .pipe(babel())
+    //.pipe(uglify())
     .pipe(gulp.dest('bin/client/js/'));
 });
 
