@@ -4,6 +4,11 @@
 
 var cfg = require('../config.json');
 
+exports.validNick = function(nickname) {
+    var regex = /^\w*$/;
+    return regex.exec(nickname) !== null;
+};
+
 // determine mass from radius of circle
 exports.massToRadius = function (mass) {
     return Math.sqrt(mass / Math.PI) * 10;
