@@ -6,7 +6,7 @@ var cfg = require('../config.json');
 
 // determine mass from radius of circle
 exports.massToRadius = function (mass) {
-    return Math.sqrt(mass / Math.PI) * 10;
+    return 10 + Math.sqrt(mass);
 };
 
 
