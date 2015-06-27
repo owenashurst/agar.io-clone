@@ -18,7 +18,6 @@ exports.log = (function () {
     };
 })();
 
-
 // get the Euclidean distance between the edges of two shapes
 exports.getDistance = function (p1, p2) {
     return Math.sqrt(Math.pow(p2.x - p1.x, 2) + Math.pow(p2.y - p1.y, 2)) - p1.radius - p2.radius;
@@ -35,4 +34,34 @@ exports.randomPosition = function (radius) {
         x: genPos(radius, cfg.gameWidth - radius),
         y: genPos(radius, cfg.gameHeight - radius)
     };
+};
+
+exports.uniformPosition = function(points, radius) {
+    var bestCandidate, maxDistance = 0;
+    var numberOfCandidates = 10;
+
+    if (points.length === 0) {
+        return exports.randomPosition(radius);
+    }
+
+    // Generate the cadidates
+    for (var ci = 0; ci < numberOfCandidates; ci++) {
+        var minDistance = Infinity;
+        var candidate = exports.randomPosition(radius);
+        candidate.radius = radius;
+
+        for (var pi = 0; pi < points.length; pi++) {
+            var distance = exports.getDistance(candidate, points[pi]);
+            if (distance < minDistance) {
+                minDistance = distance;
+            }
+        }
+
+        if (minDistance > maxDistance) {
+            bestCandidate = candidate;
+            maxDistance = minDistance;
+        }
+    }
+
+    return bestCandidate;
 };
