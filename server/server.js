@@ -38,7 +38,7 @@ function addFood(toAdd) {
             y: position.y,
             radius: radius,
             mass: Math.random() + 2,
-            color: randomColor()
+            color: util.randomColor()
         });
     }
 }
@@ -47,31 +47,6 @@ function removeFood(toRem) {
     while (toRem--) {
         food.pop();
     }
-}
-
-function findIndex(arr, id) {
-    var len = arr.length;
-
-    while (len--) {
-        if (arr[len].id === id) {
-            return len;
-        }
-    }
-
-    return -1;
-}
-
-function randomColor() {
-    var color = '#' + ('00000' + (Math.random() * (1 << 24) | 0).toString(16)).slice(-6);
-    var c = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(color);
-    var r = (parseInt(c[1], 16) - 32) > 0 ? (parseInt(c[1], 16) - 32) : 0;
-    var g = (parseInt(c[2], 16) - 32) > 0 ? (parseInt(c[2], 16) - 32) : 0;
-    var b = (parseInt(c[3], 16) - 32) > 0 ? (parseInt(c[3], 16) - 32) : 0;
-
-    return {
-        fill: color,
-        border: '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)
-    };
 }
 
 // implement player movement in the direction of the target
@@ -160,7 +135,7 @@ io.on('connection', function (socket) {
     socket.on('gotit', function (player) {
         console.log('Player ' + player.id + ' connecting');
 
-        if (findIndex(users, player.id) > -1) {
+        if (util.findIndex(users, player.id) > -1) {
             console.log('That playerID is already connected, kicking');
             socket.disconnect();
         } else if (!util.validNick(player.name)) {
@@ -204,15 +179,15 @@ io.on('connection', function (socket) {
     });
 
     socket.on('respawn', function () {
-        if (findIndex(users, currentPlayer.id) > -1)
-            users.splice(findIndex(users, currentPlayer.id), 1);
+        if (util.findIndex(users, currentPlayer.id) > -1)
+            users.splice(util.findIndex(users, currentPlayer.id), 1);
         socket.emit('welcome', currentPlayer);
         console.log('User #' + currentPlayer.id + ' respawned');
     });
 
     socket.on('disconnect', function () {
-        if (findIndex(users, currentPlayer.id) > -1)
-            users.splice(findIndex(users, currentPlayer.id), 1);
+        if (util.findIndex(users, currentPlayer.id) > -1)
+            users.splice(util.findIndex(users, currentPlayer.id), 1);
         console.log('User #' + currentPlayer.id + ' disconnected');
 
         socket.broadcast.emit('playerDisconnect', { name: currentPlayer.name });
@@ -338,8 +313,8 @@ function tickPlayer(currentPlayer) {
             console.log('collision info:');
             console.log(collision);
 
-            if (findIndex(users, collision.aUser.id) > -1)
-                users.splice(findIndex(users, collision.bUser.id), 1);
+            if (util.findIndex(users, collision.aUser.id) > -1)
+                users.splice(util.findIndex(users, collision.bUser.id), 1);
 
             io.emit('playerDied', { name: collision.bUser.name });
 
@@ -351,8 +326,8 @@ function tickPlayer(currentPlayer) {
             console.log('collision info:');
             console.log(collision);
 
-            if (findIndex(users, collision.aUser.id) > -1)
-                users.splice(findIndex(users, collision.aUser.id), 1);
+            if (util.findIndex(users, collision.aUser.id) > -1)
+                users.splice(util.findIndex(users, collision.aUser.id), 1);
 
             io.emit('playerDied', { name: collision.aUser.name });
 
