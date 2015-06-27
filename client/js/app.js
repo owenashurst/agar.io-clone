@@ -475,8 +475,6 @@
     }
 
     function drawPlayer() {
-
-        var radius = massToRadius(player.mass);
         var x = 0;
         var y = 0;
         var circle = {
@@ -497,8 +495,8 @@
 
         for (var i = 0; i < points; i++) {
 
-            x = radius * Math.cos(spin) + circle.x;
-            y = radius * Math.sin(spin) + circle.y;
+            x = player.radius * Math.cos(spin) + circle.x;
+            y = player.radius * Math.sin(spin) + circle.y;
             x = valueInRange(-player.x + screenWidth / 2, gameWidth - player.x + screenWidth / 2, x);
             y = valueInRange(-player.y + screenHeight / 2, gameHeight - player.y + screenHeight / 2, y);
 
@@ -510,8 +508,8 @@
             ystore[i] = y;
 
         }
-        /*if (wiggle >=  radius/ 3) inc = -1;
-         *if (wiggle <= radius / -3) inc = +1;
+        /*if (wiggle >= player.radius/ 3) inc = -1;
+         *if (wiggle <= player.radius / -3) inc = +1;
          *wiggle += inc;
          */
         for (i = 0; i < points; ++i) {
@@ -534,7 +532,7 @@
 
 
 
-        var fontSize = (massToRadius(player.mass) / 2);
+        var fontSize = (player.radius / 2);
         graph.lineWidth = playerConfig.textBorderSize;
         graph.miterLimit = 1;
         graph.lineJoin = 'round';
@@ -543,6 +541,7 @@
         graph.textBaseline = 'middle';
         graph.strokeStyle = playerConfig.textBorder;
         graph.font = 'bold ' + fontSize + 'px sans-serif';
+
         if (toggleMassState === 0) {
             graph.strokeText(player.name, screenWidth / 2, screenHeight / 2);
             graph.fillText(player.name, screenWidth / 2, screenHeight / 2);
@@ -556,10 +555,7 @@
         return Math.min(max, Math.max(min, value));
     }
 
-
     function drawEnemy(enemy) {
-
-        var radius = massToRadius(enemy.mass);
         var p = {};
         var q = {};
         var rad1 = 0;
@@ -574,45 +570,45 @@
         graph.fillStyle = 'hsl(' + enemy.hue + ', 70%, 50%)';
         graph.lineWidth = enemyConfig.border;
 
-        if (enemy.x > gameWidth - radius) {
-            diff = Math.asin((gameWidth - enemy.x) / radius) / 3;
+        if (enemy.x > gameWidth - enemy.radius) {
+            diff = Math.asin((gameWidth - enemy.x) / enemy.radius) / 3;
             if (isNaN(diff)) diff = 0;
             rad1 = 0.5 - diff;
             rad2 = -0.5 + diff;
-        } else if (enemy.x < radius) {
-            diff = Math.acos(enemy.x / radius) / 3;
+        } else if (enemy.x < enemy.radius) {
+            diff = Math.acos(enemy.x / enemy.radius) / 3;
             if (isNaN(diff)) diff = 0;
             rad1 = -1 + diff;
             rad2 = 1 - diff;
         }
 
-        if (enemy.y > gameHeight - radius) {
-            diff = Math.acos((gameHeight - enemy.y) / radius) / 3;
+        if (enemy.y > gameHeight - enemy.radius) {
+            diff = Math.acos((gameHeight - enemy.y) / enemy.radius) / 3;
             if (isNaN(diff)) diff = 0;
             rad1 = -0.5 + diff;
             rad2 = 1.5 - diff;
-        } else if (enemy.y < radius) {
-            diff = Math.asin(enemy.y / radius) / 3;
+        } else if (enemy.y < enemy.radius) {
+            diff = Math.asin(enemy.y / enemy.radius) / 3;
             if (isNaN(diff)) diff = 0;
             rad1 = -1 - diff;
             rad2 = diff;
         }
 
-        p.x = enemy.x + radius * Math.cos(rad1 * Math.PI);
-        p.y = enemy.y - radius * Math.sin(rad1 * Math.PI);
-        q.x = enemy.x + radius * Math.cos(rad2 * Math.PI);
-        q.y = enemy.y - radius * Math.sin(rad2 * Math.PI);
+        p.x = enemy.x + enemy.radius * Math.cos(rad1 * Math.PI);
+        p.y = enemy.y - enemy.radius * Math.sin(rad1 * Math.PI);
+        q.x = enemy.x + enemy.radius * Math.cos(rad2 * Math.PI);
+        q.y = enemy.y - enemy.radius * Math.sin(rad2 * Math.PI);
 
         graph.lineJoin = 'round';
         graph.lineCap = 'round';
         graph.beginPath();
-        graph.arc(circle.x, circle.y, radius, -rad2 * Math.PI, -rad1 * Math.PI);
+        graph.arc(circle.x, circle.y, enemy.radius, -rad2 * Math.PI, -rad1 * Math.PI);
         graph.fill();
         graph.stroke();
         
         if (p.x > 0 || p.y > 0) {
-            if (wiggle >= radius / 3) inc = -1;
-            if (wiggle <= radius / -3) inc = +1;
+            if (wiggle >= enemy.radius / 3) inc = -1;
+            if (wiggle <= enemy.radius / -3) inc = +1;
             wiggle += inc;
             graph.beginPath();
             graph.lineJoin = 'round';
@@ -622,7 +618,7 @@
             graph.fill();
         }
 
-        var fontSize = (massToRadius(enemy.mass) / 2);
+        var fontSize = (enemy.radius / 2);
         graph.lineWidth = enemyConfig.textBorderSize;
         graph.miterLimit = 1;
         graph.lineJoin = 'round';
@@ -631,6 +627,7 @@
         graph.textBaseline = 'middle';
         graph.strokeStyle = enemyConfig.textBorder;
         graph.font = 'bold ' + fontSize + 'px sans-serif';
+
         if (toggleMassState === 0) {
             graph.strokeText(enemy.name, circle.x, circle.y);
             graph.fillText(enemy.name, circle.x, circle.y);
@@ -661,7 +658,6 @@
     }
 
     function drawborder() {
-
         graph.strokeStyle = playerConfig.borderColor;
 
         // Left-vertical
