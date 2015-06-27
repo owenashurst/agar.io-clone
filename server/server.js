@@ -26,42 +26,10 @@ var initMassLog = util.log(c.defaultPlayerMass, c.slowBase);
 
 app.use(express.static(__dirname + '/../client'));
 
-
-function uniformPosition(points, radius) {
-    var bestCandidate, maxDistance = 0;
-    var numberOfCandidates = 10;
-
-    if (points.length === 0) {
-        bestCandidate = util.randomPosition(radius);
-    }
-
-    // Generate the cadidates
-    for (var ci = 0; ci < numberOfCandidates; ci++) {
-        var minDistance = Infinity;
-        var candidate = util.randomPosition(radius);
-        candidate.radius = radius;
-
-        for (var pi = 0; pi < points.length; pi++) {
-            var distance = util.getDistance(candidate, points[pi]);
-            if (distance < minDistance) {
-                minDistance = distance;
-            }
-        }
-
-        if (minDistance > maxDistance) {
-            bestCandidate = candidate;
-            maxDistance = minDistance;
-        }
-    }
-
-    return bestCandidate;
-}
-
-
 function addFood(toAdd) {
     var radius = util.massToRadius(c.foodMass);
     while (toAdd--) {
-        var position = c.foodUniformDisposition ? uniformPosition(food, radius) : util.randomPosition(radius);
+        var position = c.foodUniformDisposition ? util.uniformPosition(food, radius) : util.randomPosition(radius);
 
         food.push({
             // make ids unique
@@ -173,7 +141,7 @@ io.on('connection', function (socket) {
     console.log('A user connected!');
 
     var radius = util.massToRadius(c.defaultPlayerMass);
-    var position = c.newPlayerInitialPosition == 'farthest' ? uniformPosition(users, radius) : util.randomPosition(radius);
+    var position = c.newPlayerInitialPosition == 'farthest' ? util.uniformPosition(users, radius) : util.randomPosition(radius);
 
     var currentPlayer = {
         id: socket.id,
@@ -203,7 +171,7 @@ io.on('connection', function (socket) {
             sockets[player.id] = socket;
 
             var radius = util.massToRadius(c.defaultPlayerMass);
-            var position = c.newPlayerInitialPosition == 'farthest' ? uniformPosition(users, radius) : util.randomPosition(radius);
+            var position = c.newPlayerInitialPosition == 'farthest' ? util.uniformPosition(users, radius) : util.randomPosition(radius);
 
             player.x = position.x;
             player.y = position.y;
