@@ -4,6 +4,11 @@
 
 var cfg = require('../config.json');
 
+exports.validNick = function(nickname) {
+    var regex = /^\w*$/;
+    return regex.exec(nickname) !== null;
+};
+
 // determine mass from radius of circle
 exports.massToRadius = function (mass) {
     return 10 + Math.sqrt(mass);
@@ -17,7 +22,6 @@ exports.log = (function () {
         return log(n) / (base ? log(base) : 1);
     };
 })();
-
 
 // get the Euclidean distance between the edges of two shapes
 exports.getDistance = function (p1, p2) {
@@ -35,4 +39,34 @@ exports.randomPosition = function (radius) {
         x: genPos(radius, cfg.gameWidth - radius),
         y: genPos(radius, cfg.gameHeight - radius)
     };
+};
+
+exports.uniformPosition = function(points, radius) {
+    var bestCandidate, maxDistance = 0;
+    var numberOfCandidates = 10;
+
+    if (points.length === 0) {
+        return exports.randomPosition(radius);
+    }
+
+    // Generate the cadidates
+    for (var ci = 0; ci < numberOfCandidates; ci++) {
+        var minDistance = Infinity;
+        var candidate = exports.randomPosition(radius);
+        candidate.radius = radius;
+
+        for (var pi = 0; pi < points.length; pi++) {
+            var distance = exports.getDistance(candidate, points[pi]);
+            if (distance < minDistance) {
+                minDistance = distance;
+            }
+        }
+
+        if (minDistance > maxDistance) {
+            bestCandidate = candidate;
+            maxDistance = minDistance;
+        }
+    }
+
+    return bestCandidate;
 };

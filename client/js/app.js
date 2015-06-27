@@ -99,7 +99,7 @@
     var startPingTime = 0;
 
     var chatCommands = {};
-    var backgroundColor = '#EEEEEE';
+    var backgroundColor = '#f2fbff';
 
     var toggleMassState = 0;
 
@@ -110,7 +110,7 @@
     };
 
     var playerConfig = {
-        border: 5,
+        border: 6,
         textColor: '#FFFFFF',
         textBorder: '#000000',
         textBorderSize: 3,
@@ -446,7 +446,7 @@
     }
 
     function massToRadius(mass) {
-        return Math.sqrt(mass / Math.PI) * 10;
+        return Math.sqrt(mass / Math.PI) * 11.5;
     }
 
     function drawCircle(centerX, centerY, radius, sides) {
@@ -472,7 +472,7 @@
         graph.strokeStyle = food.color.border || foodConfig.borderColor;
         graph.fillStyle = food.color.fill || foodConfig.fillColor;
         graph.lineWidth = foodConfig.border;
-        drawCircle(food.x - player.x + screenWidth / 2, food.y - player.y + screenHeight / 2, food.radius, 10);
+        drawCircle(food.x - player.x + screenWidth / 2, food.y - player.y + screenHeight / 2, food.radius, 9);
     }
 
     function drawPlayer() {
@@ -498,8 +498,8 @@
 
             x = player.radius * Math.cos(spin) + circle.x;
             y = player.radius * Math.sin(spin) + circle.y;
-            x = contain(-player.x + screenWidth / 2, gameWidth - player.x + screenWidth / 2, x);
-            y = contain(-player.y + screenHeight / 2, gameHeight - player.y + screenHeight / 2, y);
+            x = valueInRange(-player.x + screenWidth / 2, gameWidth - player.x + screenWidth / 2, x);
+            y = valueInRange(-player.y + screenHeight / 2, gameHeight - player.y + screenHeight / 2, y);
 
             spin += increase;
 
@@ -509,7 +509,7 @@
             ystore[i] = y;
 
         }
-        /*if (wiggle >=  player.radius/ 3) inc = -1;
+        /*if (wiggle >= player.radius/ 3) inc = -1;
          *if (wiggle <= player.radius / -3) inc = +1;
          *wiggle += inc;
          */
@@ -552,7 +552,7 @@
         }
     }
 
-    function contain(min, max, value) {
+    function valueInRange(min, max, value) {
         return Math.min(max, Math.max(min, value));
     }
 
@@ -639,18 +639,23 @@
     }
 
     function drawgrid() {
-        for (var x = xoffset - player.x; x < screenWidth; x += screenHeight / 20) {
+         graph.lineWidth = 1;
+         graph.strokeStyle = '#000';
+         graph.globalAlpha = 0.15;
+         graph.beginPath();
+
+        for (var x = xoffset - player.x; x < screenWidth; x += screenHeight / 18) {
             graph.moveTo(x, 0);
             graph.lineTo(x, screenHeight);
         }
 
-        for (var y = yoffset - player.y ; y < screenHeight; y += screenHeight / 20) {
+        for (var y = yoffset - player.y ; y < screenHeight; y += screenHeight / 18) {
             graph.moveTo(0, y);
             graph.lineTo(screenWidth, y);
         }
 
-        graph.strokeStyle = '#ddd';
         graph.stroke();
+        graph.globalAlpha = 1;
     }
 
     function drawborder() {

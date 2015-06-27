@@ -26,42 +26,10 @@ var initMassLog = util.log(c.defaultPlayerMass, c.slowBase);
 
 app.use(express.static(__dirname + '/../client'));
 
-
-function uniformPosition(points, radius) {
-    var bestCandidate, maxDistance = 0;
-    var numberOfCandidates = 10;
-
-    if (points.length === 0) {
-        bestCandidate = util.randomPosition(radius);
-    }
-
-    // Generate the cadidates
-    for (var ci = 0; ci < numberOfCandidates; ci++) {
-        var minDistance = Infinity;
-        var candidate = util.randomPosition(radius);
-        candidate.radius = radius;
-
-        for (var pi = 0; pi < points.length; pi++) {
-            var distance = util.getDistance(candidate, points[pi]);
-            if (distance < minDistance) {
-                minDistance = distance;
-            }
-        }
-
-        if (minDistance > maxDistance) {
-            bestCandidate = candidate;
-            maxDistance = minDistance;
-        }
-    }
-
-    return bestCandidate;
-}
-
-
 function addFood(toAdd) {
     var radius = util.massToRadius(c.foodMass);
     while (toAdd--) {
-        var position = c.foodUniformDisposition ? uniformPosition(food, radius) : util.randomPosition(radius);
+        var position = c.foodUniformDisposition ? util.uniformPosition(food, radius) : util.randomPosition(radius);
 
         food.push({
             // make ids unique
@@ -69,6 +37,7 @@ function addFood(toAdd) {
             x: position.x,
             y: position.y,
             radius: radius,
+            mass: Math.random() + 2,
             color: randomColor()
         });
     }
@@ -149,30 +118,29 @@ function balanceMass() {
             .map(function(u) {return u.mass; })
             .reduce(function(pu,cu) { return pu+cu;}, 0);
 
-    if (food.length < c.maxFood && totalMass + (c.maxFood - food.length) * c.foodMass < c.gameMass) {
-        var missingFood = c.maxFood - food.length;
-        console.log('adding ' + missingFood + ' food to level');
-        addFood(c.maxFood - food.length);
-        console.log('mass rebalanced');
-    }
-    else if (totalMass > c.gameMass) {
-        var excessFood = parseInt((totalMass - c.gameMass) / food.length);
-        console.log('removing ' + excessFood + ' food from level');
-        removeFood(excessFood);
-        console.log('mass rebalanced');
-    }
-}
+    var massDiff = c.gameMass - totalMass;
+    var maxFoodDiff = c.maxFood - food.length;
+    var foodDiff = parseInt(massDiff / c.foodMass) - maxFoodDiff;
+    var foodToAdd = Math.min(foodDiff, maxFoodDiff);
+    var foodToRemove = -Math.max(foodDiff, maxFoodDiff);
 
-function validNick(player) {
-    var regex = /^\w*$/;
-    return regex.exec(player.name) !== null;
+    if (foodToAdd > 0) {
+        console.log('adding ' + foodToAdd + ' food to level');
+        addFood(foodToAdd);
+        console.log('mass rebalanced');
+    }
+    else if (foodToRemove > 0) {
+        console.log('removing ' + foodToRemove + ' food from level');
+        removeFood(foodToRemove);
+        console.log('mass rebalanced');
+    }
 }
 
 io.on('connection', function (socket) {
     console.log('A user connected!');
 
     var radius = util.massToRadius(c.defaultPlayerMass);
-    var position = c.newPlayerInitialPosition == 'farthest' ? uniformPosition(users, radius) : util.randomPosition(radius);
+    var position = c.newPlayerInitialPosition == 'farthest' ? util.uniformPosition(users, radius) : util.randomPosition(radius);
 
     var currentPlayer = {
         id: socket.id,
@@ -194,7 +162,7 @@ io.on('connection', function (socket) {
         if (findIndex(users, player.id) > -1) {
             console.log('That playerID is already connected, kicking');
             socket.disconnect();
-        } else if (!validNick(player)) {
+        } else if (!util.validNick(player.name)) {
             socket.emit('kick', 'Invalid username');
             socket.disconnect();
         } else {
@@ -202,7 +170,7 @@ io.on('connection', function (socket) {
             sockets[player.id] = socket;
 
             var radius = util.massToRadius(c.defaultPlayerMass);
-            var position = c.newPlayerInitialPosition == 'farthest' ? uniformPosition(users, radius) : util.randomPosition(radius);
+            var position = c.newPlayerInitialPosition == 'farthest' ? util.uniformPosition(users, radius) : util.randomPosition(radius);
 
             player.x = position.x;
             player.y = position.y;
@@ -341,7 +309,7 @@ function tickPlayer(currentPlayer) {
         food.splice(f, 1);
     });
 
-    currentPlayer.speed = 10;
+    currentPlayer.speed = 6.25;
     currentPlayer.mass += foodEaten.length * c.foodMass;
     currentPlayer.radius = util.massToRadius(currentPlayer.mass);
     playerCircle.r = currentPlayer.radius;
@@ -428,7 +396,9 @@ function gameloop() {
         }
 
         for (i = 0; i < users.length; i++) {
+            if (users[i].mass >= 10){
             users[i].mass = users[i].mass * (1 - (c.massLossRate / 1000));
+            }
         }
     }
     balanceMass();
