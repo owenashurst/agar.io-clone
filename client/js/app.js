@@ -106,8 +106,7 @@
     var foodConfig = {
         border: 0,
         borderColor: '#f39c12',
-        fillColor: '#f1c40f',
-        mass: 0.5
+        fillColor: '#f1c40f'
     };
 
     var playerConfig = {
@@ -472,7 +471,7 @@
         graph.strokeStyle = food.color.border || foodConfig.borderColor;
         graph.fillStyle = food.color.fill || foodConfig.fillColor;
         graph.lineWidth = foodConfig.border;
-        drawCircle(food.x - player.x + screenWidth / 2, food.y - player.y + screenHeight / 2, massToRadius(food.mass), 9);
+        drawCircle(food.x - player.x + screenWidth / 2, food.y - player.y + screenHeight / 2, food.radius, 9);
     }
 
     function drawPlayer() {
