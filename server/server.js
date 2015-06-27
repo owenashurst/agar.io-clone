@@ -69,6 +69,7 @@ function addFood(toAdd) {
             x: position.x,
             y: position.y,
             radius: radius,
+            mass: Math.random() + 2,
             color: randomColor()
         });
     }
@@ -343,7 +344,7 @@ function tickPlayer(currentPlayer) {
 
     currentPlayer.mass += c.foodMass * foodEaten.length;
     currentPlayer.radius = util.massToRadius(currentPlayer.mass);
-    currentPlayer.speed = 10;
+    currentPlayer.speed = 6.25;
     playerCircle.r = util.massToRadius(currentPlayer.mass);
 
     var otherUsers = users.filter(function(user) {
@@ -429,7 +430,9 @@ function gameloop() {
         }
 
         for (i = 0; i < users.length; i++) {
+            if (users[i].mass >= 10){
             users[i].mass = users[i].mass * (1 - (c.massLossRate / 1000));
+            }
         }
     }
     balanceMass();
