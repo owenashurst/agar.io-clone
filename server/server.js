@@ -119,16 +119,20 @@ function balanceMass() {
             .map(function(u) {return u.mass; })
             .reduce(function(pu,cu) { return pu+cu;}, 0);
 
-    if (food.length < c.maxFood && totalMass + (c.maxFood - food.length) * c.foodMass < c.gameMass) {
-        var missingFood = c.maxFood - food.length;
-        console.log('adding ' + missingFood + ' food to level');
-        addFood(c.maxFood - food.length);
+    var massDiff = c.gameMass - totalMass;
+    var maxFoodDiff = c.maxFood - food.length;
+    var foodDiff = parseInt(massDiff / c.foodMass) - maxFoodDiff;
+    var foodToAdd = Math.min(foodDiff, maxFoodDiff);
+    var foodToRemove = -Math.max(foodDiff, maxFoodDiff);
+
+    if (foodToAdd > 0) {
+        console.log('adding ' + foodToAdd + ' food to level');
+        addFood(foodToAdd);
         console.log('mass rebalanced');
     }
-    else if (totalMass > c.gameMass) {
-        var excessFood = parseInt((totalMass - c.gameMass) / food.length);
-        console.log('removing ' + excessFood + ' food from level');
-        removeFood(excessFood);
+    else if (foodToRemove > 0) {
+        console.log('removing ' + foodToRemove + ' food from level');
+        removeFood(foodToRemove);
         console.log('mass rebalanced');
     }
 }
