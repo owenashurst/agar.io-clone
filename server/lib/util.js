@@ -11,7 +11,7 @@ exports.validNick = function(nickname) {
 
 // determine mass from radius of circle
 exports.massToRadius = function (mass) {
-    return Math.sqrt(mass / Math.PI) * 10;
+    return 4 + Math.sqrt(mass) * 6;
 };
 
 
