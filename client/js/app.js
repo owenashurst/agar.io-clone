@@ -472,7 +472,7 @@
         graph.strokeStyle = food.color.border || foodConfig.borderColor;
         graph.fillStyle = food.color.fill || foodConfig.fillColor;
         graph.lineWidth = foodConfig.border;
-        drawCircle(food.x - player.x + screenWidth / 2, food.y - player.y + screenHeight / 2, massToRadius(food.mass) * 2, 9);
+        drawCircle(food.x - player.x + screenWidth / 2, food.y - player.y + screenHeight / 2, massToRadius(food.mass), 9);
     }
 
     function drawPlayer() {
@@ -657,7 +657,6 @@
             graph.lineTo(screenWidth, y);
         }
 
-        graph.strokeStyle = '#000';
         graph.stroke();
         graph.globalAlpha = 1;
     }
