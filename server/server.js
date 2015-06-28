@@ -7,10 +7,11 @@ var http = require('http').Server(app);
 var io = require('socket.io')(http);
 var SAT = require('sat');
 
-var c = require('./config.json'),
+// Import game settings
+var c = require('./config.json');
 
-    // import utilities
-    util = require('./lib/util');
+// Import utilities
+var util = require('./lib/util');
 
 var users = [];
 var food = [];
