@@ -246,10 +246,10 @@
         }
 
         if (on || (!off && !toggleMassState)) {
-            toggleMassState = true;
+            toggleMassState = 1;
             addSystemLine('Mass mode activated!');
         } else {
-            toggleMassState = false;
+            toggleMassState = 0;
             addSystemLine('Mass mode deactivated!');
         }
     }
