@@ -31,12 +31,15 @@
     "Juha Tauriainen <juha@bin.fi> (https://github.com/JuhQ)"
   ],
   "dependencies": {
+    "babel": "^5.6.14",
     "bower": "^1.4.1",
     "express": "^4.12.4",
     "sat": "^0.5.0",
     "socket.io": "^1.3.5"
   },
   "devDependencies": {
+    "babel-core": "^5.6.15",
+    "babel-loader": "^5.3.0",
     "chai": "^3.0.0",
     "gulp": "^3.8.11",
     "gulp-babel": "^5.1.0",
@@ -46,6 +49,9 @@
     "gulp-uglify": "^1.2.0",
     "jshint": "^2.7.0",
     "mocha": "^2.2.5",
-    "nodemon": "^1.2.1"
+    "node-libs-browser": "^0.5.2",
+    "nodemon": "^1.2.1",
+    "webpack": "^1.10.1",
+    "webpack-stream": "^2.0.0"
   }
 }
