@@ -1,4 +1,5 @@
-/* global io */
+var io = require('socket.io-client');
+
 var playerName;
 var playerNameInput = document.getElementById('playerNameInput');
 var socket;
