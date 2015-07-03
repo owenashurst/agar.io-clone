@@ -3,8 +3,14 @@ var babel = require('gulp-babel');
 var jshint = require('gulp-jshint');
 var nodemon = require('gulp-nodemon');
 var uglify = require('gulp-uglify');
+var mocha = require('gulp-mocha');
 
-gulp.task('build', ['build-client', 'build-server']);
+gulp.task('build', ['build-client', 'build-server', 'test']);
+
+gulp.task('test', ['lint-client', 'lint-server'], function () {
+    gulp.src(['test/**/*.js'])
+        .pipe(mocha());
+});
 
 gulp.task('lint-client', function () {
   return gulp.src('client/js/*.js')
