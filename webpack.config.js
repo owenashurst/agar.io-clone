@@ -1,4 +1,3 @@
-console.log('\n\n' + __dirname + '\n\n');
 module.exports = {
     entry: "./client/js/app.js",
     output: {
