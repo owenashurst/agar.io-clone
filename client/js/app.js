@@ -1,7 +1,4 @@
 /* global io */
-(function() {
-    'use strict';
-
     var playerName;
     var playerNameInput = document.getElementById('playerNameInput');
     var socket;
@@ -602,7 +599,7 @@
         graph.arc(circle.x, circle.y, enemy.radius, -rad2 * Math.PI, -rad1 * Math.PI);
         graph.fill();
         graph.stroke();
-        
+
         if (p.x > 0 || p.y > 0) {
             if (wiggle >= enemy.radius / 3) inc = -1;
             if (wiggle <= enemy.radius / -3) inc = +1;
@@ -787,4 +784,3 @@
         player.screenHeight = c.height = screenHeight = window.innerHeight;
         socket.emit('windowResized', { screenWidth: screenWidth, screenHeight: screenHeight });
     }, true);
-})();
