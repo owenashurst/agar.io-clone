@@ -200,10 +200,11 @@ function checkLatency() {
 }
 
 function toggleDarkMode(args) {
-    var LIGHT = '#EEEEEE';
+    debug(backgroundColor);
+    var LIGHT = '#f2fbff';
     var DARK = '#181818';
     var on = false;
-    var off = false;
+    var off = true;
     if (!isNaN(args)) {
         on = args[0] === 'on';
         off = args[0] === 'off';
