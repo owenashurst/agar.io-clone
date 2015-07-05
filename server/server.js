@@ -309,7 +309,7 @@ function tickPlayer(currentPlayer) {
     });
 
     playerCollisions.forEach(function(collision) {
-        if (collision.aUser.mass > collision.bUser.mass * 1.1) {
+        if (collision.aUser.mass > collision.bUser.mass * 1.1  && collision.aUser.radius > Math.sqrt(Math.pow(collision.aUser.x - collision.bUser.x, 2) + Math.pow(collision.aUser.y - collision.bUser.y, 2))*2) {
             console.log('KILLING USER: ' + collision.bUser.id);
             console.log('collision info:');
             console.log(collision);
@@ -322,7 +322,7 @@ function tickPlayer(currentPlayer) {
             collision.aUser.mass += collision.bUser.mass;
             sockets[collision.bUser.id].emit('RIP');
         }
-        else if (collision.bUser.mass > collision.aUser.mass * 1.1) {
+        else if (collision.bUser.mass > collision.aUser.mass * 1.1 && collision.bUser.radius > Math.sqrt(Math.pow(collision.bUser.x - collision.aUser.x, 2) + Math.pow(collision.bUser.y - collision.aUser.y, 2))*2) {
             console.log('KILLING USER: ' + collision.aUser.id);
             console.log('collision info:');
             console.log(collision);
