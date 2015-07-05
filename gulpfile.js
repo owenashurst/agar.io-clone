@@ -77,6 +77,6 @@ gulp.task('run', ['build'], function () {
         ext: 'html js css'
     })
     .on('restart', function () {
-        util.log.log('server restarted!');
+        util.log('server restarted!');
     });
 });
