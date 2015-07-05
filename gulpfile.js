@@ -4,6 +4,8 @@ var jshint = require('gulp-jshint');
 var nodemon = require('gulp-nodemon');
 var uglify = require('gulp-uglify');
 var util = require('gulp-util');
+var mocha = require('gulp-mocha');
+var webpack = require('webpack-stream');
 
 
 // http://stackoverflow.com/questions/27852814/gulp-jshint-how-to-fail-the-build
@@ -17,7 +19,12 @@ var exitOnJshintError = map(function (file, cb) {
 });
 
 
-gulp.task('build', ['build-client', 'build-server']);
+gulp.task('build', ['build-client', 'build-server', 'test']);
+
+gulp.task('test', ['lint-client', 'lint-server'], function () {
+    gulp.src(['test/**/*.js'])
+        .pipe(mocha());
+});
 
 gulp.task('lint-client', function () {
   return gulp.src('client/js/*.js')
@@ -27,8 +34,8 @@ gulp.task('lint-client', function () {
 });
 
 gulp.task('build-client', ['lint-client', 'move-client'], function () {
-  return gulp.src(['client/js/*.js'])
-    .pipe(babel())
+  return gulp.src(['client/js/app.js'])
+    .pipe(webpack(require('./webpack.config.js')))
     //.pipe(uglify())
     .pipe(gulp.dest('bin/client/js/'));
 });

@@ -4,10 +4,10 @@
   "description": "A simple Agar.io clone",
   "main": "server/server.js",
   "scripts": {
-    "postinstall": "node ./node_modules/bower/bin/bower install && node ./node_modules/gulp/bin/gulp.js build",
-    "start": "node ./node_modules/gulp/bin/gulp.js run",
-    "watch": "node ./node_modules/gulp/bin/gulp.js watch",
-    "test": "node ./node_modules/jshint/bin/jshint ."
+    "postinstall": "gulp build",
+    "start": "gulp run",
+    "watch": "gulp watch",
+    "test": "gulp test"
   },
   "repository": {
     "type": "git",
@@ -28,23 +28,33 @@
     "Kostas Bariotis <konmpar@gmail.com> (https://github.com/kbariotis)",
     "Jerry Xu <jerryxu23@gmail.com> (https://github.com/abalabahaha)",
     "Damian Dlugosz <bigfootdd@gmail.com> (https://github.com/bigfoot90)",
-    "Juha Tauriainen <juha@bin.fi> (https://github.com/JuhQ)"
+    "Juha Tauriainen <juha@bin.fi> (https://github.com/JuhQ)",
+    "Madara Uchiha <me@madara.ninja> (https://github.com/MadaraUchiha)"
   ],
   "dependencies": {
-    "bower": "^1.4.1",
+    "babel": "^5.6.14",
     "express": "^4.12.4",
     "sat": "^0.5.0",
-    "socket.io": "^1.3.5"
+    "socket.io": "^1.3.5",
+    "socket.io-client": "^1.3.5"
   },
   "devDependencies": {
+    "babel-core": "^5.6.15",
+    "babel-loader": "^5.3.0",
+    "chai": "^3.0.0",
     "gulp": "^3.8.11",
     "gulp-babel": "^5.1.0",
     "gulp-jshint": "^1.11.0",
+    "gulp-mocha": "^2.1.2",
     "gulp-nodemon": "^2.0.3",
     "gulp-uglify": "^1.2.0",
     "gulp-util": "^3.0.6",
     "jshint": "^2.7.0",
     "map-stream": "0.0.6",
-    "nodemon": "^1.2.1"
+    "mocha": "^2.2.5",
+    "node-libs-browser": "^0.5.2",
+    "nodemon": "^1.2.1",
+    "webpack": "^1.10.1",
+    "webpack-stream": "^2.0.0"
   }
 }
