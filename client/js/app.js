@@ -92,14 +92,12 @@ var disconnected = false;
 var died = false;
 var kicked = false;
 
+// defaults
+// TODO break out into GameControls
 var continuity = false;
-
 var startPingTime = 0;
-
-var chatCommands = {};
-var backgroundColor = '#f2fbff';
-
 var toggleMassState = 0;
+var backgroundColor = '#f2fbff';
 
 var foodConfig = {
     border: 0,
@@ -160,183 +158,190 @@ continuitySetting.onchange = toggleContinuity;
 
 var graph = c.getContext('2d');
 
-var chatInput = document.getElementById('chatInput');
-chatInput.addEventListener('keypress', sendChat);
-
-// Chat
-function addChatLine(name, text) {
-    var chatLine = document.createElement('li');
-    chatLine.className = (name === player.name)?'me':'friend';
-    chatLine.innerHTML = '<b>' + name + '</b>: ' + text;
-    var chatList = document.getElementById('chatList');
-    if (chatList.childNodes.length >=11) {
-        chatList.removeChild(chatList.childNodes[0]);
-    }
-    chatList.appendChild(chatLine);
+function ChatClient(config) {
+    this.commands = {};
+    var input = document.getElementById('chatInput');
+    input.addEventListener('keypress', this.sendChat.bind(this));
 }
 
-function addSystemLine(text) {
-    var chatLine = document.createElement('li');
-    chatLine.className = 'system';
-    chatLine.innerHTML = text;
+/** template into chat box a new message from a player */
+ChatClient.prototype.addChatLine = function (name, message) {
+    var newline = document.createElement('li');
+
+    // color the chat input appropriately
+    newline.className = (name === player.name) ? 'me' : 'friend';
+    newline.innerHTML = '<b>' + name + '</b>: ' + message;
+
+    this.appendMessage(newline);
+};
+
+
+/** template into chat box a new message from the application */
+ChatClient.prototype.addSystemLine = function (message) {
+    var newline = document.createElement('li');
+
+    // message will appear in system color
+    newline.className = 'system';
+    newline.innerHTML = message;
+
+    // place in message log
+    this.appendMessage(newline);
+};
+
+/** templates the message DOM node into the messsage area */
+ChatClient.prototype.appendMessage = function (node) {
     var chatList = document.getElementById('chatList');
-    if (chatList.childNodes.length >=11) {
+    if (chatList.childNodes.length > 10) {
         chatList.removeChild(chatList.childNodes[0]);
     }
-    chatList.appendChild(chatLine);
-}
+    chatList.appendChild(node);
+};
 
-function registerChatCommand(name, description, callback) {
-    chatCommands[name] = {
+/** sends a message or executes a command on the ENTER key */
+ChatClient.prototype.sendChat = function (key) {
+    var commands = this.commands,
+        input = document.getElementById('chatInput');
+
+    key = key.which || key.keyCode;
+
+    if (key === KEY_ENTER) {
+        var text = input.value.replace(/(<([^>]+)>)/ig,'');
+        if (text !== '') {
+
+            // this is a chat command
+            if (text.indexOf('-') === 0) {
+                var args = text.substring(1).split(' ');
+                if (commands[args[0]]) {
+                    commands[args[0]].callback(args.slice(1));
+                } else {
+                    this.addSystemLine('Unrecoginised Command: ' + text + ', type -help for more info');
+                }
+
+            // just a regular message - send along to server
+            } else {
+                socket.emit('playerChat', { sender: player.name, message: text });
+                this.addChatLine(player.name, text);
+            }
+
+            // reset input
+            input.value = '';
+        }
+    }
+};
+
+/** add a new chat command */
+ChatClient.prototype.registerCommand = function (name, description, callback) {
+    this.commands[name] = {
         description: description,
         callback: callback
     };
-}
+};
 
+/** print help of all chat commands available */
+ChatClient.prototype.printHelp = function () {
+    var commands = this.commands;
+    for (var cmd in commands) {
+        if (commands.hasOwnProperty(cmd)) {
+            this.addSystemLine('-' + cmd + ': ' + commands[cmd].description);
+        }
+    }
+};
+
+var chat = new ChatClient();
+
+// chat command callback functions
 function checkLatency() {
     // Ping
     startPingTime = Date.now();
     socket.emit('ping');
 }
 
-function toggleDarkMode(args) {
-    debug(backgroundColor);
-    var LIGHT = '#f2fbff';
-    var DARK = '#181818';
-    var on = false;
-    var off = true;
-    if (!isNaN(args)) {
-        on = args[0] === 'on';
-        off = args[0] === 'off';
-    }
+function toggleDarkMode() {
+    var LIGHT = '#f2fbff',
+        DARK = '#181818';
 
-    if (on || (!off && backgroundColor === LIGHT)) {
+    if (backgroundColor === LIGHT) {
         backgroundColor = DARK;
-        addSystemLine('Dark mode enabled');
+        chat.addSystemLine('Dark mode enabled');
     } else {
         backgroundColor = LIGHT;
-        addSystemLine('Dark mode disabled');
+        chat.addSystemLine('Dark mode disabled');
     }
 }
 
 function toggleBorder(args) {
-    var on = false;
-    var off = false;
-    if (!isNaN(args)) {
-        on = args[0] === 'on';
-        off = args[0] === 'off';
-    }
-
-    if (on || (!off && !borderDraw)) {
+    if (!borderDraw) {
         borderDraw = true;
-        addSystemLine('Showing border');
+        chat.addSystemLine('Showing border');
     } else {
         borderDraw = false;
-        addSystemLine('Hiding border');
+        chat.addSystemLine('Hiding border');
     }
 }
 
 function toggleMass(args) {
-    var on = false;
-    var off = false;
-    if (!isNaN(args)) {
-        on = args[0] === 'on';
-        off = args[0] === 'off';
-    }
-
-    if (on || (!off && !toggleMassState)) {
+    if (toggleMassState === 0) {
         toggleMassState = 1;
-        addSystemLine('Mass mode activated!');
+        chat.addSystemLine('Mass mode activated!');
     } else {
         toggleMassState = 0;
-        addSystemLine('Mass mode deactivated!');
+        chat.addSystemLine('Mass mode deactivated!');
     }
 }
 
 function toggleContinuity(args) {
-    var on = false;
-    var off = false;
-    if (!isNaN(args)) {
-        on = args[0] === 'on';
-        off = args[0] === 'off';
-    }
-
-    if (on || (!off && !continuity)) {
+    if (!continuity) {
         continuity = true;
-        addSystemLine('Continuity activated!');
+        chat.addSystemLine('Continuity activated!');
     } else {
         continuity = false;
-        addSystemLine('Continuity deactivated!');
+        chat.addSystemLine('Continuity deactivated!');
     }
 }
 
-function printHelp() {
-    for (var command in chatCommands) {
-        if (chatCommands.hasOwnProperty(command)) {
-            addSystemLine('-' + command + ': ' + chatCommands[command].description);
-        }
-    }
-}
+// TODO
+// Break out many of these game controls into a separate class
 
-registerChatCommand('ping', 'Check your latency', function () {
+chat.registerCommand('ping', 'Check your latency', function () {
     checkLatency();
 });
 
-registerChatCommand('dark', 'Toggle dark mode', function (args) {
-    toggleDarkMode(args);
+chat.registerCommand('dark', 'Toggle dark mode', function () {
+    toggleDarkMode();
 });
 
-registerChatCommand('border', 'Toggle border', function (args) {
-    toggleBorder(args);
+chat.registerCommand('border', 'Toggle border', function () {
+    toggleBorder();
 });
 
-registerChatCommand('mass', 'View mass', function (args) {
-    toggleMass(args);
+chat.registerCommand('mass', 'View mass', function () {
+    toggleMass();
 });
 
-registerChatCommand('continuity', 'Toggle continuity', function (args) {
-    toggleContinuity(args);
+chat.registerCommand('continuity', 'Toggle continuity', function () {
+    toggleContinuity();
 });
 
-registerChatCommand('help', 'Chat commands information', function () {
-    printHelp();
+chat.registerCommand('help', 'Chat commands information', function () {
+    chat.printHelp();
 });
 
-registerChatCommand('login', 'Login as an admin', function (args) {
+chat.registerCommand('login', 'Login as an admin', function (args) {
     socket.emit('pass', args);
 });
 
-registerChatCommand('kick', 'Kick a player', function (args) {
+chat.registerCommand('kick', 'Kick a player', function (args) {
     socket.emit('kick', args);
 });
 
-function sendChat(key) {
-    key = key.which || key.keyCode;
-    if (key === KEY_ENTER) {
-        var text = chatInput.value.replace(/(<([^>]+)>)/ig,'');
-        if (text !== '') {
-            if (text.indexOf('-') === 0) {
-                var args = text.substring(1).split(' ');
-                if (chatCommands[args[0]]) {
-                    chatCommands[args[0]].callback(args.slice(1));
-                } else {
-                    addSystemLine('Unrecoginised Command: ' + text + ', type -help for more info');
-                }
-            } else {
-                socket.emit('playerChat', { sender: player.name, message: text });
-                addChatLine(player.name, text);
-            }
-            chatInput.value = '';
-        }
-    }
-}
 
+// socket stuff
 function setupSocket(socket) {
     // Handle ping
     socket.on('pong', function () {
         var latency = Date.now() - startPingTime;
         debug('Latency: ' + latency + 'ms');
-        addSystemLine('Ping: ' + latency + 'ms');
+        chat.addSystemLine('Ping: ' + latency + 'ms');
     });
 
     // Handle error
@@ -360,8 +365,8 @@ function setupSocket(socket) {
         socket.emit('gotit', player);
         gameStart = true;
         debug('Game is started: ' + gameStart);
-        addSystemLine('Connected to the game!');
-        addSystemLine('Type <b>-help</b> for a list of commands');
+        chat.addSystemLine('Connected to the game!');
+        chat.addSystemLine('Type <b>-help</b> for a list of commands');
         document.getElementById('chatInput').select();
     });
 
@@ -371,19 +376,18 @@ function setupSocket(socket) {
     });
 
     socket.on('playerDied', function (data) {
-        addSystemLine('Player <b>' + data.name + '</b> died!');
+        chat.addSystemLine('Player <b>' + data.name + '</b> died!');
     });
 
     socket.on('playerDisconnect', function (data) {
-        addSystemLine('Player <b>' + data.name + '</b> disconnected!');
+        chat.addSystemLine('Player <b>' + data.name + '</b> disconnected!');
     });
 
     socket.on('playerJoin', function (data) {
-        addSystemLine('Player <b>' + data.name + '</b> joined!');
+        chat.addSystemLine('Player <b>' + data.name + '</b> joined!');
     });
 
     socket.on('leaderboard', function (data) {
-        console.log("a");
         leaderboard = data.leaderboard;
         var status = 'Players: ' + data.players;
         for (var i = 0; i < leaderboard.length; i++) {
@@ -397,12 +401,12 @@ function setupSocket(socket) {
     });
 
     socket.on('serverMSG', function (data) {
-        addSystemLine(data);
+        chat.addSystemLine(data);
     });
 
     // Chat
     socket.on('serverSendPlayerChat', function (data) {
-        addChatLine(data.sender, data.message);
+        chat.addChatLine(data.sender, data.message);
     });
 
     // Handle movement
