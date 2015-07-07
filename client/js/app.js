@@ -735,13 +735,15 @@ function gameLoop() {
             }
 
             for (var i = 0; i < enemies.length; i++) {
-                if (enemies[i].mass <= player.mass) drawEnemy(enemies[i]);
+                if (enemies[i].mass <= player.mass) 
+                    drawEnemy(enemies[i]);
             }
 
             drawPlayer();
 
             for (var j = 0; j < enemies.length; j++) {
-                if (enemies[j].mass > player.mass) drawEnemy(enemies[j]);
+                if (enemies[j].mass > player.mass) 
+                    drawEnemy(enemies[j]);
             }
 
             socket.emit('0', target); // playerSendTarget Heartbeat
