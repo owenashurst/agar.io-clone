@@ -6,10 +6,9 @@ var socket;
 var reason;
 var KEY_ENTER = 13;
 var borderDraw = false;
-var wiggle = 0;
-var inc = +1;
 var animLoopHandle;
 var spin = -Math.PI;
+var enemySpin = -Math.PI;
 
 var debug = function(args) {
     if (console && console.log) {
@@ -556,86 +555,75 @@ function valueInRange(min, max, value) {
 }
 
 function drawEnemy(enemy) {
-    var p = {};
-    var q = {};
-    var rad1 = 0;
-    var rad2 = -2;
-    var diff = 0;
-    var circle = {
-        x: enemy.x - player.x + screenWidth / 2,
-        y: enemy.y - player.y + screenHeight / 2
-    };
+        var x = 0;
+        var y = 0;
+        var circle = {
+            x: enemy.x - player.x + screenWidth / 2,
+            y: enemy.y - player.y + screenHeight / 2
+        };
 
-    graph.strokeStyle = 'hsl(' + enemy.hue + ', 80%, 40%)';
-    graph.fillStyle = 'hsl(' + enemy.hue + ', 70%, 50%)';
-    graph.lineWidth = enemyConfig.border;
+        var points = 30 + ~~(enemy.mass / 5);
+        var increase = Math.PI * 2 / points;
 
-    if (enemy.x > gameWidth - enemy.radius) {
-        diff = Math.asin((gameWidth - enemy.x) / enemy.radius) / 3;
-        if (isNaN(diff)) diff = 0;
-        rad1 = 0.5 - diff;
-        rad2 = -0.5 + diff;
-    } else if (enemy.x < enemy.radius) {
-        diff = Math.acos(enemy.x / enemy.radius) / 3;
-        if (isNaN(diff)) diff = 0;
-        rad1 = -1 + diff;
-        rad2 = 1 - diff;
-    }
+        graph.strokeStyle = 'hsl(' + enemy.hue + ', 80%, 40%)';
+        graph.fillStyle = 'hsl(' + enemy.hue + ', 70%, 50%)';
+        graph.lineWidth = enemyConfig.border;
 
-    if (enemy.y > gameHeight - enemy.radius) {
-        diff = Math.acos((gameHeight - enemy.y) / enemy.radius) / 3;
-        if (isNaN(diff)) diff = 0;
-        rad1 = -0.5 + diff;
-        rad2 = 1.5 - diff;
-    } else if (enemy.y < enemy.radius) {
-        diff = Math.asin(enemy.y / enemy.radius) / 3;
-        if (isNaN(diff)) diff = 0;
-        rad1 = -1 - diff;
-        rad2 = diff;
-    }
+        var xstore = [];
+        var ystore = [];
 
-    p.x = enemy.x + enemy.radius * Math.cos(rad1 * Math.PI);
-    p.y = enemy.y - enemy.radius * Math.sin(rad1 * Math.PI);
-    q.x = enemy.x + enemy.radius * Math.cos(rad2 * Math.PI);
-    q.y = enemy.y - enemy.radius * Math.sin(rad2 * Math.PI);
+        enemySpin += 0.0;
 
-    graph.lineJoin = 'round';
-    graph.lineCap = 'round';
-    graph.beginPath();
-    graph.arc(circle.x, circle.y, enemy.radius, -rad2 * Math.PI, -rad1 * Math.PI);
-    graph.fill();
-    graph.stroke();
+        for (var i = 0; i < points; i++) {
 
-    if (p.x > 0 || p.y > 0) {
-        if (wiggle >= enemy.radius / 3) inc = -1;
-        if (wiggle <= enemy.radius / -3) inc = +1;
-        wiggle += inc;
-        graph.beginPath();
+            x = enemy.radius * Math.cos(enemySpin) + circle.x;
+            y = enemy.radius * Math.sin(enemySpin) + circle.y;
+
+            x = valueInRange(-enemy.x - player.x + screenWidth/2 + (enemy.radius/3), gameWidth - enemy.x + gameWidth - player.x + screenWidth/2 - (enemy.radius/3), x);
+            y = valueInRange(-enemy.y - player.y + screenHeight/2 + (enemy.radius/3), gameHeight - enemy.y + gameHeight - player.y + screenHeight/2 - (enemy.radius/3) , y);
+
+            enemySpin += increase;
+
+            xstore[i] = x;
+            ystore[i] = y;
+
+        }
+
+        for (i = 0; i < points; ++i) {
+            if (i === 0) {
+                graph.beginPath();
+                graph.moveTo(xstore[i], ystore[i]);
+            } else if (i > 0 && i < points - 1) {
+                graph.lineTo(xstore[i], ystore[i]);
+            } else {
+                graph.lineTo(xstore[i], ystore[i]);
+                graph.lineTo(xstore[0], ystore[0]);
+            }
+
+        }
         graph.lineJoin = 'round';
-        graph.moveTo(p.x, p.y);
-        graph.bezierCurveTo(p.x + wiggle / 3, p.y - wiggle / 3, q.x - wiggle / 3, q.y + wiggle / 3, q.x, q.y);
-        graph.stroke();
+        graph.lineCap = 'round';
         graph.fill();
-    }
+        graph.stroke();
 
-    var fontSize = (enemy.radius / 2);
-    graph.lineWidth = enemyConfig.textBorderSize;
-    graph.miterLimit = 1;
-    graph.lineJoin = 'round';
-    graph.textAlign = 'center';
-    graph.fillStyle = enemyConfig.textColor;
-    graph.textBaseline = 'middle';
-    graph.strokeStyle = enemyConfig.textBorder;
-    graph.font = 'bold ' + fontSize + 'px sans-serif';
+        var fontSize = (enemy.radius / 2);
+        graph.lineWidth = enemyConfig.textBorderSize;
+        graph.miterLimit = 1;
+        graph.lineJoin = 'round';
+        graph.textAlign = 'center';
+        graph.fillStyle = enemyConfig.textColor;
+        graph.textBaseline = 'middle';
+        graph.strokeStyle = enemyConfig.textBorder;
+        graph.font = 'bold ' + fontSize + 'px sans-serif';
 
-    if (toggleMassState === 0) {
-        graph.strokeText(enemy.name, circle.x, circle.y);
-        graph.fillText(enemy.name, circle.x, circle.y);
-    } else {
-        graph.strokeText(enemy.name + ' (' + enemy.mass + ')', circle.x, circle.y);
-        graph.fillText(enemy.name + ' (' + enemy.mass + ')', circle.x, circle.y);
+        if (toggleMassState === 0) {
+            graph.strokeText(enemy.name, circle.x, circle.y);
+            graph.fillText(enemy.name, circle.x, circle.y);
+        } else {
+            graph.strokeText(enemy.name + ' (' + enemy.mass + ')', circle.x, circle.y);
+            graph.fillText(enemy.name + ' (' + enemy.mass + ')', circle.x, circle.y);
+        }
     }
-}
 
 function drawgrid() {
      graph.lineWidth = 1;
@@ -747,10 +735,16 @@ function gameLoop() {
             }
 
             for (var i = 0; i < enemies.length; i++) {
-                drawEnemy(enemies[i]);
+                if (enemies[i].mass <= player.mass) 
+                    drawEnemy(enemies[i]);
             }
 
             drawPlayer();
+
+            for (var j = 0; j < enemies.length; j++) {
+                if (enemies[j].mass > player.mass) 
+                    drawEnemy(enemies[j]);
+            }
 
             socket.emit('0', target); // playerSendTarget Heartbeat
 

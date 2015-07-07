@@ -291,6 +291,7 @@ function tickPlayer(currentPlayer) {
     playerCircle.r = currentPlayer.radius;
 
     var otherUsers = users.filter(function(user) {
+        if(user.mass > 10)
         return user.id !== currentPlayer.id;
     });
     var playerCollisions = [];
@@ -309,7 +310,7 @@ function tickPlayer(currentPlayer) {
     });
 
     playerCollisions.forEach(function(collision) {
-        if (collision.aUser.mass > collision.bUser.mass * 1.1  && collision.aUser.radius > Math.sqrt(Math.pow(collision.aUser.x - collision.bUser.x, 2) + Math.pow(collision.aUser.y - collision.bUser.y, 2))*2) {
+        if (collision.aUser.mass > collision.bUser.mass * 1.1  && collision.aUser.radius > Math.sqrt(Math.pow(collision.aUser.x - collision.bUser.x, 2) + Math.pow(collision.aUser.y - collision.bUser.y, 2))*1.75) {
             console.log('KILLING USER: ' + collision.bUser.id);
             console.log('collision info:');
             console.log(collision);
@@ -321,19 +322,6 @@ function tickPlayer(currentPlayer) {
 
             collision.aUser.mass += collision.bUser.mass;
             sockets[collision.bUser.id].emit('RIP');
-        }
-        else if (collision.bUser.mass > collision.aUser.mass * 1.1 && collision.bUser.radius > Math.sqrt(Math.pow(collision.bUser.x - collision.aUser.x, 2) + Math.pow(collision.bUser.y - collision.aUser.y, 2))*2) {
-            console.log('KILLING USER: ' + collision.aUser.id);
-            console.log('collision info:');
-            console.log(collision);
-
-            if (util.findIndex(users, collision.aUser.id) > -1)
-                users.splice(util.findIndex(users, collision.aUser.id), 1);
-
-            io.emit('playerDied', { name: collision.aUser.name });
-
-            collision.bUser.mass += collision.aUser.mass;
-            sockets[collision.aUser.id].emit('RIP');
         }
     });
 }
@@ -372,9 +360,8 @@ function gameloop() {
         }
 
         for (i = 0; i < users.length; i++) {
-            if (users[i].mass >= 10){
-            users[i].mass = users[i].mass * (1 - (c.massLossRate / 1000));
-            }
+            if (users[i].mass * (1 - (c.massLossRate / 1000)) > c.defaultPlayerMass)
+                users[i].mass *= (1 - (c.massLossRate / 1000));
         }
     }
     balanceMass();
