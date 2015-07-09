@@ -75,12 +75,6 @@ npm install
 After downloading all the dependencies, you can run the server with the following command:
 
 ```
-node server/server.js
-```
-
-or
-
-```
 npm start
 ```
 
