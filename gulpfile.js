@@ -8,32 +8,21 @@ var mocha = require('gulp-mocha');
 var webpack = require('webpack-stream');
 
 
-// http://stackoverflow.com/questions/27852814/gulp-jshint-how-to-fail-the-build
-// Enforce better code quality by killing gulp on error
-var map = require('map-stream');
-var exitOnJshintError = map(function (file, cb) {
-  if (!file.jshint.success) {
-    util.log('jshint failed, please fix your code!');
-    process.exit(1);
-  }
-});
-
-
 gulp.task('build', ['build-client', 'build-server', 'test']);
 
-gulp.task('test', ['lint-client', 'lint-server'], function () {
+gulp.task('test', ['lint'], function () {
     gulp.src(['test/**/*.js'])
         .pipe(mocha());
 });
 
-gulp.task('lint-client', function () {
-  return gulp.src('client/js/*.js')
+gulp.task('lint', function () {
+  return gulp.src(['**/*.js', '!node_modules/**/*.js', '!bin/**/*.js'])
     .pipe(jshint())
     .pipe(jshint.reporter('default', { verbose: true}))
-    .pipe(exitOnJshintError);
+    .pipe(jshint.reporter('fail'));
 });
 
-gulp.task('build-client', ['lint-client', 'move-client'], function () {
+gulp.task('build-client', ['lint', 'move-client'], function () {
   return gulp.src(['client/js/app.js'])
     .pipe(webpack(require('./webpack.config.js')))
     //.pipe(uglify())
@@ -45,14 +34,8 @@ gulp.task('move-client', function () {
     .pipe(gulp.dest('./bin/client/'));
 });
 
-gulp.task('lint-server', function () {
-  return gulp.src('server/*.js')
-    .pipe(jshint())
-    .pipe(jshint.reporter('default', { verbose: true}))
-    .pipe(exitOnJshintError);
-});
 
-gulp.task('build-server', ['lint-server', 'move-server'], function () {
+gulp.task('build-server', ['lint', 'move-server'], function () {
   return gulp.src('server/*.js')
     .pipe(gulp.dest('bin/server/'));
 });
