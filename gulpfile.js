@@ -3,8 +3,10 @@ var babel = require('gulp-babel');
 var jshint = require('gulp-jshint');
 var nodemon = require('gulp-nodemon');
 var uglify = require('gulp-uglify');
+var util = require('gulp-util');
 var mocha = require('gulp-mocha');
 var webpack = require('webpack-stream');
+
 
 gulp.task('build', ['build-client', 'build-server', 'test']);
 
@@ -43,13 +45,13 @@ gulp.task('move-server', function () {
     .pipe(gulp.dest('./bin/server/'));
 });
 
-gulp.task('watch', ["build"], function () {
+gulp.task('watch', ['build'], function () {
   gulp.watch('client/**/*.*', ['build-client', 'move-client']);
   gulp.watch('server/*.*', 'server/**/*.js', ['build-server']);
-  gulp.start("run");
+  gulp.start('run');
 });
 
-gulp.task('run', ["build"], function () {
+gulp.task('run', ['build'], function () {
     nodemon({
         delay: 10,
         script: 'server/server.js',
@@ -58,6 +60,6 @@ gulp.task('run', ["build"], function () {
         ext: 'html js css'
     })
     .on('restart', function () {
-        console.log('restarted!');
+        util.log('server restarted!');
     });
 });
