@@ -8,7 +8,7 @@ var io = require('socket.io')(http);
 var SAT = require('sat');
 
 // Import game settings
-var c = require('./config.json');
+var c = require('../../config.json');
 
 // Import utilities
 var util = require('./lib/util');

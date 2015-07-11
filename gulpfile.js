@@ -17,13 +17,15 @@ gulp.task('test', ['lint'], function () {
 
 gulp.task('lint', function () {
   return gulp.src(['**/*.js', '!node_modules/**/*.js', '!bin/**/*.js'])
-    .pipe(jshint())
+    .pipe(jshint({
+          esnext: true
+      }))
     .pipe(jshint.reporter('default', { verbose: true}))
     .pipe(jshint.reporter('fail'));
 });
 
 gulp.task('build-client', ['lint', 'move-client'], function () {
-  return gulp.src(['client/js/app.js'])
+  return gulp.src(['src/client/js/app.js'])
     .pipe(webpack(require('./webpack.config.js')))
     //.pipe(uglify())
     .pipe(gulp.dest('bin/client/js/'));
@@ -35,28 +37,24 @@ gulp.task('move-client', function () {
 });
 
 
-gulp.task('build-server', ['lint', 'move-server'], function () {
-  return gulp.src('server/*.js')
+gulp.task('build-server', ['lint'], function () {
+  return gulp.src(['src/server/**/*.*', 'src/server/**/*.js'])
+    .pipe(babel())
     .pipe(gulp.dest('bin/server/'));
 });
 
-gulp.task('move-server', function () {
-  return gulp.src(['server/**/*.*', 'server/**/*.js'])
-    .pipe(gulp.dest('./bin/server/'));
-});
-
-gulp.task('watch', ['build'], function () {
-  gulp.watch('client/**/*.*', ['build-client', 'move-client']);
-  gulp.watch('server/*.*', 'server/**/*.js', ['build-server']);
+gulp.task('watch', ["build"], function () {
+  gulp.watch('src/client/**/*.*', ['build-client', 'move-client']);
+  gulp.watch('src/server/*.*', 'src/server/**/*.js', ['build-server']);
   gulp.start('run');
 });
 
 gulp.task('run', ['build'], function () {
     nodemon({
         delay: 10,
-        script: 'server/server.js',
+        script: './server/server.js',
         cwd: "./bin/",
-        args: ["/server/config.json"],
+        args: ["config.json"],
         ext: 'html js css'
     })
     .on('restart', function () {
