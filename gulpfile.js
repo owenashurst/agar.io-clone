@@ -33,14 +33,9 @@ gulp.task('move-client', function () {
 });
 
 
-gulp.task('build-server', ['lint', 'move-server'], function () {
-  return gulp.src('server/*.js')
-    .pipe(gulp.dest('bin/server/'));
-});
-
-gulp.task('move-server', function () {
+gulp.task('build-server', ['lint'], function () {
   return gulp.src(['server/**/*.*', 'server/**/*.js'])
-    .pipe(gulp.dest('./bin/server/'));
+    .pipe(gulp.dest('bin/server/'));
 });
 
 gulp.task('watch', ["build"], function () {
