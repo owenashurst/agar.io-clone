@@ -1,7 +1,7 @@
 /*jshint expr:true */
 
 var expect = require('chai').expect,
-    util   = require('../server/lib/util');
+    util   = require('../src/server/lib/util');
 
 
 /**
