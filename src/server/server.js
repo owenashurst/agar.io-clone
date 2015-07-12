@@ -13,6 +13,14 @@ var c = require('../../config.json');
 // Import utilities
 var util = require('./lib/util');
 
+// Import quadtree
+var quadtree= require('../../quadtree');
+
+var args = {x : 0, y : 0, h : c.gameHeight, w : c.gameWidth, maxChildren : 1, maxDepth : 5};
+console.log(args);
+
+var tree = quadtree.QUAD.init(args);
+
 var users = [];
 var food = [];
 var sockets = {};
@@ -101,14 +109,14 @@ function balanceMass() {
     var foodToRemove = -Math.max(foodDiff, maxFoodDiff);
 
     if (foodToAdd > 0) {
-        console.log('adding ' + foodToAdd + ' food to level');
+        //console.log('adding ' + foodToAdd + ' food to level');
         addFood(foodToAdd);
-        console.log('mass rebalanced');
+        //console.log('mass rebalanced');
     }
     else if (foodToRemove > 0) {
-        console.log('removing ' + foodToRemove + ' food from level');
+        //console.log('removing ' + foodToRemove + ' food from level');
         removeFood(foodToRemove);
-        console.log('mass rebalanced');
+        //console.log('mass rebalanced');
     }
 }
 
@@ -122,6 +130,8 @@ io.on('connection', function (socket) {
         id: socket.id,
         x: position.x,
         y: position.y,
+        w: radius,
+        h: radius,
         radius: radius,
         mass: c.defaultPlayerMass,
         hue: Math.round(Math.random() * 360),
@@ -290,23 +300,23 @@ function tickPlayer(currentPlayer) {
     currentPlayer.radius = util.massToRadius(currentPlayer.mass);
     playerCircle.r = currentPlayer.radius;
 
-    var otherUsers = users.filter(function(user) {
-        if(user.mass > 10)
-        return user.id !== currentPlayer.id;
-    });
+    tree.clear();
+    tree.insert(users);
     var playerCollisions = [];
 
-    otherUsers.forEach(function(user) {
+    var otherUsers =  tree.retrieve(currentPlayer, function(user) {
+        if(user.mass > 10 && user.id !== currentPlayer.id) {
         var response = new SAT.Response();
         var collided = SAT.testCircleCircle(playerCircle,
             new C(new V(user.x, user.y), user.radius),
             response);
-
         if (collided) {
             response.aUser = currentPlayer;
             response.bUser = user;
             playerCollisions.push(response);
         }
+        }
+
     });
 
     playerCollisions.forEach(function(collision) {
@@ -432,3 +442,5 @@ if (process.env.OPENSHIFT_NODEJS_IP !== undefined) {
         console.log('listening on *:' + c.port);
     });
 }
+
+
