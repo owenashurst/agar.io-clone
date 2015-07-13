@@ -325,7 +325,7 @@ function tickPlayer(currentPlayer) {
             console.log('collision info:');
             console.log(collision);
 
-            if (util.findIndex(users, collision.aUser.id) > -1)
+            if (util.findIndex(users, collision.bUser.id) > -1)
                 users.splice(util.findIndex(users, collision.bUser.id), 1);
 
             io.emit('playerDied', { name: collision.bUser.name });
