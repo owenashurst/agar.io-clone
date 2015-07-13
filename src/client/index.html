@@ -3,11 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <title>Agar.IO Clone</title>
-
-    <link rel="stylesheet" href="/css/main.css" />
+    <link rel="stylesheet" href="css/main.css" />
 </head>
 <body>
-    <div id="gameAreaWrapper" style="display:none;">
+    <div id="gameAreaWrapper">
         <div id="status">Players: 0</div>
         <div class="chatbox">
             <ul id="chatList" class="chat-list"></ul>
@@ -22,8 +21,17 @@
             <b class="input-error">Nick must be alphanumeric characters only!</b>
             <br />
             <button id="startButton">Play</button>
-             <button id="settingsButton" >Settings</button>
-            <br/>
+            <button id="settingsButton">Settings</button>
+            <br />
+            <div id="settings">
+                <h3>Settings</h3>
+                <ul>
+                    <label><input id="visBord" type="checkbox">Show borders</label>
+                    <label><input id="showMass" type="checkbox">Show mass</label>
+                    <br />
+                    <label><input id="continuity" type="checkbox">Continue moving when mouse is off-screen</label>
+                </ul>
+            </div>
             <div id="instructions">
                 <h3>Gameplay</h3>
                 <ul>
@@ -33,15 +41,8 @@
                     <li>Objective: Try to get fat and eat other players</li>
                 </ul>
             </div>
-            <div id="settings">
-                <h3>Settings</h3>
-                <ul>
-                    <label><input id ="visBord" type="checkbox" onchange="visibleBorder()">Visible borders</label>
-                </ul>
-            </div>
         </div>
     </div>
-    <script src="/socket.io/socket.io.js"></script>
-    <script src="./js/app.js"></script>
+    <script src="js/app.js"></script>
 </body>
 </html>
