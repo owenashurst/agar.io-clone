@@ -7,6 +7,5 @@ applications:
   host: agar-clone
   domain: mybluemix.net
   timeout: 180
-  env: {
+  env:
     NPM_CONFIG_PRODUCTION: false
-  }
