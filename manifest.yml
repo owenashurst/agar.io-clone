@@ -6,7 +6,5 @@ applications:
   buildpack: nodejs_buildpack
   host: agar-clone
   domain: mybluemix.net
-  command: node server/server.js
+  command: node src/server/server.js
   timeout: 180
-  env:
-    env_type: production
