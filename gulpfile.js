@@ -16,7 +16,7 @@ gulp.task('test', ['lint'], function () {
 });
 
 gulp.task('lint', function () {
-  return gulp.src(['**/*.js', '!node_modules/**/*.js', '!bin/**/*.js'])
+  return gulp.src(['**/*.js', '!node_modules/**/*.js', '!bin/**/*.js', '!vendor/**/*.js'])
     .pipe(jshint({
           esnext: true
       }))
@@ -32,7 +32,7 @@ gulp.task('build-client', ['lint', 'move-client'], function () {
 });
 
 gulp.task('move-client', function () {
-  return gulp.src(['client/**/*.*', '!client/js/*.js'])
+  return gulp.src(['src/client/**/*.*', '!client/js/*.js'])
     .pipe(gulp.dest('./bin/client/'));
 });
 
