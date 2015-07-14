@@ -4,7 +4,7 @@
   "description": "A simple Agar.io clone",
   "main": "server/server.js",
   "scripts": {
-    "postinstall": "gulp build",
+    "build": "gulp build",
     "start": "gulp run",
     "watch": "gulp watch",
     "test": "gulp test"
