@@ -16,8 +16,8 @@ A simple Agar.io clone built with socket.io and HTML5 Canvas on top of NodeJS.
 [![Singapore](https://img.shields.io/badge/singapore-offline-red.svg)](http://codedaily.vn:3000/) 
 [![Heroku EU](https://img.shields.io/badge/heroku eu-outdated-yellow.svg)](https://agar-clone.herokuapp.com/) 
 [![Heroku US](https://img.shields.io/badge/heroku us-outdated-yellow.svg)](https://agar-clone-us.herokuapp.com/)
-[![Bluemix US](http://img.shields.io/badge/bluemix us-outdated-yellow.svg)](http://agar-clone.mybluemix.net/)
-[![Bluemix EU](http://img.shields.io/badge/bluemix eu-outdated-yellow.svg)](http://agar-clone.eu-gb.mybluemix.net/)
+[![Bluemix US](http://img.shields.io/badge/bluemix us-online-yellow.svg)](http://agar-clone.mybluemix.net/)
+[![Bluemix EU](http://img.shields.io/badge/bluemix eu-online-yellow.svg)](http://agar-clone.eu-gb.mybluemix.net/)
 [![Cloud9](https://img.shields.io/badge/cloud9-offline-red.svg)](https://agar-io-clone-d3vont3ch.c9.io/) 
 [![TS3Bahu](https://img.shields.io/badge/TS3Bahu-online-green.svg)](http://agar.ts3bahu.com:3000)
 
@@ -52,7 +52,7 @@ A simple Agar.io clone built with socket.io and HTML5 Canvas on top of NodeJS.
 ## Installation
 You can simply click one of the buttons below to easily deploy this repo to Bluemix or Heroku:
 
-[![Deploy to Bluemix](https://bluemix.net/deploy/button.png)](https://bluemix.net/deploy)
+[![Deploy to Bluemix](https://bluemix.net/deploy/button.png)](https://bluemix.net/deploy?repository=https://github.com/huytd/agar.io-clone)
 [![Deploy to Heroku](https://www.herokucdn.com/deploy/button.png)](https://heroku.com/deploy)
 
 -or-
