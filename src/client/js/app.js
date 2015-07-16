@@ -139,6 +139,8 @@ c.addEventListener('mousemove', gameInput, false);
 c.width = screenWidth; c.height = screenHeight;
 c.addEventListener('mouseout', outOfBounds, false);
 
+c.addEventListener('touchmove', touchInput, false);
+
 // register when the mouse goes off the canvas
 function outOfBounds() {
     if (!continuity) {
@@ -688,6 +690,13 @@ function drawborder() {
 function gameInput(mouse) {
     target.x = mouse.clientX - screenWidth / 2;
     target.y = mouse.clientY - screenHeight / 2;
+}
+
+function touchInput(touch) {
+    touch.preventDefault();
+    touch.stopPropagation();
+    target.x = touch.touches[0].clientX - screenWidth / 2;
+    target.y = touch.touches[0].clientY - screenHeight / 2;
 }
 
 window.requestAnimFrame = (function() {
