@@ -9,12 +9,17 @@ var borderDraw = false;
 var animLoopHandle;
 var spin = -Math.PI;
 var enemySpin = -Math.PI;
+var mobile = false;
 
 var debug = function(args) {
     if (console && console.log) {
         console.log(args);
     }
 };
+
+if ( /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent) ) {
+    mobile = true;
+}
 
 function startGame() {
     playerName = playerNameInput.value.replace(/(<([^>]+)>)/ig, '');
@@ -135,10 +140,11 @@ var leaderboard = [];
 var target = {x: player.x, y: player.y};
 
 var c = document.getElementById('cvs');
-c.addEventListener('mousemove', gameInput, false);
 c.width = screenWidth; c.height = screenHeight;
+c.addEventListener('mousemove', gameInput, false);
 c.addEventListener('mouseout', outOfBounds, false);
 
+c.addEventListener('touchstart', touchInput, false);
 c.addEventListener('touchmove', touchInput, false);
 
 // register when the mouse goes off the canvas
@@ -167,6 +173,9 @@ function ChatClient(config) {
 
 /** template into chat box a new message from a player */
 ChatClient.prototype.addChatLine = function (name, message) {
+    if (mobile) {
+        return;
+    }
     var newline = document.createElement('li');
 
     // color the chat input appropriately
@@ -179,6 +188,9 @@ ChatClient.prototype.addChatLine = function (name, message) {
 
 /** template into chat box a new message from the application */
 ChatClient.prototype.addSystemLine = function (message) {
+    if (mobile) {
+        return;
+    }
     var newline = document.createElement('li');
 
     // message will appear in system color
@@ -191,6 +203,9 @@ ChatClient.prototype.addSystemLine = function (message) {
 
 /** templates the message DOM node into the messsage area */
 ChatClient.prototype.appendMessage = function (node) {
+    if (mobile) {
+        return;
+    }
     var chatList = document.getElementById('chatList');
     if (chatList.childNodes.length > 10) {
         chatList.removeChild(chatList.childNodes[0]);
@@ -368,7 +383,12 @@ function setupSocket(socket) {
         debug('Game is started: ' + gameStart);
         chat.addSystemLine('Connected to the game!');
         chat.addSystemLine('Type <b>-help</b> for a list of commands');
-        document.getElementById('chatInput').select();
+        if (mobile) {
+            document.getElementById('gameAreaWrapper').removeChild(document.getElementById('chatbox'));
+        }
+        else {
+            document.getElementById('chatInput').select();
+        }
     });
 
     socket.on('gameSetup', function(data) {
