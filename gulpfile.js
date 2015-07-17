@@ -32,7 +32,7 @@ gulp.task('build-client', ['lint', 'move-client'], function () {
 });
 
 gulp.task('move-client', function () {
-  return gulp.src(['src/client/**/*.*', '!src/client/js/*.js'])
+  return gulp.src(['src/client/**/*.*', '!client/js/*.js'])
     .pipe(gulp.dest('./bin/client/'));
 });
 
