@@ -34,15 +34,10 @@
   ],
   "dependencies": {
     "babel": "^5.6.14",
-    "express": "^4.12.4",
-    "sat": "^0.5.0",
-    "socket.io": "^1.3.5",
-    "socket.io-client": "^1.3.5"
-  },
-  "devDependencies": {
     "babel-core": "^5.6.15",
     "babel-loader": "^5.3.0",
     "chai": "^3.0.0",
+    "express": "^4.12.4",
     "gulp": "^3.8.11",
     "gulp-babel": "^5.1.0",
     "gulp-jshint": "^1.11.0",
@@ -54,6 +49,9 @@
     "mocha": "^2.2.5",
     "node-libs-browser": "^0.5.2",
     "nodemon": "^1.2.1",
+    "sat": "^0.5.0",
+    "socket.io": "^1.3.5",
+    "socket.io-client": "^1.3.5",
     "webpack": "^1.10.1",
     "webpack-stream": "^2.0.0"
   }
