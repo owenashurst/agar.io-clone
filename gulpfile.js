@@ -21,7 +21,7 @@ gulp.task('lint', function () {
           esnext: true
       }))
     .pipe(jshint.reporter('default', { verbose: true}))
-    .pipe(jshint.reporter('fail'));
+    .pipe(jshint.reporter('fail'));dddd
 });
 
 gulp.task('build-client', ['lint', 'move-client'], function () {
