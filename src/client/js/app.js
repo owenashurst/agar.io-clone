@@ -564,11 +564,14 @@ function drawPlayer() {
     graph.font = 'bold ' + fontSize + 'px sans-serif';
 
     if (toggleMassState === 0) {
-        graph.strokeText(player.name, screenWidth / 2, screenHeight / 2);
-        graph.fillText(player.name, screenWidth / 2, screenHeight / 2);
+        graph.strokeText(player.name, circle.x, circle.y);
+        graph.fillText(player.name, circle.x, circle.y);
     } else {
-        graph.strokeText(player.name + ' (' + player.mass + ')', screenWidth / 2, screenHeight / 2);
-        graph.fillText(player.name + ' (' + player.mass + ')', screenWidth / 2, screenHeight / 2);
+        graph.strokeText(player.name, circle.x, circle.y);
+        graph.fillText(player.name, circle.x, circle.y);
+        graph.font = 'bold ' + fontSize/2 + 'px sans-serif';
+        graph.strokeText(player.mass, circle.x, circle.y+fontSize);
+        graph.fillText(player.mass, circle.x, circle.y+fontSize);
     }
 }
 
@@ -642,8 +645,11 @@ function drawEnemy(enemy) {
             graph.strokeText(enemy.name, circle.x, circle.y);
             graph.fillText(enemy.name, circle.x, circle.y);
         } else {
-            graph.strokeText(enemy.name + ' (' + enemy.mass + ')', circle.x, circle.y);
-            graph.fillText(enemy.name + ' (' + enemy.mass + ')', circle.x, circle.y);
+            graph.strokeText(enemy.name, circle.x, circle.y);
+            graph.fillText(enemy.name, circle.x, circle.y);
+            graph.font = 'bold ' + fontSize/2 + 'px sans-serif';
+            graph.strokeText(enemy.mass, circle.x, circle.y+fontSize);
+            graph.fillText(enemy.mass, circle.x, circle.y+fontSize);
         }
     }
 
