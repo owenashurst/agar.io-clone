@@ -553,7 +553,9 @@ function drawPlayer() {
 
 
 
-    var fontSize = (player.radius / 2);
+    var fontSize = player.inicial;
+    if(player.mass >= 70)
+        fontSize = (player.radius / 4);
     graph.lineWidth = playerConfig.textBorderSize;
     graph.miterLimit = 1;
     graph.lineJoin = 'round';
@@ -631,7 +633,9 @@ function drawEnemy(enemy) {
         graph.fill();
         graph.stroke();
 
-        var fontSize = (enemy.radius / 2);
+        var fontSize = player.inicial;
+        if(enemy.mass >= 70)
+            fontSize = (enemy.radius / 4);
         graph.lineWidth = enemyConfig.textBorderSize;
         graph.miterLimit = 1;
         graph.lineJoin = 'round';
