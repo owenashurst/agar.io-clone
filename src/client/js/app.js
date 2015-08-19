@@ -550,12 +550,7 @@ function drawPlayer() {
     graph.fill();
     graph.stroke();
 
-
-
-
-    var fontSize = player.inicial;
-    if(player.mass >= 70)
-        fontSize = (player.radius / 4);
+    var fontSize = Math.max(player.radius / 3, 12);
     graph.lineWidth = playerConfig.textBorderSize;
     graph.miterLimit = 1;
     graph.lineJoin = 'round';
@@ -571,7 +566,7 @@ function drawPlayer() {
     } else {
         graph.strokeText(player.name, circle.x, circle.y);
         graph.fillText(player.name, circle.x, circle.y);
-        graph.font = 'bold ' + fontSize/2 + 'px sans-serif';
+        graph.font = 'bold ' + Math.max(fontSize / 3 * 2, 10) + 'px sans-serif';
         graph.strokeText(player.mass, circle.x, circle.y+fontSize);
         graph.fillText(player.mass, circle.x, circle.y+fontSize);
     }
@@ -633,9 +628,7 @@ function drawEnemy(enemy) {
         graph.fill();
         graph.stroke();
 
-        var fontSize = player.inicial;
-        if(enemy.mass >= 70)
-            fontSize = (enemy.radius / 4);
+        var fontSize = Math.max(enemy.radius / 3, 12);
         graph.lineWidth = enemyConfig.textBorderSize;
         graph.miterLimit = 1;
         graph.lineJoin = 'round';
@@ -651,7 +644,7 @@ function drawEnemy(enemy) {
         } else {
             graph.strokeText(enemy.name, circle.x, circle.y);
             graph.fillText(enemy.name, circle.x, circle.y);
-            graph.font = 'bold ' + fontSize/2 + 'px sans-serif';
+            graph.font = 'bold ' + Math.max(fontSize / 3 * 2, 10) + 'px sans-serif';
             graph.strokeText(enemy.mass, circle.x, circle.y+fontSize);
             graph.fillText(enemy.mass, circle.x, circle.y+fontSize);
         }

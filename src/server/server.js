@@ -134,7 +134,6 @@ io.on('connection', function (socket) {
         h: radius,
         radius: radius,
         mass: c.defaultPlayerMass,
-        inicial: radius / 2,
         hue: Math.round(Math.random() * 360),
         lastHeartbeat: new Date().getTime(),
         target: {
