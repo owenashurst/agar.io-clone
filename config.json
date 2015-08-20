@@ -1,6 +1,7 @@
 {
     "port": 3000,
     "foodMass": 1,
+    "fireFood": 20,
     "defaultPlayerMass": 10,
     "gameWidth": 5000,
     "gameHeight": 5000,
@@ -13,5 +14,5 @@
     "maxHeartbeatInterval": 5000,
     "foodUniformDisposition": true,
     "newPlayerInitialPosition": "farthest",
-    "massLossRate": 10
+    "massLossRate": 1
 }
