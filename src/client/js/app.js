@@ -426,10 +426,17 @@ function setupSocket(socket) {
         var status = 'Players: ' + data.players;
         for (var i = 0; i < leaderboard.length; i++) {
             status += '<br />';
-            if (leaderboard[i].id == player.id)
-                status += '<span class="me">' + (i + 1) + '. ' + leaderboard[i].name + "</span>";
-            else
-                status += (i + 1) + '. ' + leaderboard[i].name;
+            if (leaderboard[i].id == player.id){
+                if(leaderboard[i].name.length !== 0)
+                    status += '<span class="me">' + (i + 1) + '. ' + leaderboard[i].name + "</span>";
+                else
+                    status += '<span class="me">' + (i + 1) + ". A cell unnamed</span>";
+            } else {
+                if(leaderboard[i].name.length !== 0)
+                    status += (i + 1) + '. ' + leaderboard[i].name;
+                else
+                    status += (i + 1) + '. A cell unnamed';
+            }
         }
         document.getElementById('status').innerHTML = status;
     });
@@ -588,6 +595,7 @@ function drawPlayer() {
         graph.strokeText(player.name, circle.x, circle.y);
         graph.fillText(player.name, circle.x, circle.y);
         graph.font = 'bold ' + Math.max(fontSize / 3 * 2, 10) + 'px sans-serif';
+        if(player.name.length === 0) fontSize = 0;
         graph.strokeText(player.mass, circle.x, circle.y+fontSize);
         graph.fillText(player.mass, circle.x, circle.y+fontSize);
     }
@@ -666,6 +674,7 @@ function drawEnemy(enemy) {
             graph.strokeText(enemy.name, circle.x, circle.y);
             graph.fillText(enemy.name, circle.x, circle.y);
             graph.font = 'bold ' + Math.max(fontSize / 3 * 2, 10) + 'px sans-serif';
+            if(enemy.name.length === 0) fontSize = 0;
             graph.strokeText(enemy.mass, circle.x, circle.y+fontSize);
             graph.fillText(enemy.mass, circle.x, circle.y+fontSize);
         }

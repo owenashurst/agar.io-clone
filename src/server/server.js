@@ -469,10 +469,10 @@ function sendUpdates() {
 
         var visibleMass = massFood
             .map(function(f) {
-                if ( f.x > u.x - u.screenWidth/2 - 20 &&
-                    f.x < u.x + u.screenWidth/2 + 20 &&
-                    f.y > u.y - u.screenHeight/2 - 20 &&
-                    f.y < u.y + u.screenHeight/2 + 20) {
+                if ( f.x+f.radius > u.x - u.screenWidth/2 - 20 &&
+                    f.x-f.radius < u.x + u.screenWidth/2 + 20 &&
+                    f.y+f.radius > u.y - u.screenHeight/2 - 20 &&
+                    f.y-f.radius < u.y + u.screenHeight/2 + 20) {
                     return f;
                 }
             })
@@ -480,10 +480,10 @@ function sendUpdates() {
 
         var visibleEnemies  = users
             .map(function(f) {
-                if ( f.x > u.x - u.screenWidth/2 - 20 &&
-                    f.x < u.x + u.screenWidth/2 + 20 &&
-                    f.y > u.y - u.screenHeight/2 - 20 &&
-                    f.y < u.y + u.screenHeight/2 + 20 &&
+                if ( f.x+f.radius > u.x - u.screenWidth/2 - 20 &&
+                    f.x-f.radius < u.x + u.screenWidth/2 + 20 &&
+                    f.y+f.radius > u.y - u.screenHeight/2 - 20 &&
+                    f.y-f.radius < u.y + u.screenHeight/2 + 20 &&
                     f.id !== u.id) {
                     return {
                         id: f.id,
