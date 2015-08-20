@@ -22,6 +22,7 @@ console.log(args);
 var tree = quadtree.QUAD.init(args);
 
 var users = [];
+var massFood = [];
 var food = [];
 var sockets = {};
 
@@ -93,6 +94,34 @@ function movePlayer(player) {
     }
     if (player.y < borderCalc) {
         player.y = borderCalc;
+    }
+}
+
+function moveMass(mass) {
+    var deg = Math.atan2(mass.target.y, mass.target.x);
+
+    var deltaY = mass.speed * Math.sin(deg);
+    var deltaX = mass.speed * Math.cos(deg);
+
+    mass.speed -= 0.5;
+    if(mass.speed < 0) mass.speed = 0;
+
+    mass.y += deltaY;
+    mass.x += deltaX;
+
+    var borderCalc = mass.radius + 5;
+
+    if (mass.x > c.gameWidth - borderCalc) {
+        mass.x = c.gameWidth - borderCalc;
+    }
+    if (mass.y > c.gameHeight - borderCalc) {
+        mass.y = c.gameHeight - borderCalc;
+    }
+    if (mass.x < borderCalc) {
+        mass.x = borderCalc;
+    }
+    if (mass.y < borderCalc) {
+        mass.y = borderCalc;
     }
 }
 
@@ -270,6 +299,27 @@ io.on('connection', function (socket) {
             currentPlayer.target = target;
         }
     });
+
+    socket.on('1', function() {
+        if(((currentPlayer.mass >= c.defaultPlayerMass + c.fireFood) && c.fireFood > 0) || (currentPlayer.mass >= 20 && c.fireFood === 0)){
+            var masa = 1;
+            if(c.fireFood > 0)
+                masa = c.fireFood;
+            else
+                masa = currentPlayer.mass*0.1;
+            currentPlayer.mass -= masa;
+            massFood.push({
+                id: currentPlayer.id,
+                masa: masa,
+                hue: currentPlayer.hue,
+                target: currentPlayer.target,
+                x: currentPlayer.x,
+                y: currentPlayer.y,
+                radius: util.massToRadius(masa),
+                speed: 25
+            });
+        }
+    });
 });
 
 function tickPlayer(currentPlayer) {
@@ -295,8 +345,32 @@ function tickPlayer(currentPlayer) {
         food.splice(f, 1);
     });
 
+    var massEaten = massFood
+        .map(function(m) {
+            if(SAT.pointInCircle(new V(m.x, m.y), playerCircle)){
+                if(m.id == currentPlayer.id && m.speed > 0)
+                    return false;
+                if(currentPlayer.mass > m.masa * 1.1)
+                    return true;
+            }
+            return false;
+        })
+        .reduce(function(a, b, c) {return b ? a.concat(c) : a; }, []);
+
+    var masaGanada = 0;
+    for(var m=0; m<massEaten.length; m++) {
+        masaGanada += massFood[massEaten[m]].masa;
+        massFood[massEaten[m]] = {};
+        massFood.splice(massEaten[m],1);
+        for(var n=0; n<massEaten.length; n++) {
+            if(massEaten[m] < massEaten[n]) {
+                massEaten[n]--;
+            }
+        }
+    }
+
     currentPlayer.speed = 6.25;
-    currentPlayer.mass += foodEaten.length * c.foodMass;
+    currentPlayer.mass += (foodEaten.length * c.foodMass) + masaGanada;
     currentPlayer.radius = util.massToRadius(currentPlayer.mass);
     playerCircle.r = currentPlayer.radius;
 
@@ -339,6 +413,9 @@ function tickPlayer(currentPlayer) {
 function moveloop() {
     for (var i = 0; i < users.length; i++) {
         tickPlayer(users[i]);
+    }
+    for (i=0; i < massFood.length; i++) {
+        if(massFood[i].speed > 0) moveMass(massFood[i]);
     }
 }
 
@@ -390,6 +467,17 @@ function sendUpdates() {
             })
             .filter(function(f) { return f; });
 
+        var visibleMass = massFood
+            .map(function(f) {
+                if ( f.x > u.x - u.screenWidth/2 - 20 &&
+                    f.x < u.x + u.screenWidth/2 + 20 &&
+                    f.y > u.y - u.screenHeight/2 - 20 &&
+                    f.y < u.y + u.screenHeight/2 + 20) {
+                    return f;
+                }
+            })
+            .filter(function(f) { return f; });
+
         var visibleEnemies  = users
             .map(function(f) {
                 if ( f.x > u.x - u.screenWidth/2 - 20 &&
@@ -415,7 +503,7 @@ function sendUpdates() {
             y: u.y,
             radius: Math.round(u.radius),
             mass: Math.round(u.mass)
-        }, visibleEnemies, visibleFood);
+        }, visibleEnemies, visibleFood, visibleMass);
         if (leaderboardChanged) {
             sockets[u.id].emit('leaderboard', {
                 players: users.length,

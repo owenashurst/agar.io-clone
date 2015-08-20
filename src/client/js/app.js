@@ -5,6 +5,7 @@ var playerNameInput = document.getElementById('playerNameInput');
 var socket;
 var reason;
 var KEY_ENTER = 13;
+var KEY_W = 119;
 var borderDraw = false;
 var animLoopHandle;
 var spin = -Math.PI;
@@ -135,14 +136,18 @@ var player = {
 };
 
 var foods = [];
+var fireFood = [];
 var enemies = [];
 var leaderboard = [];
 var target = {x: player.x, y: player.y};
+var reenviar = true;
 
 var c = document.getElementById('cvs');
 c.width = screenWidth; c.height = screenHeight;
 c.addEventListener('mousemove', gameInput, false);
 c.addEventListener('mouseout', outOfBounds, false);
+c.addEventListener('keypress', keyInput, false);
+c.addEventListener('keyup', function() {reenviar = true;}, false);
 
 c.addEventListener('touchstart', touchInput, false);
 c.addEventListener('touchmove', touchInput, false);
@@ -266,6 +271,14 @@ ChatClient.prototype.printHelp = function () {
 var chat = new ChatClient();
 
 // chat command callback functions
+function keyInput(event) {
+	var key = event.which || event.keyCode;
+	if(key === KEY_W && reenviar) {
+        socket.emit('1');
+        reenviar = false;
+    }
+}
+
 function checkLatency() {
     // Ping
     startPingTime = Date.now();
@@ -431,7 +444,7 @@ function setupSocket(socket) {
     });
 
     // Handle movement
-    socket.on('serverTellPlayerMove', function (playerData, userData, foodsList) {
+    socket.on('serverTellPlayerMove', function (playerData, userData, foodsList, massList) {
         var xoffset = player.x - playerData.x;
         var yoffset = player.y - playerData.y;
 
@@ -444,6 +457,7 @@ function setupSocket(socket) {
 
         enemies = userData;
         foods = foodsList;
+        fireFood = massList;
     });
 
     // Die
@@ -493,6 +507,13 @@ function drawFood(food) {
     graph.fillStyle = food.color.fill || foodConfig.fillColor;
     graph.lineWidth = foodConfig.border;
     drawCircle(food.x - player.x + screenWidth / 2, food.y - player.y + screenHeight / 2, food.radius, 9);
+}
+
+function drawFireFood(mass) {
+    graph.strokeStyle = 'hsl(' + mass.hue + ', 80%, 40%)';
+    graph.fillStyle = 'hsl(' + mass.hue + ', 70%, 50%)';
+    graph.lineWidth = playerConfig.border;
+    drawCircle(mass.x - player.x + screenWidth / 2, mass.y - player.y + screenHeight / 2, mass.radius, 18 + (~~(mass.masa/5)));
 }
 
 function drawPlayer() {
@@ -760,6 +781,10 @@ function gameLoop() {
 
             foods.forEach(function(food) {
                 drawFood(food);
+            });
+
+            fireFood.forEach(function(mass) {
+                drawFireFood(mass);
             });
 
             if (borderDraw) {
