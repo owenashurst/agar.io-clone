@@ -177,15 +177,15 @@ function ChatClient(config) {
 }
 
 /** template into chat box a new message from a player */
-ChatClient.prototype.addChatLine = function (name, message) {
+ChatClient.prototype.addChatLine = function (name, message, me) {
     if (mobile) {
         return;
     }
     var newline = document.createElement('li');
 
     // color the chat input appropriately
-    newline.className = (name === player.name) ? 'me' : 'friend';
-    newline.innerHTML = '<b>' + name + '</b>: ' + message;
+    newline.className = (me) ? 'me' : 'friend';
+    newline.innerHTML = '<b>' + ((name.length < 1) ? 'A cell unnamed' : name) + '</b>: ' + message;
 
     this.appendMessage(newline);
 };
@@ -241,7 +241,7 @@ ChatClient.prototype.sendChat = function (key) {
             // just a regular message - send along to server
             } else {
                 socket.emit('playerChat', { sender: player.name, message: text });
-                this.addChatLine(player.name, text);
+                this.addChatLine(player.name, text, true);
             }
 
             // reset input
@@ -423,7 +423,7 @@ function setupSocket(socket) {
 
     socket.on('leaderboard', function (data) {
         leaderboard = data.leaderboard;
-        var status = 'Players: ' + data.players;
+        var status = '<span class="title">Leaderboard</span>';
         for (var i = 0; i < leaderboard.length; i++) {
             status += '<br />';
             if (leaderboard[i].id == player.id){
@@ -438,6 +438,7 @@ function setupSocket(socket) {
                     status += (i + 1) + '. A cell unnamed';
             }
         }
+        //status += '<br />Players: ' + data.players;
         document.getElementById('status').innerHTML = status;
     });
 
@@ -447,7 +448,7 @@ function setupSocket(socket) {
 
     // Chat
     socket.on('serverSendPlayerChat', function (data) {
-        chat.addChatLine(data.sender, data.message);
+        chat.addChatLine(data.sender, data.message, false);
     });
 
     // Handle movement
@@ -510,17 +511,17 @@ function drawCircle(centerX, centerY, radius, sides) {
 }
 
 function drawFood(food) {
-    graph.strokeStyle = food.color.border || foodConfig.borderColor;
-    graph.fillStyle = food.color.fill || foodConfig.fillColor;
+    graph.strokeStyle = 'hsl(' + food.hue + ', 100%, 45%)';
+    graph.fillStyle = 'hsl(' + food.hue + ', 100%, 50%)';
     graph.lineWidth = foodConfig.border;
-    drawCircle(food.x - player.x + screenWidth / 2, food.y - player.y + screenHeight / 2, food.radius, 9);
+    drawCircle(food.x - player.x + screenWidth / 2, food.y - player.y + screenHeight / 2, food.radius, food.sides);
 }
 
 function drawFireFood(mass) {
-    graph.strokeStyle = 'hsl(' + mass.hue + ', 80%, 40%)';
-    graph.fillStyle = 'hsl(' + mass.hue + ', 70%, 50%)';
-    graph.lineWidth = playerConfig.border;
-    drawCircle(mass.x - player.x + screenWidth / 2, mass.y - player.y + screenHeight / 2, mass.radius, 18 + (~~(mass.masa/5)));
+    graph.strokeStyle = 'hsl(' + mass.hue + ', 100%, 45%)';
+    graph.fillStyle = 'hsl(' + mass.hue + ', 100%, 50%)';
+    graph.lineWidth = playerConfig.border+10;
+    drawCircle(mass.x - player.x + screenWidth / 2, mass.y - player.y + screenHeight / 2, mass.radius-5, 18 + (~~(mass.masa/5)));
 }
 
 function drawPlayer() {
@@ -533,8 +534,8 @@ function drawPlayer() {
     var points = 30 + ~~(player.mass/5);
     var increase = Math.PI * 2 / points;
 
-    graph.strokeStyle = 'hsl(' + player.hue + ', 80%, 40%)';
-    graph.fillStyle = 'hsl(' + player.hue + ', 70%, 50%)';
+    graph.strokeStyle = 'hsl(' + player.hue + ', 100%, 45%)';
+    graph.fillStyle = 'hsl(' + player.hue + ', 100%, 50%)';
     graph.lineWidth = playerConfig.border;
 
     var xstore = [];
@@ -616,8 +617,8 @@ function drawEnemy(enemy) {
         var points = 30 + ~~(enemy.mass / 5);
         var increase = Math.PI * 2 / points;
 
-        graph.strokeStyle = 'hsl(' + enemy.hue + ', 80%, 40%)';
-        graph.fillStyle = 'hsl(' + enemy.hue + ', 70%, 50%)';
+        graph.strokeStyle = 'hsl(' + enemy.hue + ', 100%, 45%)';
+        graph.fillStyle = 'hsl(' + enemy.hue + ', 100%, 50%)';
         graph.lineWidth = enemyConfig.border;
 
         var xstore = [];
