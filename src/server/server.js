@@ -381,17 +381,16 @@ function tickPlayer(currentPlayer) {
 
     var otherUsers =  tree.retrieve(currentPlayer, function(user) {
         if(user.mass > 10 && user.id !== currentPlayer.id) {
-        var response = new SAT.Response();
-        var collided = SAT.testCircleCircle(playerCircle,
-            new C(new V(user.x, user.y), user.radius),
-            response);
-        if (collided) {
-            response.aUser = currentPlayer;
-            response.bUser = user;
-            playerCollisions.push(response);
+            var response = new SAT.Response();
+            var collided = SAT.testCircleCircle(playerCircle,
+                new C(new V(user.x, user.y), user.radius),
+                response);
+            if (collided) {
+                response.aUser = currentPlayer;
+                response.bUser = user;
+                playerCollisions.push(response);
+            }
         }
-        }
-
     });
 
     playerCollisions.forEach(function(collision) {
