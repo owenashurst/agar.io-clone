@@ -5,7 +5,8 @@ var playerNameInput = document.getElementById('playerNameInput');
 var socket;
 var reason;
 var KEY_ENTER = 13;
-var KEY_W = 119;
+var KEY_FIREFOOD = 119;
+var KEY_SPLIT = 32;
 var borderDraw = false;
 var animLoopHandle;
 var spin = -Math.PI;
@@ -103,23 +104,14 @@ var continuity = false;
 var startPingTime = 0;
 var toggleMassState = 0;
 var backgroundColor = '#f2fbff';
+var lineColor = '#000000';
 
 var foodConfig = {
     border: 0,
-    borderColor: '#f39c12',
-    fillColor: '#f1c40f'
 };
 
 var playerConfig = {
     border: 6,
-    textColor: '#FFFFFF',
-    textBorder: '#000000',
-    textBorderSize: 3,
-    defaultSize: 30
-};
-
-var enemyConfig = {
-    border: 5,
     textColor: '#FFFFFF',
     textBorder: '#000000',
     textBorderSize: 3,
@@ -137,7 +129,7 @@ var player = {
 
 var foods = [];
 var fireFood = [];
-var enemies = [];
+var users = [];
 var leaderboard = [];
 var target = {x: player.x, y: player.y};
 var reenviar = true;
@@ -273,8 +265,12 @@ var chat = new ChatClient();
 // chat command callback functions
 function keyInput(event) {
 	var key = event.which || event.keyCode;
-	if(key === KEY_W && reenviar) {
+	if(key === KEY_FIREFOOD && reenviar) {
         socket.emit('1');
+        reenviar = false;
+    }
+    else if(key === KEY_SPLIT && reenviar) {
+        socket.emit('2');
         reenviar = false;
     }
 }
@@ -288,12 +284,16 @@ function checkLatency() {
 function toggleDarkMode() {
     var LIGHT = '#f2fbff',
         DARK = '#181818';
+    var LINELIGHT = '#000000',
+        LINEDARK = '#ffffff';
 
     if (backgroundColor === LIGHT) {
         backgroundColor = DARK;
+        lineColor = LINEDARK;
         chat.addSystemLine('Dark mode enabled');
     } else {
         backgroundColor = LIGHT;
+        lineColor = LINELIGHT;
         chat.addSystemLine('Dark mode disabled');
     }
 }
@@ -452,18 +452,27 @@ function setupSocket(socket) {
     });
 
     // Handle movement
-    socket.on('serverTellPlayerMove', function (playerData, userData, foodsList, massList) {
+    socket.on('serverTellPlayerMove', function (userData, foodsList, massList) {
+        var playerData;
+        for(var i =0; i< userData.length; i++) {
+            if(typeof(userData[i].id) == "undefined") {
+                playerData = userData[i];
+                i = userData.length;
+            }
+        }
+
         var xoffset = player.x - playerData.x;
         var yoffset = player.y - playerData.y;
 
         player.x = playerData.x;
         player.y = playerData.y;
-        player.mass = playerData.mass;
-        player.radius = playerData.radius;
+        player.hue = playerData.hue;
+        player.massTotal = playerData.massTotal;
+        player.cells = playerData.cells;
         player.xoffset = isNaN(xoffset) ? 0 : xoffset;
         player.yoffset = isNaN(yoffset) ? 0 : yoffset;
 
-        enemies = userData;
+        users = userData;
         foods = foodsList;
         fireFood = massList;
     });
@@ -524,123 +533,56 @@ function drawFireFood(mass) {
     drawCircle(mass.x - player.x + screenWidth / 2, mass.y - player.y + screenHeight / 2, mass.radius-5, 18 + (~~(mass.masa/5)));
 }
 
-function drawPlayer() {
-    var x = 0;
-    var y = 0;
-    var circle = {
-        x: screenWidth / 2,
-        y: screenHeight / 2
+function drawPlayers(order) {
+    var start = {
+        x: player.x - (screenWidth / 2),
+        y: player.y - (screenHeight / 2)
     };
-    var points = 30 + ~~(player.mass/5);
-    var increase = Math.PI * 2 / points;
 
-    graph.strokeStyle = 'hsl(' + player.hue + ', 100%, 45%)';
-    graph.fillStyle = 'hsl(' + player.hue + ', 100%, 50%)';
-    graph.lineWidth = playerConfig.border;
+    for(var z=0; z<order.length; z++)
+    {
+        var userCurrent = users[order[z].nCell];
+        var cellCurrent = users[order[z].nCell].cells[order[z].nDiv];
 
-    var xstore = [];
-    var ystore = [];
+        var x=0;
+        var y=0;
 
-    spin += 0.0;
-
-    for (var i = 0; i < points; i++) {
-
-        x = player.radius * Math.cos(spin) + circle.x;
-        y = player.radius * Math.sin(spin) + circle.y;
-        x = valueInRange(-player.x + screenWidth / 2, gameWidth - player.x + screenWidth / 2, x);
-        y = valueInRange(-player.y + screenHeight / 2, gameHeight - player.y + screenHeight / 2, y);
-
-        spin += increase;
-
-
-
-        xstore[i] = x;
-        ystore[i] = y;
-
-    }
-    /*if (wiggle >= player.radius/ 3) inc = -1;
-     *if (wiggle <= player.radius / -3) inc = +1;
-     *wiggle += inc;
-     */
-    for (i = 0; i < points; ++i) {
-        if (i === 0) {
-            graph.beginPath();
-            graph.moveTo(xstore[i], ystore[i]);
-        } else if (i > 0 && i < points - 1) {
-            graph.lineTo(xstore[i], ystore[i]);
-        } else {
-            graph.lineTo(xstore[i], ystore[i]);
-            graph.lineTo(xstore[0], ystore[0]);
-        }
-
-    }
-    graph.lineJoin = 'round';
-    graph.lineCap = 'round';
-    graph.fill();
-    graph.stroke();
-
-    var fontSize = Math.max(player.radius / 3, 12);
-    graph.lineWidth = playerConfig.textBorderSize;
-    graph.miterLimit = 1;
-    graph.lineJoin = 'round';
-    graph.textAlign = 'center';
-    graph.fillStyle = playerConfig.textColor;
-    graph.textBaseline = 'middle';
-    graph.strokeStyle = playerConfig.textBorder;
-    graph.font = 'bold ' + fontSize + 'px sans-serif';
-
-    if (toggleMassState === 0) {
-        graph.strokeText(player.name, circle.x, circle.y);
-        graph.fillText(player.name, circle.x, circle.y);
-    } else {
-        graph.strokeText(player.name, circle.x, circle.y);
-        graph.fillText(player.name, circle.x, circle.y);
-        graph.font = 'bold ' + Math.max(fontSize / 3 * 2, 10) + 'px sans-serif';
-        if(player.name.length === 0) fontSize = 0;
-        graph.strokeText(player.mass, circle.x, circle.y+fontSize);
-        graph.fillText(player.mass, circle.x, circle.y+fontSize);
-    }
-}
-
-function valueInRange(min, max, value) {
-    return Math.min(max, Math.max(min, value));
-}
-
-function drawEnemy(enemy) {
-        var x = 0;
-        var y = 0;
-        var circle = {
-            x: enemy.x - player.x + screenWidth / 2,
-            y: enemy.y - player.y + screenHeight / 2
-        };
-
-        var points = 30 + ~~(enemy.mass / 5);
+        var points = 30 + ~~(cellCurrent.mass/5);
         var increase = Math.PI * 2 / points;
 
-        graph.strokeStyle = 'hsl(' + enemy.hue + ', 100%, 45%)';
-        graph.fillStyle = 'hsl(' + enemy.hue + ', 100%, 50%)';
-        graph.lineWidth = enemyConfig.border;
+        graph.strokeStyle = 'hsl(' + userCurrent.hue + ', 100%, 45%)';
+        graph.fillStyle = 'hsl(' + userCurrent.hue + ', 100%, 50%)';
+        graph.lineWidth = playerConfig.border;
 
         var xstore = [];
         var ystore = [];
 
-        enemySpin += 0.0;
+        spin += 0.0;
+
+        var circle = {
+            x: cellCurrent.x - start.x,
+            y: cellCurrent.y - start.y
+        };
 
         for (var i = 0; i < points; i++) {
 
-            x = enemy.radius * Math.cos(enemySpin) + circle.x;
-            y = enemy.radius * Math.sin(enemySpin) + circle.y;
-
-            x = valueInRange(-enemy.x - player.x + screenWidth/2 + (enemy.radius/3), gameWidth - enemy.x + gameWidth - player.x + screenWidth/2 - (enemy.radius/3), x);
-            y = valueInRange(-enemy.y - player.y + screenHeight/2 + (enemy.radius/3), gameHeight - enemy.y + gameHeight - player.y + screenHeight/2 - (enemy.radius/3) , y);
-
-            enemySpin += increase;
-
+            x = cellCurrent.radius * Math.cos(spin) + circle.x;
+            y = cellCurrent.radius * Math.sin(spin) + circle.y;
+            if(typeof(userCurrent.id) == "undefined") {
+                x = valueInRange(-userCurrent.x + screenWidth / 2, gameWidth - userCurrent.x + screenWidth / 2, x);
+                y = valueInRange(-userCurrent.y + screenHeight / 2, gameHeight - userCurrent.y + screenHeight / 2, y);
+            } else {
+                x = valueInRange(-cellCurrent.x - player.x + screenWidth/2 + (cellCurrent.radius/3), gameWidth - cellCurrent.x + gameWidth - player.x + screenWidth/2 - (cellCurrent.radius/3), x);
+                y = valueInRange(-cellCurrent.y - player.y + screenHeight/2 + (cellCurrent.radius/3), gameHeight - cellCurrent.y + gameHeight - player.y + screenHeight/2 - (cellCurrent.radius/3) , y);
+            }
+            spin += increase;
             xstore[i] = x;
             ystore[i] = y;
-
         }
-
+        /*if (wiggle >= player.radius/ 3) inc = -1;
+        *if (wiggle <= player.radius / -3) inc = +1;
+        *wiggle += inc;
+        */
         for (i = 0; i < points; ++i) {
             if (i === 0) {
                 graph.beginPath();
@@ -657,33 +599,43 @@ function drawEnemy(enemy) {
         graph.lineCap = 'round';
         graph.fill();
         graph.stroke();
+        var nameCell = "";
+        if(typeof(userCurrent.id) == "undefined")
+            nameCell = player.name;
+        else
+            nameCell = userCurrent.name;
 
-        var fontSize = Math.max(enemy.radius / 3, 12);
-        graph.lineWidth = enemyConfig.textBorderSize;
+        var fontSize = Math.max(cellCurrent.radius / 3, 12);
+        graph.lineWidth = playerConfig.textBorderSize;
+        graph.fillStyle = playerConfig.textColor;
+        graph.strokeStyle = playerConfig.textBorder;
         graph.miterLimit = 1;
         graph.lineJoin = 'round';
         graph.textAlign = 'center';
-        graph.fillStyle = enemyConfig.textColor;
         graph.textBaseline = 'middle';
-        graph.strokeStyle = enemyConfig.textBorder;
         graph.font = 'bold ' + fontSize + 'px sans-serif';
 
         if (toggleMassState === 0) {
-            graph.strokeText(enemy.name, circle.x, circle.y);
-            graph.fillText(enemy.name, circle.x, circle.y);
+            graph.strokeText(nameCell, circle.x, circle.y);
+            graph.fillText(nameCell, circle.x, circle.y);
         } else {
-            graph.strokeText(enemy.name, circle.x, circle.y);
-            graph.fillText(enemy.name, circle.x, circle.y);
+            graph.strokeText(nameCell, circle.x, circle.y);
+            graph.fillText(nameCell, circle.x, circle.y);
             graph.font = 'bold ' + Math.max(fontSize / 3 * 2, 10) + 'px sans-serif';
-            if(enemy.name.length === 0) fontSize = 0;
-            graph.strokeText(enemy.mass, circle.x, circle.y+fontSize);
-            graph.fillText(enemy.mass, circle.x, circle.y+fontSize);
+            if(nameCell.length === 0) fontSize = 0;
+            graph.strokeText(Math.round(cellCurrent.mass), circle.x, circle.y+fontSize);
+            graph.fillText(Math.round(cellCurrent.mass), circle.x, circle.y+fontSize);
         }
     }
+}
+
+function valueInRange(min, max, value) {
+    return Math.min(max, Math.max(min, value));
+}
 
 function drawgrid() {
      graph.lineWidth = 1;
-     graph.strokeStyle = '#000';
+     graph.strokeStyle = lineColor;
      graph.globalAlpha = 0.15;
      graph.beginPath();
 
@@ -702,6 +654,7 @@ function drawgrid() {
 }
 
 function drawborder() {
+    graph.lineWidth = 1;
     graph.strokeStyle = playerConfig.borderColor;
 
     // Left-vertical
@@ -709,7 +662,7 @@ function drawborder() {
         graph.beginPath();
         graph.moveTo(screenWidth/2 - player.x, 0 ? player.y > screenHeight/2 : screenHeight/2 - player.y);
         graph.lineTo(screenWidth/2 - player.x, gameHeight + screenHeight/2 - player.y);
-        graph.strokeStyle = '#000000';
+        graph.strokeStyle = lineColor;
         graph.stroke();
     }
 
@@ -718,7 +671,7 @@ function drawborder() {
         graph.beginPath();
         graph.moveTo(0 ? player.x > screenWidth/2 : screenWidth/2 - player.x, screenHeight/2 - player.y);
         graph.lineTo(gameWidth + screenWidth/2 - player.x, screenHeight/2 - player.y);
-        graph.strokeStyle = '#000000';
+        graph.strokeStyle = lineColor;
         graph.stroke();
     }
 
@@ -727,7 +680,7 @@ function drawborder() {
         graph.beginPath();
         graph.moveTo(gameWidth + screenWidth/2 - player.x, screenHeight/2 - player.y);
         graph.lineTo(gameWidth + screenWidth/2 - player.x, gameHeight + screenHeight/2 - player.y);
-        graph.strokeStyle = '#000000';
+        graph.strokeStyle = lineColor;
         graph.stroke();
     }
 
@@ -736,7 +689,7 @@ function drawborder() {
         graph.beginPath();
         graph.moveTo(gameWidth + screenWidth/2 - player.x, gameHeight + screenHeight/2 - player.y);
         graph.lineTo(screenWidth/2 - player.x, gameHeight + screenHeight/2 - player.y);
-        graph.strokeStyle = '#000000';
+        graph.strokeStyle = lineColor;
         graph.stroke();
     }
 }
@@ -800,19 +753,21 @@ function gameLoop() {
             if (borderDraw) {
                 drawborder();
             }
-
-            for (var i = 0; i < enemies.length; i++) {
-                if (enemies[i].mass <= player.mass) 
-                    drawEnemy(enemies[i]);
+            var orderMass = [];
+            for(var i=0; i<users.length; i++) {
+                for(var j=0; j<users[i].cells.length; j++) {
+                    orderMass.push({
+                        nCell: i,
+                        nDiv: j,
+                        mass: users[i].cells[j].mass
+                    });
+                }
             }
+            orderMass.sort(function(obj1,obj2) {
+                return obj1.mass - obj2.mass;
+            });
 
-            drawPlayer();
-
-            for (var j = 0; j < enemies.length; j++) {
-                if (enemies[j].mass > player.mass) 
-                    drawEnemy(enemies[j]);
-            }
-
+            drawPlayers(orderMass);
             socket.emit('0', target); // playerSendTarget Heartbeat
 
         } else {
