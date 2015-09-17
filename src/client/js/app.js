@@ -100,7 +100,7 @@ var kicked = false;
 
 // defaults
 // TODO break out into GameControls
-var continuity = false;
+var continuity = true;
 var startPingTime = 0;
 var toggleMassState = 0;
 var backgroundColor = '#f2fbff';
