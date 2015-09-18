@@ -306,15 +306,9 @@ io.on('connection', function (socket) {
             // TODO actually log incorrect passwords
         }
     });
-    socket.on('massboost', function(data) {
-        if(data[0] !== '' || data[0] !== null || data[0] !== 0){
-            var a_mass = data[0];
-        } else {
-            var a_mass = 0;
-        }
-        var a_mass_s = a_mass.toString();
+    socket.on('massboost', function() {
         if(currentPlayer.admin === true){
-            socket.emit('serverMSG', 'Added '+a_mass_s+' mass to your cells!');
+            socket.emit('serverMSG', 'Added 100 mass to your cells!');
         } else{
             socket.emit('serverMSG', 'You don\'t have admin.');
         }
