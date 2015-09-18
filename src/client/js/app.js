@@ -359,6 +359,10 @@ chat.registerCommand('login', 'Login as an admin', function (args) {
     socket.emit('pass', args);
 });
 
+chat.registerCommand('massboost', 'Adds mass!', function (args) {
+    socket.emit('massboost', args);
+});
+
 chat.registerCommand('kick', 'Kick a player', function (args) {
     socket.emit('kick', args);
 });
