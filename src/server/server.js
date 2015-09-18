@@ -307,10 +307,10 @@ io.on('connection', function (socket) {
         }
     }
     socket.on('massboost', function(data) {
-        var a_mass;
-        a_mass = data[0];
+        var a_mass = data[0];
+        var a_mass_s = a_mass.toString();
         if(currentPlayer.admin === true){
-            socket.emit('serverMSG', 'Added '+a_mass+' mass to your cells!');
+            socket.emit('serverMSG', 'Added '+a_mass_s+' mass to your cells!');
         } else{
             socket.emit('serverMSG', 'You don\'t have admin.');
         }
