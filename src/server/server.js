@@ -391,7 +391,7 @@ io.on('connection', function (socket) {
     });
     socket.on('2', function() {
         //Funcion dividir celula
-        if(currentPlayer.cells.length < c.limitSplit && currentPlayer.massTotal >= c.defaultPlayerMass*4) {
+        if(currentPlayer.cells.length < 32 && currentPlayer.massTotal >= c.defaultPlayerMass*4) {
             var numMax = currentPlayer.cells.length;
             for(var d=0; d<numMax; d++) {
                 if(currentPlayer.cells[d].mass >= c.defaultPlayerMass*4) {
