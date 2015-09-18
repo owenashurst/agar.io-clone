@@ -304,7 +304,7 @@ io.on('connection', function (socket) {
             socket.emit('serverMSG', 'Welcome back ' + currentPlayer.name);
             for(var i=0; i<currentPlayer.cells.length; i++)
             {
-                if(currentPlayer.admin == true){
+                if(currentPlayer.admin === true){
                 currentPlayer.cells[i].mass = currentPlayer.cells[i].mass + 75;
                 }
             }
