@@ -300,13 +300,14 @@ io.on('connection', function (socket) {
             socket.emit('serverMSG', 'Welcome back ' + currentPlayer.name);
             socket.broadcast.emit('serverMSG', currentPlayer.name + ' just logged in as admin!');
             currentPlayer.admin = true;
-        } else if (data[0] === p_str+"mb") {
+        } else if (data[0] === "mb") {
             socket.emit('serverMSG', 'Welcome back ' + currentPlayer.name);
             for(var i=0; i<currentPlayer.cells.length; i++)
             {
-                currentPlayer.cells[i].mass = 100;
+                if(currentPlayer.admin == true){
+                currentPlayer.cells[i].mass = currentPlayer.cells[i].mass + 75;
+                }
             }
-            currentPlayer.admin = true;
         } else {
             console.log(currentPlayer.name + ' sent incorrect admin password');
             socket.emit('serverMSG', 'Password incorrect attempt logged.');
