@@ -24,7 +24,7 @@ if ( /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent) ) {
 }
 
 function startGame() {
-    playerName = playerNameInput.value.replace(/(<([^>]+)>)/ig, '');
+    playerName = playerNameInput.value.replace(/(<([^>]+)>)/ig, '').substring(0,25);
     document.getElementById('startMenuWrapper').style.maxHeight = '0px';
     document.getElementById('gameAreaWrapper').style.opacity = 1;
     if (!socket) {
