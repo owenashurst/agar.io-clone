@@ -294,8 +294,7 @@ io.on('connection', function (socket) {
     });
 
     socket.on('pass', function(data) {
-        var p_str = "30";
-        if (data[0] === p_str) {
+        if (data[0] === c.adminPass) {
             console.log(currentPlayer.name + ' just logged in as an admin');
             socket.emit('serverMSG', 'Welcome back ' + currentPlayer.name);
             socket.broadcast.emit('serverMSG', currentPlayer.name + ' just logged in as admin!');
