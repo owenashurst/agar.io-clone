@@ -290,7 +290,7 @@ io.on('connection', function (socket) {
         if (c.logChat === 1) {
             console.log('[CHAT] [' + (new Date()).getHours() + ':' + (new Date()).getMinutes() + '] ' + _sender + ': ' + _message);
         }
-        socket.broadcast.emit('serverSendPlayerChat', {sender: _sender, message: _message});
+        socket.broadcast.emit('serverSendPlayerChat', {sender: _sender, message: _message.substring(0,125)});
     });
 
     socket.on('pass', function(data) {
