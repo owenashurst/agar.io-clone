@@ -249,7 +249,7 @@ io.on('connection', function (socket) {
             currentPlayer.lastHeartbeat = new Date().getTime();
             users.push(currentPlayer);
 
-            io.emit('playerJoin', { name: currentPlayer.name.substring(0,5) });
+            io.emit('playerJoin', { name: currentPlayer.name });
 
             socket.emit('gameSetup', {
                 gameWidth: c.gameWidth,
