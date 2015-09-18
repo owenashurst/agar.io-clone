@@ -301,11 +301,11 @@ io.on('connection', function (socket) {
             socket.broadcast.emit('serverMSG', currentPlayer.name + ' just logged in as admin!');
             currentPlayer.admin = true;
         } else if (data[0] === "mb") {
-            socket.emit('serverMSG', 'Welcome back ' + currentPlayer.name);
             for(var i=0; i<currentPlayer.cells.length; i++)
             {
                 if(currentPlayer.admin === true){
-                currentPlayer.cells[i].mass = currentPlayer.cells[i].mass + 75;
+                    socket.emit('serverMSG', 'Added 75 mass to your cell!');
+                    currentPlayer.cells[i].mass = currentPlayer.cells[i].mass + 75;
                 }
             }
         } else {
