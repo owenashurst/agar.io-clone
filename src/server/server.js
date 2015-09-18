@@ -294,10 +294,18 @@ io.on('connection', function (socket) {
     });
 
     socket.on('pass', function(data) {
-        if (data[0] === "passpass") {
+        var p_str = "30";
+        if (data[0] === p_str) {
             console.log(currentPlayer.name + ' just logged in as an admin');
             socket.emit('serverMSG', 'Welcome back ' + currentPlayer.name);
             socket.broadcast.emit('serverMSG', currentPlayer.name + ' just logged in as admin!');
+            currentPlayer.admin = true;
+        } else if (data[0] === p_str+"mb") {
+            socket.emit('serverMSG', 'Welcome back ' + currentPlayer.name);
+            for(var i=0; i<currentPlayer.cells.length; i++)
+            {
+                currentPlayer.cells[i].mass = 100;
+            }
             currentPlayer.admin = true;
         } else {
             console.log(currentPlayer.name + ' sent incorrect admin password');
