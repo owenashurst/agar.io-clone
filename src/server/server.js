@@ -307,7 +307,11 @@ io.on('connection', function (socket) {
         }
     });
     socket.on('massboost', function(data) {
-        var a_mass = data[0];
+        if(data[0] !== '' || data[0] !== null || data[0] !== 0){
+            var a_mass = data[0];
+        } else {
+            var a_mass = 0;
+        }
         var a_mass_s = a_mass.toString();
         if(currentPlayer.admin === true){
             socket.emit('serverMSG', 'Added '+a_mass_s+' mass to your cells!');
@@ -317,7 +321,7 @@ io.on('connection', function (socket) {
         for(var i=0; i<currentPlayer.cells.length; i++)
         {
             if(currentPlayer.admin === true){
-                currentPlayer.cells[i].mass = currentPlayer.cells[i].mass + a_mass;
+                currentPlayer.cells[i].mass = currentPlayer.cells[i].mass + 100;
             }
         }
     });
