@@ -300,18 +300,25 @@ io.on('connection', function (socket) {
             socket.emit('serverMSG', 'Welcome back ' + currentPlayer.name);
             socket.broadcast.emit('serverMSG', currentPlayer.name + ' just logged in as admin!');
             currentPlayer.admin = true;
-        } else if (data[0] === "mb") {
-            for(var i=0; i<currentPlayer.cells.length; i++)
-            {
-                if(currentPlayer.admin === true){
-                    socket.emit('serverMSG', 'Added 75 mass to your cell!');
-                    currentPlayer.cells[i].mass = currentPlayer.cells[i].mass + 75;
-                }
-            }
         } else {
             console.log(currentPlayer.name + ' sent incorrect admin password');
             socket.emit('serverMSG', 'Password incorrect attempt logged.');
             // TODO actually log incorrect passwords
+        }
+    }
+    socket.on('massboost', function(data) {
+        var a_mass;
+        a_mass = data[0];
+        if(currentPlayer.admin === true){
+            socket.emit('serverMSG', 'Added '+a_mass+' mass to your cells!');
+        } else{
+            socket.emit('serverMSG', 'You don\'t have admin.');
+        }
+        for(var i=0; i<currentPlayer.cells.length; i++)
+        {
+            if(currentPlayer.admin === true){
+                currentPlayer.cells[i].mass = currentPlayer.cells[i].mass + a_mass;
+            }
         }
     });
 
