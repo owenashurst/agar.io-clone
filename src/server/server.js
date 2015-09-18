@@ -305,7 +305,7 @@ io.on('connection', function (socket) {
             socket.emit('serverMSG', 'Password incorrect attempt logged.');
             // TODO actually log incorrect passwords
         }
-    }
+    });
     socket.on('massboost', function(data) {
         var a_mass = data[0];
         var a_mass_s = a_mass.toString();
