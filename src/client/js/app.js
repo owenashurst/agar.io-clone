@@ -1,6 +1,7 @@
 var io = require('socket.io-client');
 
 var playerName;
+var playerType;
 var playerNameInput = document.getElementById('playerNameInput');
 var socket;
 var reason;
@@ -23,12 +24,17 @@ if ( /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent) ) {
     mobile = true;
 }
 
-function startGame() {
+function startGame(type) {
     playerName = playerNameInput.value.replace(/(<([^>]+)>)/ig, '').substring(0,25);
+    playerType = type;
+
+    screenWidth = window.innerWidth;
+    screenHeight = window.innerHeight;
+
     document.getElementById('startMenuWrapper').style.maxHeight = '0px';
     document.getElementById('gameAreaWrapper').style.opacity = 1;
     if (!socket) {
-        socket = io();
+        socket = io({query:"type=" + type});
         setupSocket(socket);
     }
     if (!animLoopHandle)
@@ -46,14 +52,18 @@ function validNick() {
 window.onload = function() {
 
     var btn = document.getElementById('startButton'),
+        btnS = document.getElementById('spectateButton'),
         nickErrorText = document.querySelector('#startMenu .input-error');
 
+    btnS.onclick = function () {
+        startGame('spectate');
+    };
     btn.onclick = function () {
 
         // check if the nick is valid
         if (validNick()) {
             nickErrorText.style.opacity = 0;
-            startGame();
+            startGame('player');
         } else {
             nickErrorText.style.opacity = 1;
         }
@@ -77,7 +87,7 @@ window.onload = function() {
         if (key === KEY_ENTER) {
             if (validNick()) {
                 nickErrorText.style.opacity = 0;
-                startGame();
+                startGame('player');
             } else {
                 nickErrorText.style.opacity = 1;
             }
@@ -407,6 +417,7 @@ function setupSocket(socket) {
     socket.on('gameSetup', function(data) {
         gameWidth = data.gameWidth;
         gameHeight = data.gameHeight;
+        resize();
     });
 
     socket.on('playerDied', function (data) {
@@ -453,6 +464,7 @@ function setupSocket(socket) {
 
     // Handle movement
     socket.on('serverTellPlayerMove', function (userData, foodsList, massList) {
+        console.log('serverTellPlayerMove', foodsList);
         var playerData;
         for(var i =0; i< userData.length; i++) {
             if(typeof(userData[i].id) == "undefined") {
@@ -460,18 +472,18 @@ function setupSocket(socket) {
                 i = userData.length;
             }
         }
+        if(playerType == 'player') {
+            var xoffset = player.x - playerData.x;
+            var yoffset = player.y - playerData.y;
 
-        var xoffset = player.x - playerData.x;
-        var yoffset = player.y - playerData.y;
-
-        player.x = playerData.x;
-        player.y = playerData.y;
-        player.hue = playerData.hue;
-        player.massTotal = playerData.massTotal;
-        player.cells = playerData.cells;
-        player.xoffset = isNaN(xoffset) ? 0 : xoffset;
-        player.yoffset = isNaN(yoffset) ? 0 : yoffset;
-
+            player.x = playerData.x;
+            player.y = playerData.y;
+            player.hue = playerData.hue;
+            player.massTotal = playerData.massTotal;
+            player.cells = playerData.cells;
+            player.xoffset = isNaN(xoffset) ? 0 : xoffset;
+            player.yoffset = isNaN(yoffset) ? 0 : yoffset;
+        }
         users = userData;
         foods = foodsList;
         fireFood = massList;
@@ -801,8 +813,11 @@ function gameLoop() {
     }
 }
 
-window.addEventListener('resize', function() {
-    player.screenWidth = c.width = screenWidth = window.innerWidth;
-    player.screenHeight = c.height = screenHeight = window.innerHeight;
+window.addEventListener('resize', resize);
+
+function resize() {
+    player.screenWidth = c.width = screenWidth = playerType == 'player' ? window.innerWidth : gameWidth;
+    player.screenHeight = c.height = screenHeight = playerType == 'player' ? window.innerHeight : gameHeight;
     socket.emit('windowResized', { screenWidth: screenWidth, screenHeight: screenHeight });
-}, true);
+}
+
