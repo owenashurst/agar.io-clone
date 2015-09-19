@@ -127,7 +127,7 @@ html, body, canvas {
     box-shadow: 0 0 3px 1px #DDDDDD;
 }
 
-#startButton {
+#startButton, #spectateButton {
     position: relative;
     margin: auto;
     margin-top: 10px;
@@ -150,6 +150,7 @@ html, body, canvas {
     margin-bottom: 10px;
 }
 
+#spectateButton:active, #spectateButton:hover,
 #startButton:active, #startButton:hover {
     top: 1px;
     background: #55D88B;

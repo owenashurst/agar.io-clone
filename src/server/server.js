@@ -193,23 +193,32 @@ function balanceMass() {
 }
 
 io.on('connection', function (socket) {
-    console.log('A user connected!');
+    console.log('A user connected!', socket.handshake.query.type);
 
+    var type = socket.handshake.query.type;
     var radius = util.massToRadius(c.defaultPlayerMass);
     var position = c.newPlayerInitialPosition == 'farthest' ? util.uniformPosition(users, radius) : util.randomPosition(radius);
 
-        var currentPlayer = {
-        id: socket.id,
-        x: position.x,
-        y: position.y,
-        cells: [{
+    var cells = [];
+    var massTotal = 0;
+    if(type === 'player') {
+        cells = [{
             mass: c.defaultPlayerMass,
             x: position.x,
             y: position.y,
             radius: radius
-        }],
-        massTotal: c.defaultPlayerMass,
+        }];
+        massTotal = c.defaultPlayerMass;
+    }
+
+    var currentPlayer = {
+        id: socket.id,
+        x: position.x,
+        y: position.y,
+        cells: cells,
+        massTotal: massTotal,
         hue: Math.round(Math.random() * 360),
+        type: type,
         lastHeartbeat: new Date().getTime(),
         target: {
             x: 0,
@@ -237,13 +246,19 @@ io.on('connection', function (socket) {
             player.y = position.y;
             player.target.x = 0;
             player.target.y = 0;
-            player.cells = [{
-                mass: c.defaultPlayerMass,
-                x: position.x,
-                y: position.y,
-                radius: radius
-            }];
-            player.massTotal = c.defaultPlayerMass;
+            if(type === 'player') {
+                player.cells = [{
+                    mass: c.defaultPlayerMass,
+                    x: position.x,
+                    y: position.y,
+                    radius: radius
+                }];
+                player.massTotal = c.defaultPlayerMass;
+            }
+            else {
+                 player.cells = [];
+                 player.massTotal = 0;
+            }
             player.hue = Math.round(Math.random() * 360);
             currentPlayer = player;
             currentPlayer.lastHeartbeat = new Date().getTime();
@@ -534,10 +549,12 @@ function gameloop() {
         var topUsers = [];
 
         for (var i = 0; i < Math.min(10, users.length); i++) {
-            topUsers.push({
-                id: users[i].id,
-                name: users[i].name
-            });
+            if(users[i].type == 'player') {
+                topUsers.push({
+                    id: users[i].id,
+                    name: users[i].name
+                });
+            }
         }
         if (isNaN(leaderboard) || leaderboard.length !== topUsers.length) {
             leaderboard = topUsers;
@@ -567,6 +584,10 @@ function gameloop() {
 
 function sendUpdates() {
     users.forEach( function(u) {
+        // center the view if x/y is undefined, this will happen for spectators
+        u.x = u.x || c.gameWidth / 2;
+        u.y = u.y || c.gameHeight / 2;
+
         var visibleFood  = food
             .map(function(f) {
                 if ( f.x > u.x - u.screenWidth/2 - 20 &&
