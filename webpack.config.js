@@ -1,21 +1,23 @@
 var Webpack = require('webpack');
+var ExtractTextPlugin = require('extract-text-webpack-plugin');
 var path = require('path');
 var appPath = path.resolve(__dirname, 'app');
 var nodeModulesPath = path.resolve(__dirname, 'node_modules');
 var buildPath = path.resolve(__dirname, 'public', 'build');
 
 var config = {
-  context: __dirname,
   devtool: 'eval-source-map',
   entry: [
-    'webpack-dev-server/client?http://localhost:3000', 
-    'webpack/hot/dev-server', 
-    path.resolve(appPath, 'main.js')],
+     'webpack-hot-middleware/client',
+    path.resolve(appPath, 'main.js')
+  ],
+
   output: {
     path: buildPath,
     filename: 'bundle.js',
     publicPath: '/build/'
   },
+
   module: {
     loaders: [{
       test: /\.js$/,
@@ -23,10 +25,19 @@ var config = {
       exclude: [nodeModulesPath]
     }, {
       test: /\.css$/,
-      loader: 'style!css'
+      loader: ExtractTextPlugin.extract('style-loader', 'css-loader?modules&importLoaders=1&localIdentName=[name]__[local]___[hash:base64:5]!postcss-loader')
     }]
   },
-  plugins: [new Webpack.HotModuleReplacementPlugin()]
+
+  postcss: [
+    require('autoprefixer')
+  ],
+
+  plugins: [
+    new Webpack.HotModuleReplacementPlugin(),
+    new Webpack.NoErrorsPlugin(),
+    new ExtractTextPlugin('style.css', { allChunks: true })
+  ]
 };
 
 module.exports = config;

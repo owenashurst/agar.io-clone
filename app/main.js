@@ -1,3 +1,5 @@
-require('./main.css');
+import styles from './main.css';
 
-console.log('Application is loaded!');
+var test = document.createElement('div');
+test.className = styles.main;
+document.body.appendChild(test);
