@@ -1,5 +1,5 @@
-import styles from './main.css';
+import React from 'react';
+import ReactDOM from 'react-dom';
+import App from './App.js';
 
-var test = document.createElement('div');
-test.className = styles.main;
-document.body.appendChild(test);
+ReactDOM.render(<App />, document.getElementById('root'));

@@ -3,8 +3,22 @@ A boilerplate for running a Webpack workflow in Node express
 
 Please read the following article: [The ultimate Webpack setup](http://www.christianalfoni.com/articles/2015_04_19_The-ultimate-webpack-setup) to know more about this boilerplate.
 
-## CSS Modules is the new thing
-Read [this article](http://glenmaddern.com/articles/css-modules). This boilerplate is configured with that approach.
+## Major update to project
+Inspired by [this project](https://github.com/vesparny/react-kickstart) and the evolving of [react-transform](https://github.com/gaearon/react-transform-boilerplate) and [CSS Modules]((http://glenmaddern.com/articles/css-modules)), this project has gotten a major upgrade.
 
-## Running it on Nitrous Pro
-Change the `webpack.config.js` entry point: `webpack-dev-server/client?http://localhost:8080` to point to your test server, for example: `webpack-dev-server/client?http://test-103403.nitrousapp.com:3000`.  
+## Overview
+
+### React by default
+The project runs with React by default and hot replacement of changes to the modules.
+
+### CSS Modules
+CSS files loaded into components are locally scoped and you can point to class names with javascript. You can also compose classes together, also from other files. These are also hot loaded.
+
+### Prod vs Dev
+There is one main *server.js* file which runs the development server if in DEV mode. In production it will skip the development setup. The two folders *server* and *devServer* is where requests are handled. *devServer* is used by frontend to simulate and work on APIs not currently available.
+
+### Babel and Linting
+Both Node server and frontend code runs with Babel. And all of it is linted using `npm run eslint`.
+
+### Tests
+You run tests using `npm test`. Any tests in *test/app* and *test/server* will be run.

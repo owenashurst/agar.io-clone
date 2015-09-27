@@ -1,27 +1,47 @@
-var express = require('express');
-var webpack = require('webpack');
-var config = require('./webpack.config.js');
-var compiler = webpack(config);
-var path = require('path');
-var app = express();
-var isProduction = process.env.NODE_ENV === 'production';
-var port = isProduction ? process.env.PORT : 3000;
-var publicPath = path.resolve(__dirname, 'public');
+import path from 'path';
+import express from 'express';
+import webpack from 'webpack';
+import webpackMiddleware from 'webpack-dev-middleware';
+import webpackHotMiddleware from 'webpack-hot-middleware';
+import config from './webpack.config.js';
+import devServer from './devServer/index.js';
+import server from './server/index.js';
 
-app.use(express.static(publicPath));
+const isDeveloping = process.env.NODE_ENV !== 'production';
+const port = isDeveloping ? 3000 : process.env.PORT;
+const app = express();
 
-if (!isProduction) {
-  app.use(require('webpack-dev-middleware')(compiler, {
-    noInfo: true,
-    hot: true,
-    publicPath: config.output.publicPath
+app.use(express.static(__dirname + '/dist'));
+
+if (isDeveloping) {
+  const compiler = webpack(config);
+
+  app.use(webpackMiddleware(compiler, {
+    publicPath: config.output.publicPath,
+    contentBase: 'src',
+    stats: {
+      colors: true,
+      hash: false,
+      timings: true,
+      chunks: false,
+      chunkModules: false,
+      modules: false
+    }
   }));
 
-  app.use(require('webpack-hot-middleware')(compiler));
+  app.use(webpackHotMiddleware(compiler));
+
+  devServer(app);
+} else {
+  server(app);
+  app.get('*', function response(req, res) {
+    res.sendFile(path.join(__dirname, 'dist/index.html'));
+  });
 }
 
-
-// And run the server
-app.listen(port, function () {
-  console.log('Server running on port ' + port);
+app.listen(port, 'localhost', function onStart(err) {
+  if (err) {
+    console.log(err);
+  }
+  console.info('==> 🌎 Listening on port %s. Open up http://localhost:%s/ in your browser.', port, port);
 });
