@@ -19,7 +19,7 @@
   },
   "homepage": "https://github.com/christianalfoni/webpack-express-boilerplate",
   "scripts": {
-    "test": "NODE_ENV=test mocha --require ./test/test-init --compilers js:babel/register --recursive",
+    "test": "",
     "start": "babel-node server",
     "build": "rimraf dist && NODE_ENV=production webpack --config ./webpack.config.prod.js --progress --profile --colors",
     "eslint": "eslint .",

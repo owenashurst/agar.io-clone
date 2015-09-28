@@ -18,7 +18,7 @@ CSS files loaded into components are locally scoped and you can point to class n
 There is one main *server.js* file which runs the development server if in DEV mode. In production it will skip the development setup. The two folders *server* and *devServer* is where requests are handled. *devServer* is used by frontend to simulate and work on APIs not currently available.
 
 ### Babel and Linting
-Both Node server and frontend code runs with Babel. And all of it is linted using `npm run eslint`.
+Both Node server and frontend code runs with Babel. And all of it is linted. With atom you install the `linter` package, then `linter-eslint` and `linter-jscs`. You are covered. Also run `npm run eslint` or `npm run jscs` to verify all files.
 
-### Tests
-You run tests using `npm test`. Any tests in *test/app* and *test/server* will be run.
+### Beautify
+With a beautify package installed in your editor it will also do that

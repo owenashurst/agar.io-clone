@@ -1,5 +1,5 @@
 dist
 node_modules
 coverage
-webpack.config.*.js
+webpack.*.js
 *Server.js
