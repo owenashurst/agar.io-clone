@@ -409,9 +409,7 @@ function setupSocket(socket) {
         if (mobile) {
             document.getElementById('gameAreaWrapper').removeChild(document.getElementById('chatbox'));
         }
-        else {
-            document.getElementById('chatInput').select();
-        }
+		document.getElementById('cvs').focus();
     });
 
     socket.on('gameSetup', function(data) {
