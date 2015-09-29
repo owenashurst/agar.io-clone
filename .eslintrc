@@ -167,10 +167,10 @@
       "markers": ["=", "!"]           // space here to support sprockets directives
     }],
     // React
+    "jsx-quotes": [2, "prefer-double"],
     "react/display-name": 0,
     "react/jsx-boolean-value": 1,
     "react/jsx-no-undef": 2,
-    "react/jsx-quotes": [2, "double"],
     "react/jsx-sort-prop-types": 0,
     "react/jsx-sort-props": 0,
     "react/jsx-uses-react": 1,
