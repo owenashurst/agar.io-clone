@@ -148,8 +148,7 @@ var leaderboard = [];
 var target = {x: player.x, y: player.y};
 var reenviar = true;
 var directionLock = false;
-var directionHorizontal = 0;
-var directionVertical = 0;
+var directions = [];
 
 var c = document.getElementById('cvs');
 c.width = screenWidth; c.height = screenHeight;
@@ -290,76 +289,75 @@ function keyInput(event) {
         socket.emit('2');
         reenviar = false;
     }
-
 }
-/* Function called when a key is pressed, will change direction if arrow */
+
+/* Function called when a key is pressed, will change direction if arrow key */
 function directionDown(event) {
 	var key = event.which || event.keyCode;
 
 	if (directional(key)) {
 		directionLock = true;
-		var changed = false;
-
-		if (horizontal(key)) {
-			if (directionHorizontal === 0) {
-				directionHorizontal = key;
-				changed = true;
-			}
-
-		} else {
-			// the direction is vertical
-
-			if (directionVertical === 0) {
-				directionVertical = key;
-				changed = true;
-			}
-
-		}
-
-		if (changed) {
-			 target = { x : 0, y: 0 };
-			if (directionHorizontal == KEY_LEFT) target.x -= Number.MAX_VALUE;
-			else if (directionHorizontal == KEY_RIGHT) target.x += Number.MAX_VALUE;
-			if (directionVertical == KEY_UP) target.y -= Number.MAX_VALUE;
-			else if (directionVertical == KEY_DOWN) target.y += Number.MAX_VALUE;
+		if (newDirection(key,directions, true)) {
+			updateTarget(directions);
 			socket.emit('0', target);
 		}
-
 	}
-	console.log(target);
 }
 
-
+/* Function called when a key is lifted, will change direction if arrow key */
 function directionUp(event) {
 	var key = event.which || event.keyCode;
 	if (directional(key)) {
-		var changed = false;
-
-		if (horizontal(key)) {
-			if (directionHorizontal == key) {
-				directionHorizontal = 0;
-				changed = true;
-			}
-		} else {
-			// the direction is vertical
-			if (directionVertical == key) {
-				directionVertical = 0;
-				changed = true;
-			}
-		}
-
-		if (changed) {
-			target = { x : 0, y: 0 };
-			if (directionHorizontal == KEY_LEFT) target.x -= Number.MAX_VALUE;
-			else if (directionHorizontal == KEY_RIGHT) target.x += Number.MAX_VALUE;
-			if (directionVertical == KEY_UP) target.y -= Number.MAX_VALUE;
-			else if (directionVertical == KEY_DOWN) target.y += Number.MAX_VALUE;
-			if (directionHorizontal === 0 && directionVertical === 0) directionLock = false;
+		if (newDirection(key,directions, false)) {
+			updateTarget(directions);
+			if (directions.length === 0) directionLock = false;
 			socket.emit('0', target);
 		}
 	}
 }
 
+/* Updates the direciton array including information about the new direction */
+function newDirection(direction, list, isAddition) {
+	var result = false;
+	var found = false;
+	for (var i = 0, len = list.length; i < len; i++) {
+		if (list[i] == direction) {
+			found = true;
+			if (!isAddition) {
+				result = true;
+				//remove the direction
+				list.splice(i, 1);
+			}
+			break;
+		}
+	}
+	//add the direction
+	if (isAddition && found === false) {
+		result = true;
+		list.push(direction);
+	}
+
+	return result;
+}
+
+/* Updates the target according to the directions in the directions array */
+function updateTarget(list) {
+	target = { x : 0, y: 0 };
+	var directionHorizontal = 0;
+	var directionVertical = 0;
+	for (var i = 0, len = list.length; i < len; i++) {
+		if (directionHorizontal === 0) {
+			if (list[i] == KEY_LEFT) directionHorizontal -= Number.MAX_VALUE;
+			else if (list[i] == KEY_RIGHT) directionHorizontal += Number.MAX_VALUE;
+		}
+		if (directionVertical === 0) {
+			if (list[i] == KEY_UP) directionVertical -= Number.MAX_VALUE;
+			else if (list[i] == KEY_DOWN) directionVertical += Number.MAX_VALUE;
+		}
+	}
+	target.x += directionHorizontal;
+	target.y += directionVertical;
+}
 
 function directional(key) {
 	return horizontal(key) || vertical(key);
