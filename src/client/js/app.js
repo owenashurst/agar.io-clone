@@ -8,6 +8,10 @@ var reason;
 var KEY_ENTER = 13;
 var KEY_FIREFOOD = 119;
 var KEY_SPLIT = 32;
+var KEY_LEFT = 37;
+var KEY_UP = 38;
+var KEY_RIGHT = 39;
+var KEY_DOWN = 40;
 var borderDraw = false;
 var animLoopHandle;
 var spin = -Math.PI;
@@ -143,14 +147,16 @@ var users = [];
 var leaderboard = [];
 var target = {x: player.x, y: player.y};
 var reenviar = true;
+var directionLock = false;
+var directions = [];
 
 var c = document.getElementById('cvs');
 c.width = screenWidth; c.height = screenHeight;
 c.addEventListener('mousemove', gameInput, false);
 c.addEventListener('mouseout', outOfBounds, false);
 c.addEventListener('keypress', keyInput, false);
-c.addEventListener('keyup', function() {reenviar = true;}, false);
-
+c.addEventListener('keyup', function(event) {reenviar = true; directionUp(event);}, false);
+c.addEventListener('keydown', directionDown, false);
 c.addEventListener('touchstart', touchInput, false);
 c.addEventListener('touchmove', touchInput, false);
 
@@ -285,6 +291,85 @@ function keyInput(event) {
     }
 }
 
+/* Function called when a key is pressed, will change direction if arrow key */
+function directionDown(event) {
+	var key = event.which || event.keyCode;
+
+	if (directional(key)) {
+		directionLock = true;
+		if (newDirection(key,directions, true)) {
+			updateTarget(directions);
+			socket.emit('0', target);
+		}
+	}
+}
+
+/* Function called when a key is lifted, will change direction if arrow key */
+function directionUp(event) {
+	var key = event.which || event.keyCode;
+	if (directional(key)) {
+		if (newDirection(key,directions, false)) {
+			updateTarget(directions);
+			if (directions.length === 0) directionLock = false;
+			socket.emit('0', target);
+		}
+	}
+}
+
+/* Updates the direciton array including information about the new direction */
+function newDirection(direction, list, isAddition) {
+	var result = false;
+	var found = false;
+	for (var i = 0, len = list.length; i < len; i++) {
+		if (list[i] == direction) {
+			found = true;
+			if (!isAddition) {
+				result = true;
+				//remove the direction
+				list.splice(i, 1);
+			}
+			break;
+		}
+	}
+	//add the direction
+	if (isAddition && found === false) {
+		result = true;
+		list.push(direction);
+	}
+
+	return result;
+}
+
+/* Updates the target according to the directions in the directions array */
+function updateTarget(list) {
+	target = { x : 0, y: 0 };
+	var directionHorizontal = 0;
+	var directionVertical = 0;
+	for (var i = 0, len = list.length; i < len; i++) {
+		if (directionHorizontal === 0) {
+			if (list[i] == KEY_LEFT) directionHorizontal -= Number.MAX_VALUE;
+			else if (list[i] == KEY_RIGHT) directionHorizontal += Number.MAX_VALUE;
+		}
+		if (directionVertical === 0) {
+			if (list[i] == KEY_UP) directionVertical -= Number.MAX_VALUE;
+			else if (list[i] == KEY_DOWN) directionVertical += Number.MAX_VALUE;
+		}
+	}
+	target.x += directionHorizontal;
+	target.y += directionVertical;
+}
+
+function directional(key) {
+	return horizontal(key) || vertical(key);
+}
+
+function horizontal(key) {
+	return key == KEY_LEFT || key == KEY_RIGHT;
+}
+
+function vertical(key) {
+	return key == KEY_DOWN || key == KEY_UP;
+}
 function checkLatency() {
     // Ping
     startPingTime = Date.now();
@@ -705,15 +790,19 @@ function drawborder() {
 }
 
 function gameInput(mouse) {
-    target.x = mouse.clientX - screenWidth / 2;
-    target.y = mouse.clientY - screenHeight / 2;
+	if (!directionLock) {
+		target.x = mouse.clientX - screenWidth / 2;
+		target.y = mouse.clientY - screenHeight / 2;
+	}
 }
 
 function touchInput(touch) {
     touch.preventDefault();
     touch.stopPropagation();
-    target.x = touch.touches[0].clientX - screenWidth / 2;
-    target.y = touch.touches[0].clientY - screenHeight / 2;
+	if (!directionLock) {
+		target.x = touch.touches[0].clientX - screenWidth / 2;
+		target.y = touch.touches[0].clientY - screenHeight / 2;
+	}
 }
 
 window.requestAnimFrame = (function() {
