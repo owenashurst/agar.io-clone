@@ -43,10 +43,10 @@ gulp.task('build-server', ['lint'], function () {
     .pipe(gulp.dest('bin/server/'));
 });
 
-gulp.task('watch', ["build"], function () {
+gulp.task('watch', ['build'], function () {
   gulp.watch('src/client/**/*.*', ['build-client', 'move-client']);
   gulp.watch('src/server/*.*', 'src/server/**/*.js', ['build-server']);
-  gulp.start('run');
+  gulp.start('run-only');
 });
 
 gulp.task('run', ['build'], function () {
@@ -61,3 +61,18 @@ gulp.task('run', ['build'], function () {
         util.log('server restarted!');
     });
 });
+
+gulp.task('run-only', function () {
+    nodemon({
+        delay: 10,
+        script: './server/server.js',
+        cwd: "./bin/",
+        args: ["config.json"],
+        ext: 'html js css'
+    })
+    .on('restart', function () {
+        util.log('server restarted!');
+    });
+});
+
+gulp.task('default', ['run']);

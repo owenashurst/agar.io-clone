@@ -14,6 +14,13 @@ html, body, canvas {
     padding: 0;
 }
 
+div {
+    -webkit-user-select: none; /* webkit (safari, chrome) browsers */
+    -moz-user-select: none; /* mozilla browsers */
+    -khtml-user-select: none; /* webkit (konqueror) browsers */
+    -ms-user-select: none; /* IE10+ */
+}
+
 #status {
     position: absolute;
     padding: 10px;
