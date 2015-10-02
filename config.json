@@ -15,5 +15,6 @@
     "maxHeartbeatInterval": 5000,
     "foodUniformDisposition": true,
     "newPlayerInitialPosition": "farthest",
-    "massLossRate": 1
+    "massLossRate": 1,
+    "mergeTimer": 15
 }

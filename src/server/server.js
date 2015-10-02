@@ -98,39 +98,44 @@ function movePlayer(player) {
                 var distance = Math.sqrt(Math.pow(player.cells[j].y-player.cells[i].y,2) + Math.pow(player.cells[j].x-player.cells[i].x,2));
                 var radiusTotal = (player.cells[i].radius + player.cells[j].radius);
                 if(distance < radiusTotal) {
-                    if(player.cells[i].x < player.cells[j].x) {
-                        player.cells[i].x --;
-                    } else if(player.cells[i].x > player.cells[j].x) {
-                        player.cells[i].x ++;
+                    if(player.lastSplit > new Date().getTime() - 1000 * c.mergeTimer) {
+                        if(player.cells[i].x < player.cells[j].x) {
+                            player.cells[i].x--;
+                        } else if(player.cells[i].x > player.cells[j].x) {
+                            player.cells[i].x++;
+                        }
+                        if(player.cells[i].y < player.cells[j].y) {
+                            player.cells[i].y--;
+                        } else if((player.cells[i].y > player.cells[j].y)) {
+                            player.cells[i].y++;
+                        }
                     }
-                    if(player.cells[i].y < player.cells[j].y) {
-                        player.cells[i].y --;
-                    } else if((player.cells[i].y > player.cells[j].y)) {
-                        player.cells[i].y ++;
+                    else if(distance < radiusTotal / 1.75) {
+                        player.cells[i].mass += player.cells[j].mass;
+                        player.cells[i].radius = util.massToRadius(player.cells[i].mass);
+                        player.cells = player.cells.splice(j, 1);
                     }
-                    //var degree = Math.atan2(player.cells[j].y-player.cells[i].y,player.cells[j].x-player.cells[i].x);
-                    //player.cells[i].x = Math.cos(degree) * radiusTotal + player.cells[i].x;
-                    //player.cells[i].y = Math.sin(degree) * radiusTotal + player.cells[i].y;
-                    //console.log("x: " + (Math.cos(degree) * radiusTotal + player.cells[i].x) + " x: " + player.cells[i].x + " total radio: " + radiusTotal);
-                    //console.log("y: " + (Math.sin(degree) * radiusTotal + player.cells[i].y));
                 }
             }
         }
-        var borderCalc = player.cells[i].radius / 3;
-        if (player.cells[i].x > c.gameWidth - borderCalc) {
-            player.cells[i].x = c.gameWidth - borderCalc;
+        console.log(player.cells.length + ' ' + i);
+        if(player.cells.length > i) {
+            var borderCalc = player.cells[i].radius / 3;
+            if (player.cells[i].x > c.gameWidth - borderCalc) {
+                player.cells[i].x = c.gameWidth - borderCalc;
+            }
+            if (player.cells[i].y > c.gameHeight - borderCalc) {
+                player.cells[i].y = c.gameHeight - borderCalc;
+            }
+            if (player.cells[i].x < borderCalc) {
+                player.cells[i].x = borderCalc;
+            }
+            if (player.cells[i].y < borderCalc) {
+                player.cells[i].y = borderCalc;
+            }
+            x += player.cells[i].x;
+            y += player.cells[i].y;
         }
-        if (player.cells[i].y > c.gameHeight - borderCalc) {
-            player.cells[i].y = c.gameHeight - borderCalc;
-        }
-        if (player.cells[i].x < borderCalc) {
-            player.cells[i].x = borderCalc;
-        }
-        if (player.cells[i].y < borderCalc) {
-            player.cells[i].y = borderCalc;
-        }
-        x +=player.cells[i].x;
-        y +=player.cells[i].y;
     }
     player.x = x/player.cells.length;
     player.y = y/player.cells.length;
@@ -396,11 +401,11 @@ io.on('connection', function (socket) {
         }
     });
     socket.on('2', function() {
-        //Funcion dividir celula
-        if(currentPlayer.cells.length < c.limitSplit && currentPlayer.massTotal >= c.defaultPlayerMass*4) {
+        //Split cells
+        if(currentPlayer.cells.length < c.limitSplit && currentPlayer.massTotal >= c.defaultPlayerMass*2) {
             var numMax = currentPlayer.cells.length;
             for(var d=0; d<numMax; d++) {
-                if(currentPlayer.cells[d].mass >= c.defaultPlayerMass*4) {
+                if(currentPlayer.cells[d].mass >= c.defaultPlayerMass*2) {
                     currentPlayer.cells[d].mass = currentPlayer.cells[d].mass/2;
                     currentPlayer.cells[d].radius = util.massToRadius(currentPlayer.cells[d].mass);
                     currentPlayer.cells.push({
@@ -412,6 +417,7 @@ io.on('connection', function (socket) {
                     });
                 }
             }
+            currentPlayer.lastSplit = new Date().getTime();
         }
     });
 });
