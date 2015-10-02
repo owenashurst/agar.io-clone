@@ -118,7 +118,6 @@ function movePlayer(player) {
                 }
             }
         }
-        console.log(player.cells.length + ' ' + i);
         if(player.cells.length > i) {
             var borderCalc = player.cells[i].radius / 3;
             if (player.cells[i].x > c.gameWidth - borderCalc) {

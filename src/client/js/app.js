@@ -547,7 +547,6 @@ function setupSocket(socket) {
 
     // Handle movement
     socket.on('serverTellPlayerMove', function (userData, foodsList, massList) {
-        console.log('serverTellPlayerMove', foodsList);
         var playerData;
         for(var i =0; i< userData.length; i++) {
             if(typeof(userData[i].id) == "undefined") {
