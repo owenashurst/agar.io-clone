@@ -13,12 +13,7 @@ A simple Agar.io clone built with socket.io and HTML5 Canvas on top of NodeJS.
 ![Image](http://i.imgur.com/O3rP7cg.png)
 
 ## Live Demos
-[![Heroku EU](https://img.shields.io/badge/heroku eu-online-green.svg)](https://agar-clone.herokuapp.com/) 
-[![Heroku US](https://img.shields.io/badge/heroku us-online-green.svg)](https://agar-clone-us.herokuapp.com/)
-[![Bluemix US](http://img.shields.io/badge/bluemix us-online-green.svg)](http://agar-clone.mybluemix.net/)
-[![Bluemix EU](http://img.shields.io/badge/bluemix eu-online-green.svg)](http://agar-clone.eu-gb.mybluemix.net/)
-[![TS3Bahu](https://img.shields.io/badge/TS3Bahu-offline-red.svg)](http://agar.ts3bahu.com:3000)
-[![Agarose](https://img.shields.io/badge/agarose-offline-red.svg)](http://agarose.io/)
+An updated list of live demos can be found on the [Live Demos wiki page](https://github.com/huytd/agar.io-clone/wiki/Live-Demos)
 
 ---
 
