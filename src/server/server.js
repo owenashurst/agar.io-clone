@@ -94,7 +94,7 @@ function movePlayer(player) {
         }
         //Find best solution
         for(var j=0; j<player.cells.length; j++) {
-            if(j != i) {
+            if(j != i && player.cells[i] != undefined) {
                 var distance = Math.sqrt(Math.pow(player.cells[j].y-player.cells[i].y,2) + Math.pow(player.cells[j].x-player.cells[i].x,2));
                 var radiusTotal = (player.cells[i].radius + player.cells[j].radius);
                 if(distance < radiusTotal) {
@@ -113,7 +113,7 @@ function movePlayer(player) {
                     else if(distance < radiusTotal / 1.75) {
                         player.cells[i].mass += player.cells[j].mass;
                         player.cells[i].radius = util.massToRadius(player.cells[i].mass);
-                        player.cells = player.cells.splice(j, 1);
+                        player.cells.splice(j, 1);
                     }
                 }
             }
