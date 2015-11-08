@@ -6,6 +6,8 @@ Please read the following article: [The ultimate Webpack setup](http://www.chris
 ## Major update to project
 Inspired by [this project](https://github.com/vesparny/react-kickstart) and the evolving of [react-transform](https://github.com/gaearon/react-transform-boilerplate) and [CSS Modules]((http://glenmaddern.com/articles/css-modules)), this project has gotten a major upgrade.
 
+**NOTE!** Use the latest version of Node, 4.x.x.
+
 ## Overview
 
 ### React by default
