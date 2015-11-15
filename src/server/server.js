@@ -49,8 +49,7 @@ function addFood(toAdd) {
             y: position.y,
             radius: radius,
             mass: Math.random() + 2,
-            hue: Math.round(Math.random() * 360),
-            sides: 5 + Math.round(Math.random() * 3)
+            hue: Math.round(Math.random() * 360)
         });
     }
 }

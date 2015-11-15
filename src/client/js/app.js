@@ -17,6 +17,7 @@ var animLoopHandle;
 var spin = -Math.PI;
 var enemySpin = -Math.PI;
 var mobile = false;
+var foodSides = 10;
 
 var debug = function(args) {
     if (console && console.log) {
@@ -175,6 +176,9 @@ showMassSetting.onchange = toggleMass;
 
 var continuitySetting = document.getElementById('continuity');
 continuitySetting.onchange = toggleContinuity;
+
+var continuitySetting = document.getElementById('roundFood');
+continuitySetting.onchange = toggleRoundFood;
 
 var graph = c.getContext('2d');
 
@@ -393,7 +397,7 @@ function toggleDarkMode() {
     }
 }
 
-function toggleBorder(args) {
+function toggleBorder() {
     if (!borderDraw) {
         borderDraw = true;
         chat.addSystemLine('Showing border');
@@ -403,7 +407,7 @@ function toggleBorder(args) {
     }
 }
 
-function toggleMass(args) {
+function toggleMass() {
     if (toggleMassState === 0) {
         toggleMassState = 1;
         chat.addSystemLine('Mass mode activated!');
@@ -413,13 +417,23 @@ function toggleMass(args) {
     }
 }
 
-function toggleContinuity(args) {
+function toggleContinuity() {
     if (!continuity) {
         continuity = true;
         chat.addSystemLine('Continuity activated!');
     } else {
         continuity = false;
         chat.addSystemLine('Continuity deactivated!');
+    }
+}
+
+function toggleRoundFood(args) {
+    if (foodSides > 5) {
+        foodSides = 5;
+        chat.addSystemLine('Food is not round anymore!');
+    } else {
+        foodSides = (args && !isNaN(args[0]) && +args[0] >= 3) ? +args[0] : 10;
+        chat.addSystemLine('Food is round!');
     }
 }
 
@@ -444,6 +458,10 @@ chat.registerCommand('mass', 'View mass', function () {
 
 chat.registerCommand('continuity', 'Toggle continuity', function () {
     toggleContinuity();
+});
+
+chat.registerCommand('roundfood', 'Toggle food drawing', function (args) {
+    toggleRoundFood(args);
 });
 
 chat.registerCommand('help', 'Chat commands information', function () {
@@ -617,7 +635,7 @@ function drawFood(food) {
     graph.strokeStyle = 'hsl(' + food.hue + ', 100%, 45%)';
     graph.fillStyle = 'hsl(' + food.hue + ', 100%, 50%)';
     graph.lineWidth = foodConfig.border;
-    drawCircle(food.x - player.x + screenWidth / 2, food.y - player.y + screenHeight / 2, food.radius, food.sides);
+    drawCircle(food.x - player.x + screenWidth / 2, food.y - player.y + screenHeight / 2, food.radius, foodSides);
 }
 
 function drawFireFood(mass) {
