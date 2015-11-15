@@ -5,7 +5,9 @@ var playerType;
 var playerNameInput = document.getElementById('playerNameInput');
 var socket;
 var reason;
+var KEY_ESC = 27;
 var KEY_ENTER = 13;
+var KEY_CHAT = 13;
 var KEY_FIREFOOD = 119;
 var KEY_SPLIT = 32;
 var KEY_LEFT = 37;
@@ -186,6 +188,15 @@ function ChatClient(config) {
     this.commands = {};
     var input = document.getElementById('chatInput');
     input.addEventListener('keypress', this.sendChat.bind(this));
+    input.addEventListener('keyup', function(key) {
+        input = document.getElementById('chatInput');
+
+        key = key.which || key.keyCode;
+        if (key === KEY_ESC) {
+            input.value = '';
+            c.focus();
+        }
+    });
 }
 
 /** template into chat box a new message from a player */
@@ -258,6 +269,7 @@ ChatClient.prototype.sendChat = function (key) {
 
             // reset input
             input.value = '';
+            c.focus();
         }
     }
 };
@@ -285,13 +297,16 @@ var chat = new ChatClient();
 // chat command callback functions
 function keyInput(event) {
 	var key = event.which || event.keyCode;
-	if(key === KEY_FIREFOOD && reenviar) {
+	if (key === KEY_FIREFOOD && reenviar) {
         socket.emit('1');
         reenviar = false;
     }
-    else if(key === KEY_SPLIT && reenviar) {
+    else if (key === KEY_SPLIT && reenviar) {
         socket.emit('2');
         reenviar = false;
+    }
+    else if (key === KEY_CHAT) {
+        document.getElementById('chatInput').focus();
     }
 }
 
@@ -428,12 +443,12 @@ function toggleContinuity() {
 }
 
 function toggleRoundFood(args) {
-    if (foodSides > 5) {
+    if (args || foodSides < 10) {
+        foodSides = (args && !isNaN(args[0]) && +args[0] >= 3) ? +args[0] : 10;
+        chat.addSystemLine('Food is now rounded!');
+    } else {
         foodSides = 5;
         chat.addSystemLine('Food is not round anymore!');
-    } else {
-        foodSides = (args && !isNaN(args[0]) && +args[0] >= 3) ? +args[0] : 10;
-        chat.addSystemLine('Food is round!');
     }
 }
 
@@ -512,7 +527,7 @@ function setupSocket(socket) {
         if (mobile) {
             document.getElementById('gameAreaWrapper').removeChild(document.getElementById('chatbox'));
         }
-		document.getElementById('cvs').focus();
+		c.focus();
     });
 
     socket.on('gameSetup', function(data) {
