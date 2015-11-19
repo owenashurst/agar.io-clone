@@ -26,8 +26,8 @@
     "jscs": "jscs ."
   },
   "dependencies": {
-    "react": "0.14.0-rc1 ",
-    "react-dom": "0.14.0-rc1"
+    "react": "^0.14.3",
+    "react-dom": "^0.14.3"
   },
   "devDependencies": {
     "autoprefixer": "^6.0.3",
