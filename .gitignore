@@ -3,4 +3,3 @@ node_modules
 dist
 *.log
 coverage
-.idea
