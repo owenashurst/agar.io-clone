@@ -8,6 +8,13 @@ Inspired by [this project](https://github.com/vesparny/react-kickstart) and the 
 
 **NOTE!** Use the latest version of Node, 4.x.x.
 
+## Install
+`git clone https://github.com/christianalfoni/webpack-express-boilerplate.git`
+
+or just export the files:
+
+`svn export https://github.com/christianalfoni/webpack-express-boilerplate/trunk ./dir`
+
 ## Overview
 
 ### React by default
