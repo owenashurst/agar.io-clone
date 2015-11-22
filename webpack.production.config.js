@@ -40,7 +40,7 @@ module.exports = {
     loaders: [{
       test: /\.js?$/,
       exclude: /node_modules/,
-      loader: 'babel?optional=es7.decorators'
+      loader: 'babel'
     }, {
       test: /\.json?$/,
       loader: 'json'
