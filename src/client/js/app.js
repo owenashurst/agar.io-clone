@@ -208,7 +208,7 @@ ChatClient.prototype.addChatLine = function (name, message, me) {
 
     // color the chat input appropriately
     newline.className = (me) ? 'me' : 'friend';
-    newline.innerHTML = '<b>' + ((name.length < 1) ? 'A cell unnamed' : name) + '</b>: ' + message;
+    newline.innerHTML = '<b>' + ((name.length < 1) ? 'An unnamed cell' : name) + '</b>: ' + message;
 
     this.appendMessage(newline);
 };
