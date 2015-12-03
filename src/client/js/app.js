@@ -208,7 +208,7 @@ ChatClient.prototype.addChatLine = function (name, message, me) {
 
     // color the chat input appropriately
     newline.className = (me) ? 'me' : 'friend';
-    newline.innerHTML = '<b>' + ((name.length < 1) ? 'A cell unnamed' : name) + '</b>: ' + message;
+    newline.innerHTML = '<b>' + ((name.length < 1) ? 'An unnamed cell' : name) + '</b>: ' + message;
 
     this.appendMessage(newline);
 };
@@ -557,12 +557,12 @@ function setupSocket(socket) {
                 if(leaderboard[i].name.length !== 0)
                     status += '<span class="me">' + (i + 1) + '. ' + leaderboard[i].name + "</span>";
                 else
-                    status += '<span class="me">' + (i + 1) + ". A cell unnamed</span>";
+                    status += '<span class="me">' + (i + 1) + ". An unnamed cell</span>";
             } else {
                 if(leaderboard[i].name.length !== 0)
                     status += (i + 1) + '. ' + leaderboard[i].name;
                 else
-                    status += (i + 1) + '. A cell unnamed';
+                    status += (i + 1) + '. An unnamed cell';
             }
         }
         //status += '<br />Players: ' + data.players;
