@@ -258,7 +258,7 @@ ChatClient.prototype.sendChat = function (key) {
                 if (commands[args[0]]) {
                     commands[args[0]].callback(args.slice(1));
                 } else {
-                    this.addSystemLine('Unrecoginised Command: ' + text + ', type -help for more info');
+                    this.addSystemLine('Unrecognized Command: ' + text + ', type -help for more info');
                 }
 
             // just a regular message - send along to server
