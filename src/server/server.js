@@ -24,6 +24,7 @@ var tree = quadtree.QUAD.init(args);
 var users = [];
 var massFood = [];
 var food = [];
+var virus = [];
 var sockets = {};
 
 var leaderboard = [];
@@ -40,8 +41,6 @@ function addFood(toAdd) {
     var radius = util.massToRadius(c.foodMass);
     while (toAdd--) {
         var position = c.foodUniformDisposition ? util.uniformPosition(food, radius) : util.randomPosition(radius);
-        if(typeof(position) == "undefined")
-            position = util.randomPosition(radius);
         food.push({
             // make ids unique
             id: ((new Date()).getTime() + '' + food.length) >>> 0,
@@ -50,6 +49,24 @@ function addFood(toAdd) {
             radius: radius,
             mass: Math.random() + 2,
             hue: Math.round(Math.random() * 360)
+        });
+    }
+}
+
+function addVirus(toAdd) {
+    while (toAdd--) {
+        var mass = util.randomInRange(c.virus.defaultMass.from, c.virus.defaultMass.to, true);
+        var radius = util.massToRadius(mass);
+        var position = c.virusUniformDisposition ? util.uniformPosition(virus, radius) : util.randomPosition(radius);
+        virus.push({
+            id: ((new Date()).getTime() + '' + virus.length) >>> 0,
+            x: position.x,
+            y: position.y,
+            radius: radius,
+            mass: mass,
+            fill: c.virus.fill,
+            stroke: c.virus.stroke,
+            strokeWidth: c.virus.strokeWidth
         });
     }
 }
@@ -192,6 +209,12 @@ function balanceMass() {
         //console.log('removing ' + foodToRemove + ' food from level');
         removeFood(foodToRemove);
         //console.log('mass rebalanced');
+    }
+
+    var virusToAdd = c.maxVirus - virus.length;
+
+    if (virusToAdd > 0) {
+        addVirus(virusToAdd);
     }
 }
 
@@ -603,6 +626,17 @@ function sendUpdates() {
             })
             .filter(function(f) { return f; });
 
+        var visibleVirus  = virus
+            .map(function(f) {
+                if ( f.x > u.x - u.screenWidth/2 - f.radius &&
+                    f.x < u.x + u.screenWidth/2 + f.radius &&
+                    f.y > u.y - u.screenHeight/2 - f.radius &&
+                    f.y < u.y + u.screenHeight/2 + f.radius) {
+                    return f;
+                }
+            })
+            .filter(function(f) { return f; });
+
         var visibleMass = massFood
             .map(function(f) {
                 if ( f.x+f.radius > u.x - u.screenWidth/2 - 20 &&
@@ -648,7 +682,7 @@ function sendUpdates() {
             })
             .filter(function(f) { return f; });
 
-        sockets[u.id].emit('serverTellPlayerMove', visibleCells, visibleFood, visibleMass);
+        sockets[u.id].emit('serverTellPlayerMove', visibleCells, visibleFood, visibleMass, visibleVirus);
         if (leaderboardChanged) {
             sockets[u.id].emit('leaderboard', {
                 players: users.length,

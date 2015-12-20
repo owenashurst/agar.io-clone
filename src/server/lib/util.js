@@ -28,16 +28,15 @@ exports.getDistance = function (p1, p2) {
     return Math.sqrt(Math.pow(p2.x - p1.x, 2) + Math.pow(p2.y - p1.y, 2)) - p1.radius - p2.radius;
 };
 
-function genPos(from, to) {
+exports.randomInRange = function (from, to) {
     return Math.floor(Math.random() * (to - from)) + from;
-}
-
+};
 
 // generate a random position within the field of play
 exports.randomPosition = function (radius) {
     return {
-        x: genPos(radius, cfg.gameWidth - radius),
-        y: genPos(radius, cfg.gameHeight - radius)
+        x: exports.randomInRange(radius, cfg.gameWidth - radius),
+        y: exports.randomInRange(radius, cfg.gameHeight - radius)
     };
 };
 
@@ -65,6 +64,8 @@ exports.uniformPosition = function(points, radius) {
         if (minDistance > maxDistance) {
             bestCandidate = candidate;
             maxDistance = minDistance;
+        } else {
+            return exports.randomPosition(radius);
         }
     }
 

@@ -44,8 +44,8 @@ gulp.task('build-server', ['lint'], function () {
 });
 
 gulp.task('watch', ['build'], function () {
-  gulp.watch('src/client/**/*.*', ['build-client', 'move-client']);
-  gulp.watch('src/server/*.*', 'src/server/**/*.js', ['build-server']);
+  gulp.watch(['src/client/**/*.*'], ['build-client', 'move-client']);
+  gulp.watch(['src/server/*.*', 'src/server/**/*.js'], ['build-server']);
   gulp.start('run-only');
 });
 
