@@ -20,6 +20,7 @@ var spin = -Math.PI;
 var enemySpin = -Math.PI;
 var mobile = false;
 var foodSides = 10;
+var virusSides = 20;
 
 var debug = function(args) {
     if (console && console.log) {
@@ -145,6 +146,7 @@ var player = {
 };
 
 var foods = [];
+var viruses = [];
 var fireFood = [];
 var users = [];
 var leaderboard = [];
@@ -579,7 +581,7 @@ function setupSocket(socket) {
     });
 
     // Handle movement
-    socket.on('serverTellPlayerMove', function (userData, foodsList, massList) {
+    socket.on('serverTellPlayerMove', function (userData, foodsList, massList, virusList) {
         var playerData;
         for(var i =0; i< userData.length; i++) {
             if(typeof(userData[i].id) == "undefined") {
@@ -601,6 +603,7 @@ function setupSocket(socket) {
         }
         users = userData;
         foods = foodsList;
+        viruses = virusList;
         fireFood = massList;
     });
 
@@ -651,6 +654,13 @@ function drawFood(food) {
     graph.fillStyle = 'hsl(' + food.hue + ', 100%, 50%)';
     graph.lineWidth = foodConfig.border;
     drawCircle(food.x - player.x + screenWidth / 2, food.y - player.y + screenHeight / 2, food.radius, foodSides);
+}
+
+function drawVirus(virus) {
+    graph.strokeStyle = virus.stroke;
+    graph.fillStyle = virus.fill;
+    graph.lineWidth = virus.strokeWidth;
+    drawCircle(virus.x - player.x + screenWidth / 2, virus.y - player.y + screenHeight / 2, virus.radius, virusSides);
 }
 
 function drawFireFood(mass) {
@@ -871,15 +881,11 @@ function gameLoop() {
         if (gameStart) {
             graph.fillStyle = backgroundColor;
             graph.fillRect(0, 0, screenWidth, screenHeight);
+
             drawgrid();
-
-            foods.forEach(function(food) {
-                drawFood(food);
-            });
-
-            fireFood.forEach(function(mass) {
-                drawFireFood(mass);
-            });
+            foods.forEach(drawFood);
+            viruses.forEach(drawVirus);
+            fireFood.forEach(drawFireFood);
 
             if (borderDraw) {
                 drawborder();
