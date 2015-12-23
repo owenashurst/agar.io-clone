@@ -201,14 +201,14 @@ function balanceMass() {
     var foodToRemove = -Math.max(foodDiff, maxFoodDiff);
 
     if (foodToAdd > 0) {
-        //console.log('adding ' + foodToAdd + ' food to level');
+        //console.log('[DEBUG] Adding ' + foodToAdd + ' food to level!');
         addFood(foodToAdd);
-        //console.log('mass rebalanced');
+        //console.log('[DEBUG] Mass rebalanced!');
     }
     else if (foodToRemove > 0) {
-        //console.log('removing ' + foodToRemove + ' food from level');
+        //console.log('[DEBUG] Removing ' + foodToRemove + ' food from level!');
         removeFood(foodToRemove);
-        //console.log('mass rebalanced');
+        //console.log('[DEBUG] Mass rebalanced!');
     }
 
     var virusToAdd = c.maxVirus - virus.length;
@@ -253,16 +253,16 @@ io.on('connection', function (socket) {
     };
 
     socket.on('gotit', function (player) {
-        console.log('Player ' + player.id + ' connecting');
+        console.log('[INFO] Player ' + player.name + ' connecting!');
 
         if (util.findIndex(users, player.id) > -1) {
-            console.log('That playerID is already connected, kicking');
+            console.log('[INFO] That playerID is already connected, kicking!');
             socket.disconnect();
         } else if (!util.validNick(player.name)) {
             socket.emit('kick', 'Invalid username');
             socket.disconnect();
         } else {
-            console.log('Player ' + player.id + ' connected!');
+            console.log('[INFO] Player ' + player.name + ' connected!');
             sockets[player.id] = socket;
 
             var radius = util.massToRadius(c.defaultPlayerMass);
@@ -314,13 +314,13 @@ io.on('connection', function (socket) {
         if (util.findIndex(users, currentPlayer.id) > -1)
             users.splice(util.findIndex(users, currentPlayer.id), 1);
         socket.emit('welcome', currentPlayer);
-        console.log('User #' + currentPlayer.id + ' respawned');
+        console.log('[INFO] User ' + currentPlayer.name + ' respawned!');
     });
 
     socket.on('disconnect', function () {
         if (util.findIndex(users, currentPlayer.id) > -1)
             users.splice(util.findIndex(users, currentPlayer.id), 1);
-        console.log('User #' + currentPlayer.id + ' disconnected');
+        console.log('[INFO] User ' + currentPlayer.name + ' disconnected!');
 
         socket.broadcast.emit('playerDisconnect', { name: currentPlayer.name });
     });
@@ -336,12 +336,12 @@ io.on('connection', function (socket) {
 
     socket.on('pass', function(data) {
         if (data[0] === c.adminPass) {
-            console.log(currentPlayer.name + ' just logged in as an admin');
+            console.log('[ADMIN] ' + currentPlayer.name + ' just logged in as an admin');
             socket.emit('serverMSG', 'Welcome back ' + currentPlayer.name);
             socket.broadcast.emit('serverMSG', currentPlayer.name + ' just logged in as admin!');
             currentPlayer.admin = true;
         } else {
-            console.log(currentPlayer.name + ' sent incorrect admin password');
+            console.log('[ADMIN] ' + currentPlayer.name + ' sent incorrect admin password');
             socket.emit('serverMSG', 'Password incorrect attempt logged.');
             // TODO actually log incorrect passwords
         }
@@ -364,10 +364,10 @@ io.on('connection', function (socket) {
                         }
                     }
                     if (reason !== '') {
-                       console.log('User ' + users[e].name + ' kicked successfully by ' + currentPlayer.name + ' for reason ' + reason);
+                       console.log('[ADMIN] User ' + users[e].name + ' kicked successfully by ' + currentPlayer.name + ' for reason ' + reason);
                     }
                     else {
-                       console.log('User ' + users[e].name + ' kicked successfully by ' + currentPlayer.name);
+                       console.log('[ADMIN] User ' + users[e].name + ' kicked successfully by ' + currentPlayer.name);
                     }
                     socket.emit('serverMSG', 'User ' + users[e].name + ' was kicked by ' + currentPlayer.name);
                     sockets[users[e].id].emit('kick', reason);
@@ -380,7 +380,7 @@ io.on('connection', function (socket) {
                 socket.emit('serverMSG', 'Could not find user or user is admin');
             }
         } else {
-            console.log(currentPlayer.name + ' is trying to use -kick but isn\'t admin');
+            console.log('[ADMIN] ' + currentPlayer.name + ' is trying to use -kick but isn\'t admin');
             socket.emit('serverMSG', 'You are not permitted to use this command');
         }
     });
@@ -495,8 +495,8 @@ function tickPlayer(currentPlayer) {
 
     function collisionCheck(collision) {
         if (collision.aUser.mass > collision.bUser.mass * 1.1  && collision.aUser.radius > Math.sqrt(Math.pow(collision.aUser.x - collision.bUser.x, 2) + Math.pow(collision.aUser.y - collision.bUser.y, 2))*1.75) {
-            console.log('KILLING USER: ' + collision.bUser.id);
-            console.log('collision info:');
+            console.log('[DEBUG] Killing user: ' + collision.bUser.id);
+            console.log('[DEBUG] Collision info:');
             console.log(collision);
 
             var numUser = util.findIndex(users, collision.bUser.id);
@@ -702,11 +702,11 @@ var ipaddress = process.env.OPENSHIFT_NODEJS_IP || process.env.IP || '127.0.0.1'
 var serverport = process.env.OPENSHIFT_NODEJS_PORT || process.env.PORT || c.port;
 if (process.env.OPENSHIFT_NODEJS_IP !== undefined) {
     http.listen( serverport, ipaddress, function() {
-        console.log('listening on *:' + serverport);
+        console.log('[DEBUG] Listening on *:' + serverport);
     });
 } else {
     http.listen( serverport, function() {
-        console.log('listening on *:' + c.port);
+        console.log('[DEBUG] Listening on *:' + c.port);
     });
 }
 
