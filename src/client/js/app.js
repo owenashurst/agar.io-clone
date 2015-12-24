@@ -50,7 +50,7 @@ function startGame(type) {
     socket.emit('respawn');
 }
 
-// check if nick is valid alphanumeric characters (and underscores)
+// Checks if the nick chosen contains valid alphanumeric characters (and underscores).
 function validNick() {
     var regex = /^\w*$/;
     debug('Regex Test', regex.exec(playerNameInput.value));
@@ -68,7 +68,7 @@ window.onload = function() {
     };
     btn.onclick = function () {
 
-        // check if the nick is valid
+        // Checks if the nick is valid.
         if (validNick()) {
             nickErrorText.style.opacity = 0;
             startGame('player');
@@ -165,7 +165,7 @@ c.addEventListener('keydown', directionDown, false);
 c.addEventListener('touchstart', touchInput, false);
 c.addEventListener('touchmove', touchInput, false);
 
-// register when the mouse goes off the canvas
+// Register when the mouse goes off the canvas.
 function outOfBounds() {
     if (!continuity) {
         target = { x : 0, y: 0 };
@@ -201,14 +201,14 @@ function ChatClient(config) {
     });
 }
 
-/** template into chat box a new message from a player */
+// Chat box implementation for the users.
 ChatClient.prototype.addChatLine = function (name, message, me) {
     if (mobile) {
         return;
     }
     var newline = document.createElement('li');
 
-    // color the chat input appropriately
+    // Colours the chat input correctly.
     newline.className = (me) ? 'me' : 'friend';
     newline.innerHTML = '<b>' + ((name.length < 1) ? 'An unnamed cell' : name) + '</b>: ' + message;
 
@@ -216,22 +216,22 @@ ChatClient.prototype.addChatLine = function (name, message, me) {
 };
 
 
-/** template into chat box a new message from the application */
+// Chat box implementation for the system.
 ChatClient.prototype.addSystemLine = function (message) {
     if (mobile) {
         return;
     }
     var newline = document.createElement('li');
 
-    // message will appear in system color
+    // Colours the chat input correctly.
     newline.className = 'system';
     newline.innerHTML = message;
 
-    // place in message log
+    // Append message to the logs.
     this.appendMessage(newline);
 };
 
-/** templates the message DOM node into the messsage area */
+// Places the message DOM node into the chat box.
 ChatClient.prototype.appendMessage = function (node) {
     if (mobile) {
         return;
@@ -254,29 +254,29 @@ ChatClient.prototype.sendChat = function (key) {
         var text = input.value.replace(/(<([^>]+)>)/ig,'');
         if (text !== '') {
 
-            // this is a chat command
+            // Chat command.
             if (text.indexOf('-') === 0) {
                 var args = text.substring(1).split(' ');
                 if (commands[args[0]]) {
                     commands[args[0]].callback(args.slice(1));
                 } else {
-                    this.addSystemLine('Unrecognized Command: ' + text + ', type -help for more info');
+                    this.addSystemLine('Unrecognized Command: ' + text + ', type -help for more info.');
                 }
 
-            // just a regular message - send along to server
+            // Allows for regular messages to be sent to the server.
             } else {
                 socket.emit('playerChat', { sender: player.name, message: text });
                 this.addChatLine(player.name, text, true);
             }
 
-            // reset input
+            // Resets input.
             input.value = '';
             c.focus();
         }
     }
 };
 
-/** add a new chat command */
+// Allows for addition of commands.
 ChatClient.prototype.registerCommand = function (name, description, callback) {
     this.commands[name] = {
         description: description,
@@ -284,7 +284,7 @@ ChatClient.prototype.registerCommand = function (name, description, callback) {
     };
 };
 
-/** print help of all chat commands available */
+// Allows help to print the list of all the commands and their descriptions.
 ChatClient.prototype.printHelp = function () {
     var commands = this.commands;
     for (var cmd in commands) {
@@ -296,7 +296,7 @@ ChatClient.prototype.printHelp = function () {
 
 var chat = new ChatClient();
 
-// chat command callback functions
+// Chat command callback functions.
 function keyInput(event) {
 	var key = event.which || event.keyCode;
 	if (key === KEY_FIREFOOD && reenviar) {
@@ -312,7 +312,7 @@ function keyInput(event) {
     }
 }
 
-/* Function called when a key is pressed, will change direction if arrow key */
+// Function called when a key is pressed, will change direction if arrow key.
 function directionDown(event) {
 	var key = event.which || event.keyCode;
 
@@ -325,7 +325,7 @@ function directionDown(event) {
 	}
 }
 
-/* Function called when a key is lifted, will change direction if arrow key */
+// Function called when a key is lifted, will change direction if arrow key.
 function directionUp(event) {
 	var key = event.which || event.keyCode;
 	if (directional(key)) {
@@ -337,7 +337,7 @@ function directionUp(event) {
 	}
 }
 
-/* Updates the direciton array including information about the new direction */
+// Updates the direction array including information about the new direction.
 function newDirection(direction, list, isAddition) {
 	var result = false;
 	var found = false;
@@ -352,7 +352,7 @@ function newDirection(direction, list, isAddition) {
 			break;
 		}
 	}
-	//add the direction
+	// Adds the direction.
 	if (isAddition && found === false) {
 		result = true;
 		list.push(direction);
@@ -361,7 +361,7 @@ function newDirection(direction, list, isAddition) {
 	return result;
 }
 
-/* Updates the target according to the directions in the directions array */
+// Updates the target according to the directions in the directions array.
 function updateTarget(list) {
 	target = { x : 0, y: 0 };
 	var directionHorizontal = 0;
@@ -406,41 +406,41 @@ function toggleDarkMode() {
     if (backgroundColor === LIGHT) {
         backgroundColor = DARK;
         lineColor = LINEDARK;
-        chat.addSystemLine('Dark mode enabled');
+        chat.addSystemLine('Dark mode enabled.');
     } else {
         backgroundColor = LIGHT;
         lineColor = LINELIGHT;
-        chat.addSystemLine('Dark mode disabled');
+        chat.addSystemLine('Dark mode disabled.');
     }
 }
 
 function toggleBorder() {
     if (!borderDraw) {
         borderDraw = true;
-        chat.addSystemLine('Showing border');
+        chat.addSystemLine('Showing border.');
     } else {
         borderDraw = false;
-        chat.addSystemLine('Hiding border');
+        chat.addSystemLine('Hiding border.');
     }
 }
 
 function toggleMass() {
     if (toggleMassState === 0) {
         toggleMassState = 1;
-        chat.addSystemLine('Mass mode activated!');
+        chat.addSystemLine('Viewing mass enabled.');
     } else {
         toggleMassState = 0;
-        chat.addSystemLine('Mass mode deactivated!');
+        chat.addSystemLine('Viewing mass disabled.');
     }
 }
 
 function toggleContinuity() {
     if (!continuity) {
         continuity = true;
-        chat.addSystemLine('Continuity activated!');
+        chat.addSystemLine('Continuity enabled.');
     } else {
         continuity = false;
-        chat.addSystemLine('Continuity deactivated!');
+        chat.addSystemLine('Continuity disabled.');
     }
 }
 
@@ -450,51 +450,51 @@ function toggleRoundFood(args) {
         chat.addSystemLine('Food is now rounded!');
     } else {
         foodSides = 5;
-        chat.addSystemLine('Food is not round anymore!');
+        chat.addSystemLine('Food is no longer rounded!');
     }
 }
 
 // TODO
-// Break out many of these game controls into a separate class
+// Breaks out many of these game controls into separate classses.
 
-chat.registerCommand('ping', 'Check your latency', function () {
+chat.registerCommand('ping', 'Check your latency.', function () {
     checkLatency();
 });
 
-chat.registerCommand('dark', 'Toggle dark mode', function () {
+chat.registerCommand('dark', 'Toggle dark mode.', function () {
     toggleDarkMode();
 });
 
-chat.registerCommand('border', 'Toggle border', function () {
+chat.registerCommand('border', 'Toggle visibility of border.', function () {
     toggleBorder();
 });
 
-chat.registerCommand('mass', 'View mass', function () {
+chat.registerCommand('mass', 'Toggle visibility of mass.', function () {
     toggleMass();
 });
 
-chat.registerCommand('continuity', 'Toggle continuity', function () {
+chat.registerCommand('continuity', 'Toggle continuity.', function () {
     toggleContinuity();
 });
 
-chat.registerCommand('roundfood', 'Toggle food drawing', function (args) {
+chat.registerCommand('roundfood', 'Toggle food drawing.', function (args) {
     toggleRoundFood(args);
 });
 
-chat.registerCommand('help', 'Chat commands information', function () {
+chat.registerCommand('help', 'Information about the chat commands.', function () {
     chat.printHelp();
 });
 
-chat.registerCommand('login', 'Login as an admin', function (args) {
+chat.registerCommand('login', 'Login as an admin.', function (args) {
     socket.emit('pass', args);
 });
 
-chat.registerCommand('kick', 'Kick a player', function (args) {
+chat.registerCommand('kick', 'Kick a player, for admins only.', function (args) {
     socket.emit('kick', args);
 });
 
 
-// socket stuff
+// socket stuff.
 function setupSocket(socket) {
     // Handle ping
     socket.on('pong', function () {
@@ -503,7 +503,7 @@ function setupSocket(socket) {
         chat.addSystemLine('Ping: ' + latency + 'ms');
     });
 
-    // Handle error
+    // Handle error.
     socket.on('connect_failed', function () {
         socket.close();
         disconnected = true;
@@ -514,7 +514,7 @@ function setupSocket(socket) {
         disconnected = true;
     });
 
-    // Handle connection
+    // Handle connection.
     socket.on('welcome', function (playerSettings) {
         player = playerSettings;
         player.name = playerName;
@@ -525,7 +525,7 @@ function setupSocket(socket) {
         gameStart = true;
         debug('Game is started: ' + gameStart);
         chat.addSystemLine('Connected to the game!');
-        chat.addSystemLine('Type <b>-help</b> for a list of commands');
+        chat.addSystemLine('Type <b>-help</b> for a list of commands.');
         if (mobile) {
             document.getElementById('gameAreaWrapper').removeChild(document.getElementById('chatbox'));
         }
@@ -539,15 +539,15 @@ function setupSocket(socket) {
     });
 
     socket.on('playerDied', function (data) {
-        chat.addSystemLine('Player <b>' + data.name + '</b> died!');
+        chat.addSystemLine('Player <b>' + (data.name.length < 1 ? 'An unnamed cell' : data.name) + '</b> died!');
     });
 
     socket.on('playerDisconnect', function (data) {
-        chat.addSystemLine('Player <b>' + data.name + '</b> disconnected!');
+        chat.addSystemLine('Player <b>' + (data.name.length < 1 ? 'An unnamed cell' : data.name) + '</b> disconnected!');
     });
 
     socket.on('playerJoin', function (data) {
-        chat.addSystemLine('Player <b>' + data.name + '</b> joined!');
+        chat.addSystemLine('Player <b>' + (data.name.length < 1 ? 'An unnamed cell' : data.name) + '</b> joined!');
     });
 
     socket.on('leaderboard', function (data) {
@@ -575,12 +575,12 @@ function setupSocket(socket) {
         chat.addSystemLine(data);
     });
 
-    // Chat
+    // Chat.
     socket.on('serverSendPlayerChat', function (data) {
         chat.addChatLine(data.sender, data.message, false);
     });
 
-    // Handle movement
+    // Handle movement.
     socket.on('serverTellPlayerMove', function (userData, foodsList, massList, virusList) {
         var playerData;
         for(var i =0; i< userData.length; i++) {
@@ -607,7 +607,7 @@ function setupSocket(socket) {
         fireFood = massList;
     });
 
-    // Die
+    // Death.
     socket.on('RIP', function () {
         gameStart = false;
         died = true;
@@ -794,7 +794,7 @@ function drawborder() {
     graph.lineWidth = 1;
     graph.strokeStyle = playerConfig.borderColor;
 
-    // Left-vertical
+    // Left-vertical.
     if (player.x <= screenWidth/2) {
         graph.beginPath();
         graph.moveTo(screenWidth/2 - player.x, 0 ? player.y > screenHeight/2 : screenHeight/2 - player.y);
@@ -803,7 +803,7 @@ function drawborder() {
         graph.stroke();
     }
 
-    // Top-horizontal
+    // Top-horizontal.
     if (player.y <= screenHeight/2) {
         graph.beginPath();
         graph.moveTo(0 ? player.x > screenWidth/2 : screenWidth/2 - player.x, screenHeight/2 - player.y);
@@ -812,7 +812,7 @@ function drawborder() {
         graph.stroke();
     }
 
-    // Right-vertical
+    // Right-vertical.
     if (gameWidth - player.x <= screenWidth/2) {
         graph.beginPath();
         graph.moveTo(gameWidth + screenWidth/2 - player.x, screenHeight/2 - player.y);
@@ -821,7 +821,7 @@ function drawborder() {
         graph.stroke();
     }
 
-    // Bottom-horizontal
+    // Bottom-horizontal.
     if (gameHeight - player.y <= screenHeight/2) {
         graph.beginPath();
         graph.moveTo(gameWidth + screenWidth/2 - player.x, gameHeight + screenHeight/2 - player.y);
@@ -905,7 +905,7 @@ function gameLoop() {
             });
 
             drawPlayers(orderMass);
-            socket.emit('0', target); // playerSendTarget Heartbeat
+            socket.emit('0', target); // playerSendTarget "Heartbeat".
 
         } else {
             graph.fillStyle = '#333333';
@@ -925,7 +925,7 @@ function gameLoop() {
         graph.font = 'bold 30px sans-serif';
         if (kicked) {
             if (reason !== '') {
-                graph.fillText('You were kicked for reason:', screenWidth / 2, screenHeight / 2 - 20);
+                graph.fillText('You were kicked for:', screenWidth / 2, screenHeight / 2 - 20);
                 graph.fillText(reason, screenWidth / 2, screenHeight / 2 + 20);
             }
             else {
