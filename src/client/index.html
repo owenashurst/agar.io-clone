@@ -1,9 +1,11 @@
 ﻿<!doctype html>
 <html lang="en">
 <head>
+    <!-- Meta Properties -->
     <meta charset="UTF-8">
     <title>Agar.IO Clone</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
+    <!-- CSS -->
     <link rel="stylesheet" href="css/main.css" />
 </head>
 <body>
@@ -12,6 +14,10 @@
         <div class="chatbox" id="chatbox">
             <ul id="chatList" class="chat-list"></ul>
             <input id="chatInput" type="text" class="chat-input" placeholder="Chat here..." maxlength="35" />
+        </div>
+        <div id="mobile">
+           <input type="image" id="split" class="split" src="img/split.png" alt="splitBtn">
+           <input type="image" id="feed" class="feed" src="img/feed.png" alt="feedBtn">
         </div>
         <canvas tabindex="1" id="cvs"></canvas>
     </div>
@@ -28,7 +34,7 @@
             <div id="settings">
                 <h3>Settings</h3>
                 <ul>
-                    <label><input id="visBord" type="checkbox">Show borders</label>
+                    <label><input id="visBord" type="checkbox">Show border</label>
                     <label><input id="showMass" type="checkbox">Show mass</label>
                     <br />
                     <label><input id="continuity" type="checkbox">Continue moving when mouse is off-screen</label>
@@ -39,14 +45,17 @@
             <div id="instructions">
                 <h3>Gameplay</h3>
                 <ul>
-                    <li>Move your mouse on the screen to move your character</li>
-                    <li>Eat food and other players in order to grow your character (food respawns every time a player eats it)</li>
-                    <li>A player's mass is the number of food particles eaten</li>
-                    <li>Objective: Try to get fat and eat other players</li>
+                    <li>Move your mouse on the screen to move your character.</li>
+                    <li>Eat food and other players in order to grow your character (food respawns every time a player eats it).</li>
+                    <li>A player's mass is the number of food particles eaten.</li>
+                    <li>Objective: Try to get fat and eat other players.</li>
                 </ul>
             </div>
         </div>
     </div>
+    <!-- JS -->
+    <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
     <script src="js/app.js"></script>
 </body>
 </html>

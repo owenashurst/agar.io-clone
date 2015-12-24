@@ -7,13 +7,13 @@ var http = require('http').Server(app);
 var io = require('socket.io')(http);
 var SAT = require('sat');
 
-// Import game settings
+// Import game settings.
 var c = require('../../config.json');
 
-// Import utilities
+// Import utilities.
 var util = require('./lib/util');
 
-// Import quadtree
+// Import quadtree.
 var quadtree= require('../../quadtree');
 
 var args = {x : 0, y : 0, h : c.gameHeight, w : c.gameWidth, maxChildren : 1, maxDepth : 5};
@@ -42,7 +42,7 @@ function addFood(toAdd) {
     while (toAdd--) {
         var position = c.foodUniformDisposition ? util.uniformPosition(food, radius) : util.randomPosition(radius);
         food.push({
-            // make ids unique
+            // Make IDs unique.
             id: ((new Date()).getTime() + '' + food.length) >>> 0,
             x: position.x,
             y: position.y,
@@ -108,7 +108,7 @@ function movePlayer(player) {
         if (!isNaN(deltaX)) {
             player.cells[i].x += deltaX;
         }
-        //Find best solution
+        // Find best solution.
         for(var j=0; j<player.cells.length; j++) {
             if(j != i && player.cells[i] !== undefined) {
                 var distance = Math.sqrt(Math.pow(player.cells[j].y-player.cells[i].y,2) + Math.pow(player.cells[j].x-player.cells[i].x,2));
@@ -256,10 +256,10 @@ io.on('connection', function (socket) {
         console.log('[INFO] Player ' + player.name + ' connecting!');
 
         if (util.findIndex(users, player.id) > -1) {
-            console.log('[INFO] That playerID is already connected, kicking!');
+            console.log('[INFO] Player ID is already connected, kicking.');
             socket.disconnect();
         } else if (!util.validNick(player.name)) {
-            socket.emit('kick', 'Invalid username');
+            socket.emit('kick', 'Invalid username.');
             socket.disconnect();
         } else {
             console.log('[INFO] Player ' + player.name + ' connected!');
@@ -296,7 +296,7 @@ io.on('connection', function (socket) {
                 gameWidth: c.gameWidth,
                 gameHeight: c.gameHeight
             });
-            console.log('Total player: ' + users.length);
+            console.log('Total players: ' + users.length);
         }
 
     });
@@ -336,14 +336,14 @@ io.on('connection', function (socket) {
 
     socket.on('pass', function(data) {
         if (data[0] === c.adminPass) {
-            console.log('[ADMIN] ' + currentPlayer.name + ' just logged in as an admin');
+            console.log('[ADMIN] ' + currentPlayer.name + ' just logged in as an admin!');
             socket.emit('serverMSG', 'Welcome back ' + currentPlayer.name);
             socket.broadcast.emit('serverMSG', currentPlayer.name + ' just logged in as admin!');
             currentPlayer.admin = true;
         } else {
-            console.log('[ADMIN] ' + currentPlayer.name + ' sent incorrect admin password');
-            socket.emit('serverMSG', 'Password incorrect attempt logged.');
-            // TODO actually log incorrect passwords
+            console.log('[ADMIN] ' + currentPlayer.name + ' attempted to log in with incorrect password.');
+            socket.emit('serverMSG', 'Password incorrect, attempt logged.');
+            // TODO: Actually log incorrect passwords.
         }
     });
 
@@ -377,15 +377,15 @@ io.on('connection', function (socket) {
                 }
             }
             if (!worked) {
-                socket.emit('serverMSG', 'Could not find user or user is admin');
+                socket.emit('serverMSG', 'Could not locate user or user is an admin.');
             }
         } else {
-            console.log('[ADMIN] ' + currentPlayer.name + ' is trying to use -kick but isn\'t admin');
-            socket.emit('serverMSG', 'You are not permitted to use this command');
+            console.log('[ADMIN] ' + currentPlayer.name + ' is trying to use -kick but isn\'t an admin.');
+            socket.emit('serverMSG', 'You are not permitted to use this command.');
         }
     });
 
-    // Heartbeat function, update everytime
+    // Heartbeat function, update everytime.
     socket.on('0', function(target) {
         currentPlayer.lastHeartbeat = new Date().getTime();
         if (target.x !== currentPlayer.x || target.y !== currentPlayer.y) {
@@ -394,6 +394,7 @@ io.on('connection', function (socket) {
     });
 
     socket.on('1', function() {
+        // Fire food.
         for(var i=0; i<currentPlayer.cells.length; i++)
         {
             if(((currentPlayer.cells[i].mass >= c.defaultPlayerMass + c.fireFood) && c.fireFood > 0) || (currentPlayer.cells[i].mass >= 20 && c.fireFood === 0)){
@@ -422,7 +423,7 @@ io.on('connection', function (socket) {
         }
     });
     socket.on('2', function() {
-        //Split cells
+        //Split cells.
         if(currentPlayer.cells.length < c.limitSplit && currentPlayer.massTotal >= c.defaultPlayerMass*2) {
             var numMax = currentPlayer.cells.length;
             for(var d=0; d<numMax; d++) {
@@ -697,7 +698,7 @@ setInterval(moveloop, 1000 / 60);
 setInterval(gameloop, 1000);
 setInterval(sendUpdates, 1000 / c.networkUpdateFactor);
 
-// Don't touch on ip
+// Don't touch, IP configurations.
 var ipaddress = process.env.OPENSHIFT_NODEJS_IP || process.env.IP || '127.0.0.1';
 var serverport = process.env.OPENSHIFT_NODEJS_PORT || process.env.PORT || c.port;
 if (process.env.OPENSHIFT_NODEJS_IP !== undefined) {
@@ -709,5 +710,3 @@ if (process.env.OPENSHIFT_NODEJS_IP !== undefined) {
         console.log('[DEBUG] Listening on *:' + c.port);
     });
 }
-
-
