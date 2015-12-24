@@ -103,7 +103,7 @@ window.onload = function() {
     });
 };
 
-// Canvas
+// Canvas.
 var screenWidth = window.innerWidth;
 var screenHeight = window.innerHeight;
 var gameWidth = 0;
@@ -116,8 +116,7 @@ var disconnected = false;
 var died = false;
 var kicked = false;
 
-// defaults
-// TODO break out into GameControls
+// TODO: Break out into GameControls.
 var continuity = false;
 var startPingTime = 0;
 var toggleMassState = 0;
@@ -227,7 +226,7 @@ ChatClient.prototype.addSystemLine = function (message) {
     newline.className = 'system';
     newline.innerHTML = message;
 
-    // Append message to the logs.
+    // Append messages to the logs.
     this.appendMessage(newline);
 };
 
@@ -243,7 +242,7 @@ ChatClient.prototype.appendMessage = function (node) {
     chatList.appendChild(node);
 };
 
-/** sends a message or executes a command on the ENTER key */
+// Sends a message or executes a command on the click of enter.
 ChatClient.prototype.sendChat = function (key) {
     var commands = this.commands,
         input = document.getElementById('chatInput');
@@ -312,6 +311,16 @@ function keyInput(event) {
     }
 }
 
+    $( "#feed" ).click(function() {
+        socket.emit('1');
+        reenviar = false;
+});
+
+    $( "#split" ).click(function() {
+        socket.emit('2');
+        reenviar = false;
+});
+
 // Function called when a key is pressed, will change direction if arrow key.
 function directionDown(event) {
 	var key = event.which || event.keyCode;
@@ -346,7 +355,7 @@ function newDirection(direction, list, isAddition) {
 			found = true;
 			if (!isAddition) {
 				result = true;
-				//remove the direction
+				// Removes the direction.
 				list.splice(i, 1);
 			}
 			break;
@@ -392,7 +401,7 @@ function vertical(key) {
 	return key == KEY_DOWN || key == KEY_UP;
 }
 function checkLatency() {
-    // Ping
+    // Ping.
     startPingTime = Date.now();
     socket.emit('ping');
 }
@@ -454,8 +463,7 @@ function toggleRoundFood(args) {
     }
 }
 
-// TODO
-// Breaks out many of these game controls into separate classses.
+// TODO: Break out many of these GameControls into separate classes.
 
 chat.registerCommand('ping', 'Check your latency.', function () {
     checkLatency();
@@ -496,7 +504,7 @@ chat.registerCommand('kick', 'Kick a player, for admins only.', function (args) 
 
 // socket stuff.
 function setupSocket(socket) {
-    // Handle ping
+    // Handle ping.
     socket.on('pong', function () {
         var latency = Date.now() - startPingTime;
         debug('Latency: ' + latency + 'ms');
@@ -523,7 +531,7 @@ function setupSocket(socket) {
         player.target = target;
         socket.emit('gotit', player);
         gameStart = true;
-        debug('Game is started: ' + gameStart);
+        debug('Game started at: ' + gameStart);
         chat.addSystemLine('Connected to the game!');
         chat.addSystemLine('Type <b>-help</b> for a list of commands.');
         if (mobile) {
@@ -539,15 +547,15 @@ function setupSocket(socket) {
     });
 
     socket.on('playerDied', function (data) {
-        chat.addSystemLine('Player <b>' + (data.name.length < 1 ? 'An unnamed cell' : data.name) + '</b> died!');
+        chat.addSystemLine('{GAME} - <b>' + (data.name.length < 1 ? 'An unnamed cell' : data.name) + '</b> was eaten.');
     });
 
     socket.on('playerDisconnect', function (data) {
-        chat.addSystemLine('Player <b>' + (data.name.length < 1 ? 'An unnamed cell' : data.name) + '</b> disconnected!');
+        chat.addSystemLine('{GAME} - <b>' + (data.name.length < 1 ? 'An unnamed cell' : data.name) + '</b> disconnected.');
     });
 
     socket.on('playerJoin', function (data) {
-        chat.addSystemLine('Player <b>' + (data.name.length < 1 ? 'An unnamed cell' : data.name) + '</b> joined!');
+        chat.addSystemLine('{GAME} - <b>' + (data.name.length < 1 ? 'An unnamed cell' : data.name) + '</b> joined.');
     });
 
     socket.on('leaderboard', function (data) {
@@ -945,4 +953,3 @@ function resize() {
     player.screenHeight = c.height = screenHeight = playerType == 'player' ? window.innerHeight : gameHeight;
     socket.emit('windowResized', { screenWidth: screenWidth, screenHeight: screenHeight });
 }
-

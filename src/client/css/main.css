@@ -21,6 +21,24 @@ div {
     -ms-user-select: none; /* IE10+ */
 }
 
+#split {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    width: 100px;
+    height: 100px;
+    padding: 5px;
+}
+
+#feed {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    width: 100px;
+    height: 100px;
+    padding: 5px;
+}
+
 #status {
     position: absolute;
     padding: 10px;
@@ -236,4 +254,16 @@ div {
     top: 0;
     left: 0;
     opacity: 0;
+}
+
+@media only screen  and (min-width : 1224px) {
+#mobile {
+display: none;
+	}
+}
+
+@media only screen  and (max-width : 1224px) {
+#chatbox {
+display: none;
+        }
 }
