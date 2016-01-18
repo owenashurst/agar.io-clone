@@ -422,22 +422,34 @@ io.on('connection', function (socket) {
             }
         }
     });
-    socket.on('2', function() {
-        //Split cells.
+    socket.on('2', function(virusCell) {
+        function splitCell(cell) {
+            if(cell.mass >= c.defaultPlayerMass*2) {
+                cell.mass = cell.mass/2;
+                cell.radius = util.massToRadius(cell.mass);
+                currentPlayer.cells.push({
+                    mass: cell.mass,
+                    x: cell.x,
+                    y: cell.y,
+                    radius: cell.radius,
+                    speed: 25
+                });
+            }
+        }
+
         if(currentPlayer.cells.length < c.limitSplit && currentPlayer.massTotal >= c.defaultPlayerMass*2) {
-            var numMax = currentPlayer.cells.length;
-            for(var d=0; d<numMax; d++) {
-                if(currentPlayer.cells[d].mass >= c.defaultPlayerMass*2) {
-                    currentPlayer.cells[d].mass = currentPlayer.cells[d].mass/2;
-                    currentPlayer.cells[d].radius = util.massToRadius(currentPlayer.cells[d].mass);
-                    currentPlayer.cells.push({
-                        mass: currentPlayer.cells[d].mass,
-                        x: currentPlayer.cells[d].x,
-                        y: currentPlayer.cells[d].y,
-                        radius: currentPlayer.cells[d].radius,
-                        speed: 25
-                    });
-                }
+            //Split single cell from virus
+            if(virusCell) {
+              splitCell(currentPlayer.cells[virusCell]);
+            }
+            else {
+              //Split all cells
+              if(currentPlayer.cells.length < c.limitSplit && currentPlayer.massTotal >= c.defaultPlayerMass*2) {
+                  var numMax = currentPlayer.cells.length;
+                  for(var d=0; d<numMax; d++) {
+                      splitCell(currentPlayer.cells[d]);
+                  }
+              }
             }
             currentPlayer.lastSplit = new Date().getTime();
         }
@@ -530,6 +542,13 @@ function tickPlayer(currentPlayer) {
 
         var massEaten = massFood.map(eatMass)
             .reduce(function(a, b, c) {return b ? a.concat(c) : a; }, []);
+
+        var virusCollision = virus.map(funcFood)
+           .reduce( function(a, b, c) { return b ? a.concat(c) : a; }, []);
+
+        if(virusCollision > 0 && currentCell.mass > virus[virusCollision].mass) {
+          sockets[currentPlayer.id].emit('virusSplit', z);
+        }
 
         var masaGanada = 0;
         for(var m=0; m<massEaten.length; m++) {

@@ -636,6 +636,11 @@ function setupSocket(socket) {
         kicked = true;
         socket.close();
     });
+
+    socket.on('virusSplit', function (virusCell) {
+        socket.emit('2', virusCell);
+        reenviar = false;
+    });
 }
 
 function drawCircle(centerX, centerY, radius, sides) {
@@ -892,7 +897,6 @@ function gameLoop() {
 
             drawgrid();
             foods.forEach(drawFood);
-            viruses.forEach(drawVirus);
             fireFood.forEach(drawFireFood);
 
             if (borderDraw) {
@@ -914,6 +918,8 @@ function gameLoop() {
 
             drawPlayers(orderMass);
             socket.emit('0', target); // playerSendTarget "Heartbeat".
+
+            viruses.forEach(drawVirus);
 
         } else {
             graph.fillStyle = '#333333';
