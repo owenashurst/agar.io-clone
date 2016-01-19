@@ -898,7 +898,8 @@ function gameLoop() {
             drawgrid();
             foods.forEach(drawFood);
             fireFood.forEach(drawFireFood);
-
+            viruses.forEach(drawVirus);
+            
             if (borderDraw) {
                 drawborder();
             }
@@ -918,8 +919,6 @@ function gameLoop() {
 
             drawPlayers(orderMass);
             socket.emit('0', target); // playerSendTarget "Heartbeat".
-
-            viruses.forEach(drawVirus);
 
         } else {
             graph.fillStyle = '#333333';
