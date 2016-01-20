@@ -1,3 +1,0 @@
-FROM node
-
-EXPOSE 80
