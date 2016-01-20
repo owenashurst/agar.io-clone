@@ -1,17 +1,32 @@
 {
     "port": 3000,
     "foodMass": 1,
+    "fireFood": 20,
+    "limitSplit": 16,
     "defaultPlayerMass": 10,
+	"virus": {
+    "fill": "#33ff33",
+  	"stroke": "#19D119",
+		"strokeWidth": 20,
+		"defaultMass": {
+            "from": 100,
+            "to": 150
+        },
+		"splitMass": 180
+	},
     "gameWidth": 5000,
     "gameHeight": 5000,
     "adminPass": "DEFAULT",
     "gameMass": 20000,
     "maxFood": 1000,
+    "maxVirus": 50,
     "slowBase": 4.5,
     "logChat": 0,
     "networkUpdateFactor": 40,
     "maxHeartbeatInterval": 5000,
     "foodUniformDisposition": true,
+    "virusUniformDisposition": false,
     "newPlayerInitialPosition": "farthest",
-    "massLossRate": 10
+    "massLossRate": 1,
+    "mergeTimer": 15
 }
