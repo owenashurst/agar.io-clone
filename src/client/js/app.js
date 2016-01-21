@@ -303,7 +303,7 @@ function keyInput(event) {
         reenviar = false;
     }
     else if (key === KEY_SPLIT && reenviar) {
-       document.getElementById('split').play();
+       document.getElementById('split_cell').play();
         socket.emit('2');
         reenviar = false;
     }
