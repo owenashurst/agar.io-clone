@@ -4,3 +4,5 @@ dist
 *.log
 coverage
 .idea
+npm-debug.log
+bin
