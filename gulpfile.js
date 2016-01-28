@@ -99,7 +99,7 @@ gulp.task('contributors', function(){
                                 }
                             });
         var user = JSON.parse(userResponse.getBody().toString());
-        return result.concat(user.name + '<' + (user.email != null)?user.email:((user.login != null)?user.login:'') + '>' + '(' + user.html_url + ')');
+        return result.concat(user.name + '<' + (user.email !== null)?user.email:((user.login !== null)?user.login:'') + '>' + '(' + user.html_url + ')');
     }, []);
 
     project.contributors = contributorsList;
@@ -107,7 +107,7 @@ gulp.task('contributors', function(){
     fs.writeFile('package.json', JSON.stringify(project), function(err){
         if (err) console.log('ERROR!!!', err);
         console.log('DONE!');
-    })
+    });
 });
 
 gulp.task('default', ['run']);
