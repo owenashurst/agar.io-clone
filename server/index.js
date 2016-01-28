@@ -1,11 +1,10 @@
 console.log('[STARTING SERVER]');
 
-import path from 'path';
 import express from 'express';
 import webpack from 'webpack';
 import webpackMiddleware from 'webpack-dev-middleware';
 import webpackHotMiddleware from 'webpack-hot-middleware';
-import config from './webpack.config.js';
+import config from '../webpack.config.js';
 
 const isDeveloping = process.env.NODE_ENV !== 'production';
 const app = express();
@@ -27,21 +26,12 @@ if (isDeveloping) {
 
   app.use(middleware);
   app.use(webpackHotMiddleware(compiler));
-  app.get('*', function response(req, res) {
-    res.write(middleware.fileSystem.readFileSync(path.join(__dirname, 'dist/index.html')));
-    res.end();
-  });
-} else {
-  app.use(express.static(__dirname + '/dist'));
-  app.get('*', function response(req, res) {
-    res.sendFile(path.join(__dirname, 'dist/index.html'));
-  });
 }
 
 import Http from 'http';
 import IO from 'socket.io';
 import SAT from 'sat';
-import Config from './config.json';
+import Config from '../config.json';
 import Util from './lib/util';
 import QuadTree from 'simple-quadtree';
 

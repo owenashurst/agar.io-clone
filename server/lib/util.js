@@ -1,8 +1,4 @@
-/* jslint node: true */
-
-'use strict';
-
-var cfg = require('../config.json');
+var cfg = require('../../config.json');
 
 exports.validNick = function(nickname) {
     var regex = /^\w*$/;

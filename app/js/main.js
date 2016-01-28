@@ -1,4 +1,10 @@
-import './App.scss';
+// IMPORT ASSETS
+import '../css/App.scss';
+import '../img/feed.png';
+import '../img/split.png';
+import '../audio/spawn.mp3';
+import '../audio/split.mp3';
+
 console.log('[STARTING CLIENT]');
 
 const io = require('socket.io-client');

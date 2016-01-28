@@ -8,7 +8,7 @@ module.exports = {
   devtool: 'eval-source-map',
   entry: [
     'webpack-hot-middleware/client?reload=true',
-    path.join(__dirname, 'app/main.js')
+    path.join(__dirname, 'app/js/main.js')
   ],
   output: {
     path: path.join(__dirname, '/dist/'),
@@ -39,6 +39,9 @@ module.exports = {
     }, {
       test: /\.scss$/,
       loader: 'style!css!sass'
+    }, {
+      test: /\.(jpe?g|png|mp3)$/,
+      loader: 'file?name=[path][name].[ext]'
     }]
   }
 };
