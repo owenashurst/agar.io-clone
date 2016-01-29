@@ -116,7 +116,7 @@ ChatClient.prototype.addChatLine = function(name, message, me) {
 
   // Colours the chat input correctly.
   newline.className = (me) ? 'me' : 'friend';
-  newline.innerHTML = '<b>' + ((name.length < 1) ? 'An unnamed cell' : name) + '</b>: ' + message;
+  newline.innerHTML = `<b>${((name.length < 1) ? 'An unnamed cell' : name)}</b>: ${message}`;
 
   this.appendMessage(newline);
 };
@@ -165,7 +165,7 @@ ChatClient.prototype.sendChat = function(key) {
         if (commands[args[0]]) {
           commands[args[0]].callback(args.slice(1));
         } else {
-          this.addSystemLine('Unrecognized Command: ' + text + ', type -help for more info.');
+          this.addSystemLine(`Unrecognized Command: ${text}, type -help for more info.`);
         }
 
       // Allows for regular messages to be sent to the server.
@@ -194,7 +194,7 @@ ChatClient.prototype.printHelp = function() {
   const commands = this.commands;
   for (const cmd in commands) {
     if (commands.hasOwnProperty(cmd)) {
-      this.addSystemLine('-' + cmd + ': ' + commands[cmd].description);
+      this.addSystemLine(`- ${cmd}: ${commands[cmd].description}`);
     }
   }
 };
@@ -206,8 +206,8 @@ function setupSocket() {
   // Handle ping.
   socket.on('pong', () => {
     const latency = Date.now() - startPingTime;
-    debug('Latency: ' + latency + 'ms');
-    chat.addSystemLine('Ping: ' + latency + 'ms');
+    debug(`Latency: ${latency}ms`);
+    chat.addSystemLine(`Ping: ${latency}ms`);
   });
 
   // Handle error.
@@ -230,7 +230,7 @@ function setupSocket() {
     player.target = target;
     socket.emit('gotit', player);
     gameStart = true;
-    debug('Game started at: ' + gameStart);
+    debug(`Game started at: ${gameStart}`);
     chat.addSystemLine('Connected to the game!');
     chat.addSystemLine('Type <b>-help</b> for a list of commands.');
     if (mobile) {
@@ -254,15 +254,15 @@ function setupSocket() {
   });
 
   socket.on('playerDied', (data) => {
-    chat.addSystemLine('{GAME} - <b>' + (data.name.length < 1 ? 'An unnamed cell' : data.name) + '</b> was eaten.');
+    chat.addSystemLine(`{GAME} - <b>${(data.name.length < 1 ? 'An unnamed cell' : data.name)}</b> was eaten.`);
   });
 
   socket.on('playerDisconnect', (data) => {
-    chat.addSystemLine('{GAME} - <b>' + (data.name.length < 1 ? 'An unnamed cell' : data.name) + '</b> disconnected.');
+    chat.addSystemLine(`{GAME} - <b>${(data.name.length < 1 ? 'An unnamed cell' : data.name)}</b> disconnected.`);
   });
 
   socket.on('playerJoin', (data) => {
-    chat.addSystemLine('{GAME} - <b>' + (data.name.length < 1 ? 'An unnamed cell' : data.name) + '</b> joined.');
+    chat.addSystemLine(`{GAME} - <b>${(data.name.length < 1 ? 'An unnamed cell' : data.name)}</b> joined.`);
   });
 
   socket.on('leaderboard', (data) => {
@@ -271,9 +271,9 @@ function setupSocket() {
     for (let i = 0; i < leaderboard.length; i++) {
       status += '<br />';
       if (leaderboard[i].id === player.id) {
-        status += leaderboard[i].name.length !== 0 ? '<span class="me">' + (i + 1) + '. ' + leaderboard[i].name + '</span>' : '<span class="me">' + (i + 1) + '. An unnamed cell</span>';
+        status += leaderboard[i].name.length !== 0 ? `<span class="me">${(i + 1)}. ${leaderboard[i].name}</span>` : `<span class="me">${(i + 1)}. An unnamed cell</span>`;
       } else {
-        status += leaderboard[i].name.length !== 0 ? (i + 1) + '. ' + leaderboard[i].name : (i + 1) + '. An unnamed cell';
+        status += leaderboard[i].name.length !== 0 ? `${(i + 1)}. ${leaderboard[i].name}` : `${(i + 1)}. An unnamed cell`;
       }
     }
     // status += '<br />Players: ' + data.players;
@@ -364,8 +364,8 @@ function drawCircle(centerX, centerY, radius, sides) {
 }
 
 function drawFood(food) {
-  graph.strokeStyle = 'hsl(' + food.hue + ', 100%, 45%)';
-  graph.fillStyle = 'hsl(' + food.hue + ', 100%, 50%)';
+  graph.strokeStyle = `hsl(${food.hue}, 100%, 45%)`;
+  graph.fillStyle = `hsl(${food.hue}, 100%, 50%)`;
   graph.lineWidth = foodConfig.border;
   drawCircle(food.x - player.x + screenWidth / 2, food.y - player.y + screenHeight / 2, food.radius, foodSides);
 }
@@ -378,8 +378,8 @@ function drawVirus(virus) {
 }
 
 function drawFireFood(mass) {
-  graph.strokeStyle = 'hsl(' + mass.hue + ', 100%, 45%)';
-  graph.fillStyle = 'hsl(' + mass.hue + ', 100%, 50%)';
+  graph.strokeStyle = `hsl(${mass.hue}, 100%, 45%)`;
+  graph.fillStyle = `hsl(${mass.hue}, 100%, 50%)`;
   graph.lineWidth = playerConfig.border + 10;
   drawCircle(mass.x - player.x + screenWidth / 2, mass.y - player.y + screenHeight / 2, mass.radius - 5, 18 + (~~(mass.masa / 5)));
 }
@@ -404,8 +404,8 @@ function drawPlayers(order) {
     const points = 30 + ~~(cellCurrent.mass / 5);
     const increase = Math.PI * 2 / points;
 
-    graph.strokeStyle = 'hsl(' + userCurrent.hue + ', 100%, 45%)';
-    graph.fillStyle = 'hsl(' + userCurrent.hue + ', 100%, 50%)';
+    graph.strokeStyle = `hsl(${userCurrent.hue}, 100%, 45%)`;
+    graph.fillStyle = `hsl(${userCurrent.hue}, 100%, 50%)`;
     graph.lineWidth = playerConfig.border;
 
     const xstore = [];
@@ -466,7 +466,7 @@ function drawPlayers(order) {
     graph.lineJoin = 'round';
     graph.textAlign = 'center';
     graph.textBaseline = 'middle';
-    graph.font = 'bold ' + fontSize + 'px sans-serif';
+    graph.font = `bold ${fontSize}px sans-serif`;
 
     if (toggleMassState === 0) {
       graph.strokeText(nameCell, circle.x, circle.y);
@@ -474,7 +474,7 @@ function drawPlayers(order) {
     } else {
       graph.strokeText(nameCell, circle.x, circle.y);
       graph.fillText(nameCell, circle.x, circle.y);
-      graph.font = 'bold ' + Math.max(fontSize / 3 * 2, 10) + 'px sans-serif';
+      graph.font = `bold ${Math.max(fontSize / 3 * 2, 10)}px sans-serif`;
       if (nameCell.length === 0) fontSize = 0;
       graph.strokeText(Math.round(cellCurrent.mass), circle.x, circle.y + fontSize);
       graph.fillText(Math.round(cellCurrent.mass), circle.x, circle.y + fontSize);

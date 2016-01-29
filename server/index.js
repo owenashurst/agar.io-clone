@@ -269,7 +269,7 @@ io.on('connection', (socket) => {
   };
 
   socket.on('gotit', (player) => {
-    console.log('[INFO] Player ' + player.name + ' connecting!');
+    console.log(`[INFO] Player ${player.name} connecting!`);
 
     if (Util.findIndex(users, player.id) > -1) {
       console.log('[INFO] Player ID is already connected, kicking.');
@@ -278,7 +278,7 @@ io.on('connection', (socket) => {
       socket.emit('kick', 'Invalid username.');
       socket.disconnect();
     } else {
-      console.log('[INFO] Player ' + player.name + ' connected!');
+      console.log(`[INFO] Player ${player.name} connected!`);
       sockets[player.id] = socket;
 
       radius = Util.massToRadius(Config.defaultPlayerMass);
@@ -312,7 +312,7 @@ io.on('connection', (socket) => {
         gameWidth: Config.gameWidth,
         gameHeight: Config.gameHeight
       });
-      console.log('Total players: ' + users.length);
+      console.log(`Total players: ${users.length}`);
     }
   });
 
@@ -330,14 +330,14 @@ io.on('connection', (socket) => {
       users.splice(Util.findIndex(users, currentPlayer.id), 1);
     }
     socket.emit('welcome', currentPlayer);
-    console.log('[INFO] User ' + currentPlayer.name + ' respawned!');
+    console.log(`[INFO] User ${currentPlayer.name} respawned!`);
   });
 
   socket.on('disconnect', () => {
     if (Util.findIndex(users, currentPlayer.id) > -1) {
       users.splice(Util.findIndex(users, currentPlayer.id), 1);
     }
-    console.log('[INFO] User ' + currentPlayer.name + ' disconnected!');
+    console.log(`[INFO] User ${currentPlayer.name} disconnected!`);
     socket.broadcast.emit('playerDisconnect', { name: currentPlayer.name });
   });
 
@@ -345,19 +345,19 @@ io.on('connection', (socket) => {
     const _sender = data.sender.replace(/(<([^>]+)>)/ig, '');
     const _message = data.message.replace(/(<([^>]+)>)/ig, '');
     if (Config.logChat === 1) {
-      console.log('[CHAT] [' + (new Date()).getHours() + ':' + (new Date()).getMinutes() + '] ' + _sender + ': ' + _message);
+      console.log(`[CHAT] [${(new Date()).getHours()}:${(new Date()).getMinutes()}] ${_sender}: ${_message}`);
     }
     socket.broadcast.emit('serverSendPlayerChat', {sender: _sender, message: _message.substring(0, 35)});
   });
 
   socket.on('pass', (data) => {
     if (data[0] === Config.adminPass) {
-      console.log('[ADMIN] ' + currentPlayer.name + ' just logged in as an admin!');
-      socket.emit('serverMSG', 'Welcome back ' + currentPlayer.name);
-      socket.broadcast.emit('serverMSG', currentPlayer.name + ' just logged in as admin!');
+      console.log(`[ADMIN] ${currentPlayer.name} just logged in as an admin!`);
+      socket.emit('serverMSG', `Welcome back ${currentPlayer.name}`);
+      socket.broadcast.emit('serverMSG', `${currentPlayer.name} just logged in as admin!`);
       currentPlayer.admin = true;
     } else {
-      console.log('[ADMIN] ' + currentPlayer.name + ' attempted to log in with incorrect password.');
+      console.log(`[ADMIN] ${currentPlayer.name} attempted to log in with incorrect password.`);
       socket.emit('serverMSG', 'Password incorrect, attempt logged.');
       // TODO: Actually log incorrect passwords.
     }
@@ -379,11 +379,11 @@ io.on('connection', (socket) => {
             }
           }
           if (reason !== '') {
-            console.log('[ADMIN] User ' + users[e].name + ' kicked successfully by ' + currentPlayer.name + ' for reason ' + reason);
+            console.log(`[ADMIN] User ${users[e].name} kicked successfully by ${currentPlayer.name} for reason ${reason}`);
           } else {
-            console.log('[ADMIN] User ' + users[e].name + ' kicked successfully by ' + currentPlayer.name);
+            console.log(`[ADMIN] User ${users[e].name} kicked successfully by ${currentPlayer.name}`);
           }
-          socket.emit('serverMSG', 'User ' + users[e].name + ' was kicked by ' + currentPlayer.name);
+          socket.emit('serverMSG', `User ${users[e].name} was kicked by ${currentPlayer.name}`);
           sockets[users[e].id].emit('kick', reason);
           sockets[users[e].id].disconnect();
           users.splice(e, 1);
@@ -394,7 +394,7 @@ io.on('connection', (socket) => {
         socket.emit('serverMSG', 'Could not locate user or user is an admin.');
       }
     } else {
-      console.log('[ADMIN] ' + currentPlayer.name + ' is trying to use -kick but isn\'t an admin.');
+      console.log(`[ADMIN] ${currentPlayer.name} is trying to use -kick but isn't an admin.`);
       socket.emit('serverMSG', 'You are not permitted to use this command.');
     }
   });
@@ -476,7 +476,7 @@ function tickPlayer(currentPlayer) {
   let z = 0;
 
   if (currentPlayer.lastHeartbeat < new Date().getTime() - Config.maxHeartbeatInterval) {
-    sockets[currentPlayer.id].emit('kick', 'Last heartbeat received over ' + Config.maxHeartbeatInterval + ' ago.');
+    sockets[currentPlayer.id].emit('kick', `Last heartbeat received over ${Config.maxHeartbeatInterval} ago.`);
     sockets[currentPlayer.id].disconnect();
   }
 
@@ -489,7 +489,7 @@ function tickPlayer(currentPlayer) {
 
   function collisionCheck(collision) {
     if (collision.aUser.mass > collision.bUser.mass * 1.1  && collision.aUser.radius > Math.sqrt(Math.pow(collision.aUser.x - collision.bUser.x, 2) + Math.pow(collision.aUser.y - collision.bUser.y, 2)) * 1.75) {
-      console.log('[DEBUG] Killing user: ' + collision.bUser.id);
+      console.log(`[DEBUG] Killing user: ${collision.bUser.id}`);
       console.log('[DEBUG] Collision info:');
 
       const numUser = Util.findIndex(users, collision.bUser.id);
@@ -745,10 +745,10 @@ const ipaddress = process.env.OPENSHIFT_NODEJS_IP || process.env.IP || '127.0.0.
 const serverport = process.env.OPENSHIFT_NODEJS_PORT || process.env.PORT || Config.port;
 if (process.env.OPENSHIFT_NODEJS_IP !== undefined) {
   http.listen( serverport, ipaddress, () => {
-    console.log('[DEBUG] Listening on *:' + serverport);
+    console.log(`[DEBUG] Listening on *:${serverport}`);
   });
 } else {
   http.listen( serverport, () => {
-    console.log('[DEBUG] Listening on *:' + Config.port);
+    console.log(`[DEBUG] Listening on *:${Config.port}`);
   });
 }
