@@ -1,5 +1,4 @@
 console.log('[STARTING SERVER]');
-
 import express from 'express';
 import webpack from 'webpack';
 import webpackMiddleware from 'webpack-dev-middleware';
@@ -33,16 +32,20 @@ import IO from 'socket.io';
 import SAT from 'sat';
 import Config from '../config.json';
 import Util from './lib/util';
-import QuadTree from 'simple-quadtree';
+import QuadTree from './quadtree';
 
 const http = (Http).Server(app);
 const io = (IO)(http);
-const qt = QuadTree(0, 0, Config.gameHeight, Config.gameWidth, {maxChildren: 1});
+const args = {x: 0, y: 0, h: Config.gameHeight, w: Config.gameWidth, maxChildren: 1, maxDepth: 5};
+
+// TODO: GET THIS WORKING
+const qt = QuadTree().init(args);
 
 const users = [];
 const massFood = [];
 const food = [];
 const virus = [];
+const bots = [];
 const sockets = {};
 
 let leaderboard = [];
@@ -86,6 +89,37 @@ function addVirus(add) {
       stroke: Config.virus.stroke,
       strokeWidth: Config.virus.strokeWidth
     });
+  }
+}
+
+function addBot(add) {
+  let toAdd = add;
+  while (toAdd--) {
+    const mass = Util.randomInRange(10, 20, true);
+    const radius = Util.massToRadius(mass);
+    const position = Util.randomPosition(radius);
+    const bot = {
+      id: ((new Date()).getTime() + '' + bots.length) >>> 0,
+      type: 'bot',
+      name: `Bot ${toAdd}`,
+      x: position.x,
+      y: position.y,
+      w: Config.gameWidth,
+      h: Config.gameHeight,
+      cells: [{
+        mass: 20,
+        x: position.x,
+        y: position.y,
+        radius: 21,
+        speed: 6.25
+      }],
+      radius: radius,
+      mass: mass,
+      fill: `#ff0099`,
+      stroke: Config.virus.stroke,
+      strokeWidth: 10
+    };
+    bots.push(bot);
   }
 }
 
@@ -232,6 +266,11 @@ function balanceMass() {
   if (virusToAdd > 0) {
     addVirus(virusToAdd);
   }
+
+  const botToAdd = Config.maxBot - bots.length;
+  if (botToAdd > 0) {
+    addBot(botToAdd);
+  }
 }
 
 io.on('connection', (socket) => {
@@ -312,7 +351,6 @@ io.on('connection', (socket) => {
         gameWidth: Config.gameWidth,
         gameHeight: Config.gameHeight
       });
-      console.log(`Total players: ${users.length}`);
     }
   });
 
@@ -321,8 +359,8 @@ io.on('connection', (socket) => {
   });
 
   socket.on('windowResized', (data) => {
-    currentPlayer.screenWidth = data.screenWidth;
-    currentPlayer.screenHeight = data.screenHeight;
+    currentPlayer.w = data.w;
+    currentPlayer.h = data.h;
   });
 
   socket.on('respawn', () => {
@@ -492,19 +530,26 @@ function tickPlayer(currentPlayer) {
       console.log(`[DEBUG] Killing user: ${collision.bUser.id}`);
       console.log('[DEBUG] Collision info:');
 
-      const numUser = Util.findIndex(users, collision.bUser.id);
+      const botCheck = Util.findIndex(bots, collision.bUser.id);
+      const userCheck = Util.findIndex(users, collision.bUser.id);
+      const numUser = userCheck > -1 ? userCheck : botCheck;
       if (numUser > -1) {
-        if (users[numUser].cells.length > 1) {
-          users[numUser].massTotal -= collision.bUser.mass;
-          users[numUser].cells.splice(collision.bUser.num, 1);
+        if (collision.bUser.type === 'bot') {
+          bots.splice(numUser, 1);
         } else {
-          users.splice(numUser, 1);
-          io.emit('playerDied', { name: collision.bUser.name });
-          sockets[collision.bUser.id].emit('RIP');
+          if (users[numUser].cells.length > 1) {
+            users[numUser].massTotal -= collision.bUser.mass;
+            users[numUser].cells.splice(collision.bUser.num, 1);
+          } else {
+            users.splice(numUser, 1);
+            io.emit('playerDied', { name: collision.bUser.name });
+            sockets[collision.bUser.id].emit('RIP');
+          }
         }
+
+        currentPlayer.massTotal += collision.bUser.mass;
+        collision.aUser.mass += collision.bUser.mass;
       }
-      currentPlayer.massTotal += collision.bUser.mass;
-      collision.aUser.mass += collision.bUser.mass;
     }
   }
 
@@ -527,6 +572,7 @@ function tickPlayer(currentPlayer) {
             x: user.cells[i].x,
             y: user.cells[i].y,
             num: i,
+            type: user.type,
             mass: user.cells[i].mass
           };
           playerCollisions.push(response);
@@ -595,10 +641,13 @@ function tickPlayer(currentPlayer) {
     currentCell.radius = Util.massToRadius(currentCell.mass);
     playerCircle.r = currentCell.radius;
     qt.clear();
-    qt.put(users);
+
+    qt.insert(users);
+    qt.insert(bots);
+
 
     // TODO: TEST TO MAKE SURE PLAYER COLLISSIONS WORK
-    qt.get(currentPlayer, 1, check);
+    qt.retrieve(currentPlayer, check);
 
     playerCollisions.forEach(collisionCheck);
   }
@@ -656,81 +705,93 @@ function gameloop() {
 
 function sendUpdates() {
   users.forEach((u) => {
-    // center the view if x/y is undefined, this will happen for spectators
-    u.x = u.x || Config.gameWidth / 2;
-    u.y = u.y || Config.gameHeight / 2;
+    if (u.type === 'player') {
+      // center the view if x/y is undefined, this will happen for spectators
+      u.x = u.x || Config.gameWidth / 2;
+      u.y = u.y || Config.gameHeight / 2;
 
-    const visibleFood  = food
-      .map((f) => {
-        if ( f.x > u.x - u.screenWidth / 2 - 20 &&
-        f.x < u.x + u.screenWidth / 2 + 20 &&
-        f.y > u.y - u.screenHeight / 2 - 20 &&
-        f.y < u.y + u.screenHeight / 2 + 20) {
-          return f;
-        }
-      })
-      .filter((f) => { return f; });
-
-    const visibleVirus  = virus
+      const visibleFood  = food
         .map((f) => {
-          if ( f.x > u.x - u.screenWidth / 2 - f.radius &&
-          f.x < u.x + u.screenWidth / 2 + f.radius &&
-          f.y > u.y - u.screenHeight / 2 - f.radius &&
-          f.y < u.y + u.screenHeight / 2 + f.radius) {
+          if ( f.x > u.x - u.w / 2 - 20 &&
+          f.x < u.x + u.w / 2 + 20 &&
+          f.y > u.y - u.h / 2 - 20 &&
+          f.y < u.y + u.h / 2 + 20) {
             return f;
           }
         })
         .filter((f) => { return f; });
 
-    const visibleMass = massFood
-        .map((f) => {
-          if ( f.x + f.radius > u.x - u.screenWidth / 2 - 20 &&
-          f.x - f.radius < u.x + u.screenWidth / 2 + 20 &&
-          f.y + f.radius > u.y - u.screenHeight / 2 - 20 &&
-          f.y - f.radius < u.y + u.screenHeight / 2 + 20) {
-            return f;
-          }
-        })
-        .filter((f) => { return f; });
+      const visibleVirus  = virus
+          .map((f) => {
+            if ( f.x > u.x - u.w / 2 - f.radius &&
+            f.x < u.x + u.w / 2 + f.radius &&
+            f.y > u.y - u.h / 2 - f.radius &&
+            f.y < u.y + u.h / 2 + f.radius) {
+              return f;
+            }
+          })
+          .filter((f) => { return f; });
 
-    const visibleCells  = users
-        .map((f) => {
-          for (let z = 0; z < f.cells.length; z++) {
-            if ( f.cells[z].x + f.cells[z].radius > u.x - u.screenWidth / 2 - 20 &&
-            f.cells[z].x - f.cells[z].radius < u.x + u.screenWidth / 2 + 20 &&
-            f.cells[z].y + f.cells[z].radius > u.y - u.screenHeight / 2 - 20 &&
-            f.cells[z].y - f.cells[z].radius < u.y + u.screenHeight / 2 + 20) {
-              z = f.cells.lenth;
-              if (f.id !== u.id) {
+      const visibleBots  = bots
+          .map((f) => {
+            if ( f.x > u.x - u.w / 2 - f.radius &&
+            f.x < u.x + u.w / 2 + f.radius &&
+            f.y > u.y - u.h / 2 - f.radius &&
+            f.y < u.y + u.h / 2 + f.radius) {
+              return f;
+            }
+          })
+          .filter((f) => { return f; });
+
+      const visibleMass = massFood
+          .map((f) => {
+            if ( f.x + f.radius > u.x - u.w / 2 - 20 &&
+            f.x - f.radius < u.x + u.w / 2 + 20 &&
+            f.y + f.radius > u.y - u.h / 2 - 20 &&
+            f.y - f.radius < u.y + u.h / 2 + 20) {
+              return f;
+            }
+          })
+          .filter((f) => { return f; });
+
+      const visibleCells  = users
+          .map((f) => {
+            for (let z = 0; z < f.cells.length; z++) {
+              if ( f.cells[z].x + f.cells[z].radius > u.x - u.w / 2 - 20 &&
+              f.cells[z].x - f.cells[z].radius < u.x + u.w / 2 + 20 &&
+              f.cells[z].y + f.cells[z].radius > u.y - u.h / 2 - 20 &&
+              f.cells[z].y - f.cells[z].radius < u.y + u.h / 2 + 20) {
+                z = f.cells.lenth;
+                if (f.id !== u.id) {
+                  return {
+                    id: f.id,
+                    x: f.x,
+                    y: f.y,
+                    cells: f.cells,
+                    massTotal: Math.round(f.massTotal),
+                    hue: f.hue,
+                    name: f.name
+                  };
+                }
+                // console.log("Nombre: " + f.name + " Es Usuario");
                 return {
-                  id: f.id,
                   x: f.x,
                   y: f.y,
                   cells: f.cells,
                   massTotal: Math.round(f.massTotal),
-                  hue: f.hue,
-                  name: f.name
+                  hue: f.hue
                 };
               }
-              // console.log("Nombre: " + f.name + " Es Usuario");
-              return {
-                x: f.x,
-                y: f.y,
-                cells: f.cells,
-                massTotal: Math.round(f.massTotal),
-                hue: f.hue
-              };
             }
-          }
-        })
-        .filter((f) => { return f; });
-
-    sockets[u.id].emit('serverTellPlayerMove', visibleCells, visibleFood, visibleMass, visibleVirus);
-    if (leaderboardChanged) {
-      sockets[u.id].emit('leaderboard', {
-        players: users.length,
-        leaderboard: leaderboard
-      });
+          })
+          .filter((f) => { return f; });
+      sockets[u.id].emit('serverTellPlayerMove', visibleCells, visibleFood, visibleMass, visibleVirus, visibleBots);
+      if (leaderboardChanged) {
+        sockets[u.id].emit('leaderboard', {
+          players: users.length,
+          leaderboard: leaderboard
+        });
+      }
     }
   });
   leaderboardChanged = false;

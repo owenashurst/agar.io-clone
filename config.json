@@ -9,9 +9,9 @@
     "stroke": "#19D119",
     "strokeWidth": 20,
     "defaultMass": {
-            "from": 100,
-            "to": 150
-        },
+      "from": 100,
+      "to": 150
+    },
     "splitMass": 180
   },
   "gameWidth": 5000,
@@ -20,10 +20,11 @@
   "gameMass": 20000,
   "maxFood": 1000,
   "maxVirus": 50,
+  "maxBot": 10,
   "slowBase": 4.5,
   "logChat": 0,
   "networkUpdateFactor": 40,
-  "maxHeartbeatInterval": 5000,
+  "maxHeartbeatInterval": 50000,
   "foodUniformDisposition": true,
   "virusUniformDisposition": false,
   "newPlayerInitialPosition": "farthest",

@@ -64,14 +64,15 @@ let player = {
   id: -1,
   x: screenWidth / 2,
   y: screenHeight / 2,
-  screenWidth: screenWidth,
-  screenHeight: screenHeight,
+  w: screenWidth,
+  h: screenHeight,
   target: {x: screenWidth / 2, y: screenHeight / 2}
 };
 
 let foods = [];
 let viruses = [];
 let fireFood = [];
+let bots = [];
 let users = [];
 let leaderboard = [];
 let target = {x: player.x, y: player.y};
@@ -225,8 +226,8 @@ function setupSocket() {
   socket.on('welcome', (playerSettings) => {
     player = playerSettings;
     player.name = playerName;
-    player.screenWidth = screenWidth;
-    player.screenHeight = screenHeight;
+    player.w = screenWidth;
+    player.h = screenHeight;
     player.target = target;
     socket.emit('gotit', player);
     gameStart = true;
@@ -240,9 +241,9 @@ function setupSocket() {
   });
 
   function resize() {
-    player.screenWidth = c.width = screenWidth = playerType === 'player' ? window.innerWidth : gameWidth;
-    player.screenHeight = c.height = screenHeight = playerType === 'player' ? window.innerHeight : gameHeight;
-    socket.emit('windowResized', { screenWidth: screenWidth, screenHeight: screenHeight });
+    player.w = c.width = screenWidth = playerType === 'player' ? window.innerWidth : gameWidth;
+    player.h = c.height = screenHeight = playerType === 'player' ? window.innerHeight : gameHeight;
+    socket.emit('windowResized', { w: screenWidth, h: screenHeight });
   }
 
   window.addEventListener('resize', resize);
@@ -290,7 +291,7 @@ function setupSocket() {
   });
 
   // Handle movement.
-  socket.on('serverTellPlayerMove', (userData, foodsList, massList, virusList) => {
+  socket.on('serverTellPlayerMove', (userData, foodsList, massList, virusList, botsList) => {
     let playerData = {};
     for (let i = 0; i < userData.length; i++) {
       if (typeof(userData[i].id) === 'undefined') {
@@ -313,6 +314,7 @@ function setupSocket() {
     users = userData;
     foods = foodsList;
     viruses = virusList;
+    bots = botsList;
     fireFood = massList;
   });
 
@@ -375,6 +377,13 @@ function drawVirus(virus) {
   graph.fillStyle = virus.fill;
   graph.lineWidth = virus.strokeWidth;
   drawCircle(virus.x - player.x + screenWidth / 2, virus.y - player.y + screenHeight / 2, virus.radius, virusSides);
+}
+
+function drawBots(bot) {
+  graph.strokeStyle = bot.stroke;
+  graph.fillStyle = bot.fill;
+  graph.lineWidth = bot.strokeWidth;
+  drawCircle(bot.x - player.x + screenWidth / 2, bot.y - player.y + screenHeight / 2, bot.radius, virusSides);
 }
 
 function drawFireFood(mass) {
@@ -560,6 +569,7 @@ function gameLoop() {
       foods.forEach(drawFood);
       fireFood.forEach(drawFireFood);
       viruses.forEach(drawVirus);
+      bots.forEach(drawBots);
 
       if (borderDraw) {
         drawborder();
