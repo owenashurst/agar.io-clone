@@ -5,7 +5,7 @@ import '../img/split.png';
 import '../audio/spawn.mp3';
 import '../audio/split.mp3';
 
-const io = require('socket.io-client');
+import io from 'socket.io-client';
 
 let playerName;
 let playerType;
@@ -346,6 +346,38 @@ function setupSocket() {
   });
 }
 
+function drawName(name, cell) {
+  const start = {
+    x: player.x - (screenWidth / 2),
+    y: player.y - (screenHeight / 2)
+  };
+  const circle = {
+    x: cell.x - start.x,
+    y: cell.y - start.y
+  };
+  let fontSize = Math.max(cell.radius / 3, 12);
+  graph.lineWidth = playerConfig.textBorderSize;
+  graph.fillStyle = playerConfig.textColor;
+  graph.strokeStyle = playerConfig.textBorder;
+  graph.miterLimit = 1;
+  graph.lineJoin = 'round';
+  graph.textAlign = 'center';
+  graph.textBaseline = 'middle';
+  graph.font = `bold ${fontSize}px sans-serif`;
+
+  if (toggleMassState === 0) {
+    graph.strokeText(name, circle.x, circle.y);
+    graph.fillText(name, circle.x, circle.y);
+  } else {
+    graph.strokeText(name, circle.x, circle.y);
+    graph.fillText(name, circle.x, circle.y);
+    graph.font = `bold ${Math.max(fontSize / 3 * 2, 10)}px sans-serif`;
+    if (name.length === 0) fontSize = 0;
+    graph.strokeText(Math.round(cell.mass), circle.x, circle.y + fontSize);
+    graph.fillText(Math.round(cell.mass), circle.x, circle.y + fontSize);
+  }
+}
+
 function drawCircle(centerX, centerY, radius, sides) {
   let theta = 0;
   let x = 0;
@@ -359,10 +391,9 @@ function drawCircle(centerX, centerY, radius, sides) {
     y = centerY + radius * Math.cos(theta);
     graph.lineTo(x, y);
   }
-
   graph.closePath();
-  graph.stroke();
   graph.fill();
+  graph.stroke();
 }
 
 function drawFood(food) {
@@ -380,16 +411,17 @@ function drawVirus(virus) {
 }
 
 function drawBots(bot) {
-  graph.strokeStyle = bot.stroke;
-  graph.fillStyle = bot.fill;
-  graph.lineWidth = bot.strokeWidth;
+  graph.strokeStyle = `hsl(${bot.hue}, 100%, 45%)`;
+  graph.fillStyle = `hsl(${bot.hue}, 100%, 50%)`;
+  graph.lineWidth = playerConfig.border;
   drawCircle(bot.x - player.x + screenWidth / 2, bot.y - player.y + screenHeight / 2, bot.radius, virusSides);
+  drawName('BOT', bot);
 }
 
 function drawFireFood(mass) {
   graph.strokeStyle = `hsl(${mass.hue}, 100%, 45%)`;
   graph.fillStyle = `hsl(${mass.hue}, 100%, 50%)`;
-  graph.lineWidth = playerConfig.border + 10;
+  graph.lineWidth = playerConfig.border;
   drawCircle(mass.x - player.x + screenWidth / 2, mass.y - player.y + screenHeight / 2, mass.radius - 5, 18 + (~~(mass.masa / 5)));
 }
 

@@ -95,8 +95,7 @@ function addVirus(add) {
 function addBot(add) {
   let toAdd = add;
   while (toAdd--) {
-    const mass = Util.randomInRange(10, 20, true);
-    const radius = Util.massToRadius(mass);
+    const radius = Util.massToRadius(Config.defaultPlayerMass);
     const position = Util.randomPosition(radius);
     const bot = {
       id: ((new Date()).getTime() + '' + bots.length) >>> 0,
@@ -107,17 +106,21 @@ function addBot(add) {
       w: Config.gameWidth,
       h: Config.gameHeight,
       cells: [{
-        mass: 20,
+        mass: Config.defaultPlayerMass,
         x: position.x,
         y: position.y,
-        radius: 21,
+        radius: radius,
         speed: 6.25
       }],
+      target: {
+        directionX: 'left' || 'right',
+        directionY: 'up' || 'down',
+        x: 0,
+        y: 0
+      },
+      hue: Math.round(Math.random() * 360),
       radius: radius,
-      mass: mass,
-      fill: `#ff0099`,
-      stroke: Config.virus.stroke,
-      strokeWidth: 10
+      mass: Config.defaultPlayerMass
     };
     bots.push(bot);
   }
@@ -261,15 +264,17 @@ function balanceMass() {
     // console.log('[DEBUG] Mass rebalanced!');
   }
 
-  const virusToAdd = Config.maxVirus - virus.length;
+  const virusToAdd = Config.virus.maxVirus - virus.length;
 
   if (virusToAdd > 0) {
     addVirus(virusToAdd);
   }
 
-  const botToAdd = Config.maxBot - bots.length;
-  if (botToAdd > 0) {
-    addBot(botToAdd);
+  if (Config.bots.active) {
+    const botToAdd = Config.bots.maxBot - bots.length;
+    if (botToAdd > 0) {
+      addBot(botToAdd);
+    }
   }
 }
 
@@ -509,8 +514,42 @@ io.on('connection', (socket) => {
   });
 });
 
+function moveBot() {
+  for (let i = 0; i < bots.length; i++) {
+    if (bots[i].x < 100 && bots[i].target.directionX === 'left') {
+      bots[i].target.x = Config.bots.speed;
+      bots[i].target.directionX = 'right';
+    } else if (bots[i].x > (Config.gameWidth - 100) && bots[i].target.directionX === 'right') {
+      bots[i].target.x = -Config.bots.speed;
+      bots[i].target.directionX = 'left';
+    } else {
+      if (bots[i].target.directionX === 'left') {
+        bots[i].target.x = -Config.bots.speed;
+      } else {
+        bots[i].target.x = Config.bots.speed;
+      }
+    }
+
+    if (bots[i].y < 100 && bots[i].target.directionY === 'up') {
+      bots[i].target.y = Config.bots.speed;
+      bots[i].target.directionY = 'down';
+    } else if (bots[i].y > (Config.gameHeight - 100) && bots[i].target.directionY === 'down') {
+      bots[i].target.y = -Config.bots.speed;
+      bots[i].target.directionY = 'up';
+    } else {
+      if (bots[i].target.directionY === 'up') {
+        bots[i].target.y = -Config.bots.speed;
+      } else {
+        bots[i].target.y = Config.bots.speed;
+      }
+    }
+
+    movePlayer(bots[i]);
+  }
+}
+
 function tickPlayer(currentPlayer) {
-  // TODO: THIS SHOULD NOT HAVE TO BE DECLARED HERE FIX CALL ORDER
+  // TODO: THIS SHOULD NOT HAVE TO BE DECLARED HERE FIX SCOPE
   let z = 0;
 
   if (currentPlayer.lastHeartbeat < new Date().getTime() - Config.maxHeartbeatInterval) {
@@ -518,6 +557,7 @@ function tickPlayer(currentPlayer) {
     sockets[currentPlayer.id].disconnect();
   }
 
+  moveBot();
   movePlayer(currentPlayer);
 
   function deleteFood(f) {
@@ -559,7 +599,7 @@ function tickPlayer(currentPlayer) {
 
   function check(user) {
     for (let i = 0; i < user.cells.length; i++) {
-      if (user.cells[i].mass > 10 && user.id !== currentPlayer.id) {
+      if (/* user.cells[i].mass > 10 && */ user.id !== currentPlayer.id) {
         const response = new SAT.Response();
         const collided = SAT.testCircleCircle(playerCircle,
             new C(new V(user.cells[i].x, user.cells[i].y), user.cells[i].radius),
