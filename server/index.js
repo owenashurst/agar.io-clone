@@ -463,6 +463,7 @@ io.on('connection', (socket) => {
 
         currentPlayer.cells[i].mass -= masa;
         currentPlayer.massTotal -= masa;
+        currentPlayer.score -= masa;
         massFood.push({
           id: currentPlayer.id,
           num: i,
@@ -676,8 +677,12 @@ function tickPlayer(currentPlayer) {
     }
 
     masaGanada += (foodEaten.length * Config.foodMass);
-    currentCell.mass += masaGanada;
-    currentPlayer.massTotal += masaGanada;
+    if (masaGanada > 0) {
+      currentPlayer.score += masaGanada;
+      currentCell.mass += masaGanada;
+      currentPlayer.massTotal += masaGanada;
+    }
+    sockets[currentPlayer.id].emit('playerScore', currentPlayer.score);
     currentCell.radius = Util.massToRadius(currentCell.mass);
     playerCircle.r = currentCell.radius;
     qt.clear();

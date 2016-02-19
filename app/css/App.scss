@@ -48,6 +48,16 @@ div {
     height: 100px;
     padding: 5px;
 }
+#score {
+  background: rgba(0, 0, 0, 0.4);
+  padding: 10px;
+  font-size: 16.1px;
+  color: #FFF;
+  font-weight: bold;
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+}
 
 #status {
     position: absolute;

@@ -230,6 +230,7 @@ function setupSocket() {
     player.w = screenWidth;
     player.h = screenHeight;
     player.target = target;
+    player.score = 0;
     socket.emit('gotit', player);
     gameStart = true;
     document.body.id = 'gameStarted';
@@ -345,6 +346,10 @@ function setupSocket() {
   socket.on('virusSplit', (virusCell) => {
     socket.emit('2', virusCell);
     reenviar = false;
+  });
+
+  socket.on('playerScore', (data) => {
+    document.getElementById('score').innerHTML = `Score: ${data}`;
   });
 }
 

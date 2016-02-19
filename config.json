@@ -16,7 +16,7 @@
     "splitMass": 180
   },
   "bots": {
-    "active": true,
+    "active": false,
     "maxBot": 3,
     "speed": 50
   },
