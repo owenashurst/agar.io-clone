@@ -7,6 +7,17 @@ html, body {
     background-color: #222;
 }
 
+body {
+  &#gameStarted {
+    background: url(http://33.media.tumblr.com/bf8dfe2e6ff97f506306344fe021504e/tumblr_inline_nk1ln0Oif01s9yrmw.png) center center repeat;
+    background-size: 500px 500px;
+  }
+  &.dark {
+    filter: invert(100%);
+   -webkit-filter: invert(100%);
+  }
+}
+
 html, body, canvas {
     width: 100%;
     height: 100%;
