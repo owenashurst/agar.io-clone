@@ -2,6 +2,7 @@
 import '../css/App.scss';
 import '../img/feed.png';
 import '../img/split.png';
+import virusImage from '../img/virus.png';
 import '../audio/spawn.mp3';
 import '../audio/split.mp3';
 
@@ -405,10 +406,9 @@ function drawFood(food) {
 }
 
 function drawVirus(virus) {
-  graph.strokeStyle = virus.stroke;
-  graph.fillStyle = virus.fill;
-  graph.lineWidth = virus.strokeWidth;
-  drawCircle(virus.x - player.x + screenWidth / 2, virus.y - player.y + screenHeight / 2, virus.radius, virusSides);
+  const img = new Image();
+  img.src = virusImage;
+  graph.drawImage(img, virus.x - player.x - virus.radius + screenWidth / 2, virus.y - player.y - virus.radius + screenHeight / 2, virus.radius * 2, virus.radius * 2);
 }
 
 function drawBots(bot) {
