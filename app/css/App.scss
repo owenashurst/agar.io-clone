@@ -7,6 +7,16 @@ html, body {
     background-color: #222;
 }
 
+body {
+  &#gameStarted {
+    background: url(../img/grid.png) center center repeat;
+  }
+  &.dark {
+    filter: invert(100%);
+   -webkit-filter: invert(100%);
+  }
+}
+
 html, body, canvas {
     width: 100%;
     height: 100%;
@@ -37,6 +47,16 @@ div {
     width: 100px;
     height: 100px;
     padding: 5px;
+}
+#score {
+  background: rgba(0, 0, 0, 0.4);
+  padding: 10px;
+  font-size: 16.1px;
+  color: #FFF;
+  font-weight: bold;
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
 }
 
 #status {

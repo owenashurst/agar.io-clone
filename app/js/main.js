@@ -2,6 +2,7 @@
 import '../css/App.scss';
 import '../img/feed.png';
 import '../img/split.png';
+import virusImage from '../img/virus.png';
 import '../audio/spawn.mp3';
 import '../audio/split.mp3';
 
@@ -12,6 +13,7 @@ let playerType;
 const playerNameInput = document.getElementById('playerNameInput');
 let socket;
 let reason;
+let LIGHT_THEME = 'light';
 const KEY_ESC = 27;
 const KEY_ENTER = 13;
 const KEY_CHAT = 13;
@@ -45,7 +47,6 @@ let kicked = false;
 let continuity = false;
 let startPingTime = 0;
 let toggleMassState = 0;
-let backgroundColor = '#f2fbff';
 let lineColor = '#000000';
 
 const foodConfig = {
@@ -229,8 +230,10 @@ function setupSocket() {
     player.w = screenWidth;
     player.h = screenHeight;
     player.target = target;
+    player.score = 0;
     socket.emit('gotit', player);
     gameStart = true;
+    document.body.id = 'gameStarted';
     debug(`Game started at: ${gameStart}`);
     chat.addSystemLine('Connected to the game!');
     chat.addSystemLine('Type <b>-help</b> for a list of commands.');
@@ -344,6 +347,10 @@ function setupSocket() {
     socket.emit('2', virusCell);
     reenviar = false;
   });
+
+  socket.on('playerScore', (data) => {
+    document.getElementById('score').innerHTML = `Score: ${data}`;
+  });
 }
 
 function drawName(name, cell) {
@@ -404,10 +411,9 @@ function drawFood(food) {
 }
 
 function drawVirus(virus) {
-  graph.strokeStyle = virus.stroke;
-  graph.fillStyle = virus.fill;
-  graph.lineWidth = virus.strokeWidth;
-  drawCircle(virus.x - player.x + screenWidth / 2, virus.y - player.y + screenHeight / 2, virus.radius, virusSides);
+  const img = new Image();
+  img.src = virusImage;
+  graph.drawImage(img, virus.x - player.x - virus.radius + screenWidth / 2, virus.y - player.y - virus.radius + screenHeight / 2, virus.radius * 2, virus.radius * 2);
 }
 
 function drawBots(bot) {
@@ -523,26 +529,6 @@ function drawPlayers(order) {
   }
 }
 
-function drawgrid() {
-  graph.lineWidth = 1;
-  graph.strokeStyle = lineColor;
-  graph.globalAlpha = 0.15;
-  graph.beginPath();
-
-  for (let x = xoffset - player.x; x < screenWidth; x += screenHeight / 18) {
-    graph.moveTo(x, 0);
-    graph.lineTo(x, screenHeight);
-  }
-
-  for (let y = yoffset - player.y; y < screenHeight; y += screenHeight / 18) {
-    graph.moveTo(0, y);
-    graph.lineTo(screenWidth, y);
-  }
-
-  graph.stroke();
-  graph.globalAlpha = 1;
-}
-
 function drawborder() {
   graph.lineWidth = 1;
   graph.strokeStyle = playerConfig.borderColor;
@@ -594,10 +580,8 @@ function gameLoop() {
     graph.fillText('You died!', screenWidth / 2, screenHeight / 2);
   } else if (!disconnected) {
     if (gameStart) {
-      graph.fillStyle = backgroundColor;
-      graph.fillRect(0, 0, screenWidth, screenHeight);
-
-      drawgrid();
+      graph.clearRect(0, 0, screenWidth, screenHeight);
+      document.body.style.backgroundPosition = `${xoffset - player.x}px ${yoffset - player.y}px`;
       foods.forEach(drawFood);
       fireFood.forEach(drawFireFood);
       viruses.forEach(drawVirus);
@@ -843,18 +827,18 @@ function checkLatency() {
 }
 
 function toggleDarkMode() {
-  const LIGHT = '#f2fbff';
-  const DARK = '#181818';
   const LINELIGHT = '#000000';
-  const LINEDARK = '#ffffff';
+  const LINEDARK = '#ff0099';
 
-  if (backgroundColor === LIGHT) {
-    backgroundColor = DARK;
+  if (LIGHT_THEME === 'light') {
+    document.body.className = 'dark';
     lineColor = LINEDARK;
+    LIGHT_THEME = 'dark';
     chat.addSystemLine('Dark mode enabled.');
   } else {
-    backgroundColor = LIGHT;
+    document.body.className = '';
     lineColor = LINELIGHT;
+    LIGHT_THEME = 'light';
     chat.addSystemLine('Dark mode disabled.');
   }
 }
