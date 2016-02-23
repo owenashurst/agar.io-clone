@@ -4,6 +4,7 @@ import webpack from 'webpack';
 import webpackMiddleware from 'webpack-dev-middleware';
 import webpackHotMiddleware from 'webpack-hot-middleware';
 import config from '../webpack.config.js';
+import Player from './player';
 
 const isDeveloping = process.env.NODE_ENV !== 'production';
 const app = express();
@@ -54,8 +55,6 @@ let leaderboardChanged = false;
 const V = SAT.Vector;
 const C = SAT.Circle;
 
-const initMassLog = Util.log(Config.defaultPlayerMass, Config.slowBase);
-
 function addFood(add) {
   const radius = Util.massToRadius(Config.foodMass);
   let toAdd = add;
@@ -97,31 +96,10 @@ function addBot(add) {
   while (toAdd--) {
     const radius = Util.massToRadius(Config.defaultPlayerMass);
     const position = Util.randomPosition(radius);
-    const bot = {
-      id: ((new Date()).getTime() + '' + bots.length) >>> 0,
-      type: 'bot',
-      name: `Bot ${toAdd}`,
-      x: position.x,
-      y: position.y,
-      w: Config.gameWidth,
-      h: Config.gameHeight,
-      cells: [{
-        mass: Config.defaultPlayerMass,
-        x: position.x,
-        y: position.y,
-        radius: radius,
-        speed: 6.25
-      }],
-      target: {
-        directionX: 'left' || 'right',
-        directionY: 'up' || 'down',
-        x: 0,
-        y: 0
-      },
-      hue: Math.round(Math.random() * 360),
-      radius: radius,
-      mass: Config.defaultPlayerMass
-    };
+    const bot = new Player(((new Date()).getTime() + '' + bots.length) >>> 0, `Bot ${toAdd}`, position, 'bot', 6.25);
+    bot.radius = radius;
+    bot.target.directionX = 'left' || 'right';
+    bot.target.directionY = 'up' || 'down';
     bots.push(bot);
   }
 }
@@ -131,84 +109,6 @@ function removeFood(rem) {
   while (toRem--) {
     food.pop();
   }
-}
-
-function movePlayer(player) {
-  let x = 0;
-  let y = 0;
-  for (let i = 0; i < player.cells.length; i++) {
-    const target = {
-      x: player.x - player.cells[i].x + player.target.x,
-      y: player.y - player.cells[i].y + player.target.y
-    };
-    const dist = Math.sqrt(Math.pow(target.y, 2) + Math.pow(target.x, 2));
-    const deg = Math.atan2(target.y, target.x);
-    let slowDown = 1;
-    if (player.cells[i].speed <= 6.25) {
-      slowDown = Util.log(player.cells[i].mass, Config.slowBase) - initMassLog + 1;
-    }
-
-    let deltaY = player.cells[i].speed * Math.sin(deg) / slowDown;
-    let deltaX = player.cells[i].speed * Math.cos(deg) / slowDown;
-
-    if (player.cells[i].speed > 6.25) {
-      player.cells[i].speed -= 0.5;
-    }
-    if (dist < (50 + player.cells[i].radius)) {
-      deltaY *= dist / (50 + player.cells[i].radius);
-      deltaX *= dist / (50 + player.cells[i].radius);
-    }
-    if (!isNaN(deltaY)) {
-      player.cells[i].y += deltaY;
-    }
-    if (!isNaN(deltaX)) {
-      player.cells[i].x += deltaX;
-    }
-    // Find best solution.
-    for (let j = 0; j < player.cells.length; j++) {
-      if (j !== i && player.cells[i] !== undefined) {
-        const distance = Math.sqrt(Math.pow(player.cells[j].y - player.cells[i].y, 2) + Math.pow(player.cells[j].x - player.cells[i].x, 2));
-        const radiusTotal = (player.cells[i].radius + player.cells[j].radius);
-        if (distance < radiusTotal) {
-          if (player.lastSplit > new Date().getTime() - 1000 * Config.mergeTimer) {
-            if (player.cells[i].x < player.cells[j].x) {
-              player.cells[i].x--;
-            } else if (player.cells[i].x > player.cells[j].x) {
-              player.cells[i].x++;
-            }
-            if (player.cells[i].y < player.cells[j].y) {
-              player.cells[i].y--;
-            } else if ((player.cells[i].y > player.cells[j].y)) {
-              player.cells[i].y++;
-            }
-          } else if (distance < radiusTotal / 1.75) {
-            player.cells[i].mass += player.cells[j].mass;
-            player.cells[i].radius = Util.massToRadius(player.cells[i].mass);
-            player.cells.splice(j, 1);
-          }
-        }
-      }
-    }
-    if (player.cells.length > i) {
-      const borderCalc = player.cells[i].radius / 3;
-      if (player.cells[i].x > Config.gameWidth - borderCalc) {
-        player.cells[i].x = Config.gameWidth - borderCalc;
-      }
-      if (player.cells[i].y > Config.gameHeight - borderCalc) {
-        player.cells[i].y = Config.gameHeight - borderCalc;
-      }
-      if (player.cells[i].x < borderCalc) {
-        player.cells[i].x = borderCalc;
-      }
-      if (player.cells[i].y < borderCalc) {
-        player.cells[i].y = borderCalc;
-      }
-      x += player.cells[i].x;
-      y += player.cells[i].y;
-    }
-  }
-  player.x = x / player.cells.length;
-  player.y = y / player.cells.length;
 }
 
 function moveMass(mass) {
@@ -284,33 +184,7 @@ io.on('connection', (socket) => {
   const type = socket.handshake.query.type;
   let radius = Util.massToRadius(Config.defaultPlayerMass);
   let position = Config.newPlayerInitialPosition === 'farthest' ? Util.uniformPosition(users, radius) : Util.randomPosition(radius);
-  let cells = [];
-  let massTotal = 0;
-
-  if (type === 'player') {
-    cells = [{
-      mass: Config.defaultPlayerMass,
-      x: position.x,
-      y: position.y,
-      radius: radius
-    }];
-    massTotal = Config.defaultPlayerMass;
-  }
-
-  let currentPlayer = {
-    id: socket.id,
-    x: position.x,
-    y: position.y,
-    cells: cells,
-    massTotal: massTotal,
-    hue: Math.round(Math.random() * 360),
-    type: type,
-    lastHeartbeat: new Date().getTime(),
-    target: {
-      x: 0,
-      y: 0
-    }
-  };
+  let currentPlayer = new Player(socket.id, '', position, type);
 
   socket.on('gotit', (player) => {
     console.log(`[INFO] Player ${player.name} connecting!`);
@@ -327,27 +201,7 @@ io.on('connection', (socket) => {
 
       radius = Util.massToRadius(Config.defaultPlayerMass);
       position = Config.newPlayerInitialPosition === 'farthest' ? Util.uniformPosition(users, radius) : Util.randomPosition(radius);
-
-      player.x = position.x;
-      player.y = position.y;
-      player.target.x = 0;
-      player.target.y = 0;
-
-      if (type === 'player') {
-        player.cells = [{
-          mass: Config.defaultPlayerMass,
-          x: position.x,
-          y: position.y,
-          radius: radius
-        }];
-        player.massTotal = Config.defaultPlayerMass;
-      } else {
-        player.cells = [];
-        player.massTotal = 0;
-      }
-      player.hue = Math.round(Math.random() * 360);
-      currentPlayer = player;
-      currentPlayer.lastHeartbeat = new Date().getTime();
+      currentPlayer = new Player(player.id, player.name, position, type);
       users.push(currentPlayer);
 
       io.emit('playerJoin', { name: currentPlayer.name });
@@ -364,8 +218,7 @@ io.on('connection', (socket) => {
   });
 
   socket.on('windowResized', (data) => {
-    currentPlayer.w = data.w;
-    currentPlayer.h = data.h;
+    currentPlayer.resize(data);
   });
 
   socket.on('respawn', () => {
@@ -408,19 +261,12 @@ io.on('connection', (socket) => {
 
   socket.on('kick', (data) => {
     if (currentPlayer.admin) {
+      const [name, ...reasons] = data;
       let reason = '';
       let worked = false;
       for (let e = 0; e < users.length; e++) {
-        if (users[e].name === data[0] && !users[e].admin && !worked) {
-          if (data.length > 1) {
-            for (let f = 1; f < data.length; f++) {
-              if (f === data.length) {
-                reason = reason + data[f];
-              } else {
-                reason = reason + data[f] + ' ';
-              }
-            }
-          }
+        if (users[e].name === name && !users[e].admin && !worked) {
+          reason = reasons.reduce((rs, r) => rs + ' ' + r, '');
           if (reason !== '') {
             console.log(`[ADMIN] User ${users[e].name} kicked successfully by ${currentPlayer.name} for reason ${reason}`);
           } else {
@@ -444,71 +290,21 @@ io.on('connection', (socket) => {
 
   // Heartbeat function, update everytime.
   socket.on('0', (target) => {
-    currentPlayer.lastHeartbeat = new Date().getTime();
-    if (target.x !== currentPlayer.x || target.y !== currentPlayer.y) {
-      currentPlayer.target = target;
-    }
+    currentPlayer.heartbeat(target);
   });
 
   socket.on('1', () => {
-    // Fire food.
-    for (let i = 0; i < currentPlayer.cells.length; i++) {
-      if (((currentPlayer.cells[i].mass >= Config.defaultPlayerMass + Config.fireFood) && Config.fireFood > 0) || (currentPlayer.cells[i].mass >= 20 && Config.fireFood === 0)) {
-        let masa = 1;
-        if (Config.fireFood > 0)  {
-          masa = Config.fireFood;
-        } else {
-          masa = currentPlayer.cells[i].mass * 0.1;
-        }
-
-        currentPlayer.cells[i].mass -= masa;
-        currentPlayer.massTotal -= masa;
-        currentPlayer.score -= masa;
-        massFood.push({
-          id: currentPlayer.id,
-          num: i,
-          masa: masa,
-          hue: currentPlayer.hue,
-          target: {
-            x: currentPlayer.x - currentPlayer.cells[i].x + currentPlayer.target.x,
-            y: currentPlayer.y - currentPlayer.cells[i].y + currentPlayer.target.y
-          },
-          x: currentPlayer.cells[i].x,
-          y: currentPlayer.cells[i].y,
-          radius: Util.massToRadius(masa),
-          speed: 25
-        });
-      }
-    }
+    currentPlayer.fireFood(massFood);
   });
 
   socket.on('2', (virusCell) => {
-    function splitCell(cell) {
-      if (cell.mass >= Config.defaultPlayerMass * 2) {
-        cell.mass = cell.mass / 2;
-        cell.radius = Util.massToRadius(cell.mass);
-        currentPlayer.cells.push({
-          mass: cell.mass,
-          x: cell.x,
-          y: cell.y,
-          radius: cell.radius,
-          speed: 25
-        });
-      }
-    }
-
-    if (currentPlayer.cells.length < Config.limitSplit && currentPlayer.massTotal >= Config.defaultPlayerMass * 2) {
+    if (currentPlayer.canSplit()) {
       // Split single cell from virus
       if (virusCell) {
-        splitCell(currentPlayer.cells[virusCell]);
+        currentPlayer.splitCell(currentPlayer.cells[virusCell]);
       } else {
         // Split all cells
-        if (currentPlayer.cells.length < Config.limitSplit && currentPlayer.massTotal >= Config.defaultPlayerMass * 2) {
-          const numMax = currentPlayer.cells.length;
-          for (let d = 0; d < numMax; d++) {
-            splitCell(currentPlayer.cells[d]);
-          }
-        }
+        currentPlayer.splitAllCells();
       }
       currentPlayer.lastSplit = new Date().getTime();
     }
@@ -516,37 +312,36 @@ io.on('connection', (socket) => {
 });
 
 function moveBot() {
-  for (let i = 0; i < bots.length; i++) {
-    if (bots[i].x < 100 && bots[i].target.directionX === 'left') {
-      bots[i].target.x = Config.bots.speed;
-      bots[i].target.directionX = 'right';
-    } else if (bots[i].x > (Config.gameWidth - 100) && bots[i].target.directionX === 'right') {
-      bots[i].target.x = -Config.bots.speed;
-      bots[i].target.directionX = 'left';
+  bots.forEach(bot => {
+    if (bot.x < 100 && bot.target.directionX === 'left') {
+      bot.target.x = Config.bots.speed;
+      bot.target.directionX = 'right';
+    } else if (bot.x > (Config.gameWidth - 100) && bot.target.directionX === 'right') {
+      bot.target.x = -Config.bots.speed;
+      bot.target.directionX = 'left';
     } else {
-      if (bots[i].target.directionX === 'left') {
-        bots[i].target.x = -Config.bots.speed;
+      if (bot.target.directionX === 'left') {
+        bot.target.x = -Config.bots.speed;
       } else {
-        bots[i].target.x = Config.bots.speed;
+        bot.target.x = Config.bots.speed;
       }
     }
 
-    if (bots[i].y < 100 && bots[i].target.directionY === 'up') {
-      bots[i].target.y = Config.bots.speed;
-      bots[i].target.directionY = 'down';
-    } else if (bots[i].y > (Config.gameHeight - 100) && bots[i].target.directionY === 'down') {
-      bots[i].target.y = -Config.bots.speed;
-      bots[i].target.directionY = 'up';
+    if (bot.y < 100 && bot.target.directionY === 'up') {
+      bot.target.y = Config.bots.speed;
+      bot.target.directionY = 'down';
+    } else if (bot.y > (Config.gameHeight - 100) && bot.target.directionY === 'down') {
+      bot.target.y = -Config.bots.speed;
+      bot.target.directionY = 'up';
     } else {
-      if (bots[i].target.directionY === 'up') {
-        bots[i].target.y = -Config.bots.speed;
+      if (bot.target.directionY === 'up') {
+        bot.target.y = -Config.bots.speed;
       } else {
-        bots[i].target.y = Config.bots.speed;
+        bot.target.y = Config.bots.speed;
       }
     }
-
-    movePlayer(bots[i]);
-  }
+    bot.move();
+  });
 }
 
 function tickPlayer(currentPlayer) {
@@ -559,7 +354,7 @@ function tickPlayer(currentPlayer) {
   }
 
   moveBot();
-  movePlayer(currentPlayer);
+  currentPlayer.move();
 
   function deleteFood(f) {
     food[f] = {};
@@ -599,27 +394,27 @@ function tickPlayer(currentPlayer) {
   const playerCollisions = [];
 
   function check(user) {
-    for (let i = 0; i < user.cells.length; i++) {
+    user.cells.forEach((c, i) => {
       if (/* user.cells[i].mass > 10 && */ user.id !== currentPlayer.id) {
         const response = new SAT.Response();
         const collided = SAT.testCircleCircle(playerCircle,
-            new C(new V(user.cells[i].x, user.cells[i].y), user.cells[i].radius),
-            response);
+          new C(new V(c.x, c.y), c.radius),
+          response);
         if (collided) {
           response.aUser = currentCell;
           response.bUser = {
             id: user.id,
             name: user.name,
-            x: user.cells[i].x,
-            y: user.cells[i].y,
+            x: c.x,
+            y: c.y,
             num: i,
             type: user.type,
-            mass: user.cells[i].mass
+            mass: c.mass
           };
           playerCollisions.push(response);
         }
       }
-    }
+    });
   }
 
   function eatMass(m) {
@@ -699,14 +494,9 @@ function tickPlayer(currentPlayer) {
 }
 
 function moveloop() {
-  for (let i = 0; i < users.length; i++) {
-    tickPlayer(users[i]);
-  }
-  for (let i = 0; i < massFood.length; i++) {
-    if (massFood[i].speed > 0) {
-      moveMass(massFood[i]);
-    }
-  }
+  users.forEach(u => tickPlayer(u));
+  massFood.filter(m => m.speed > 0)
+    .forEach(m => moveMass(m));
 }
 
 function gameloop() {
@@ -735,15 +525,15 @@ function gameloop() {
         }
       }
     }
-    for (let i = 0; i < users.length; i++) {
-      for (let z = 0; z < users[i].cells.length; z++) {
-        if (users[i].cells[z].mass * (1 - (Config.massLossRate / 1000)) > Config.defaultPlayerMass) {
-          const massLoss = users[i].cells[z].mass * (1 - (Config.massLossRate / 1000));
-          users[i].massTotal -= users[i].cells[z].mass - massLoss;
-          users[i].cells[z].mass = massLoss;
+    users.forEach(u => {
+      u.cells.forEach(c => {
+        if (c.mass * (1 - (Config.massLossRate / 1000)) > Config.defaultPlayerMass) {
+          const massLoss = c.mass * (1 - (Config.massLossRate / 1000));
+          u.massTotal -= c.mass - massLoss;
+          c.mass = massLoss;
         }
-      }
-    }
+      });
+    });
   }
   balanceMass();
 }
@@ -756,80 +546,53 @@ function sendUpdates() {
       u.y = u.y || Config.gameHeight / 2;
 
       const visibleFood  = food
-        .map((f) => {
-          if ( f.x > u.x - u.w / 2 - 20 &&
+          .filter(f => f.x > u.x - u.w / 2 - 20 &&
           f.x < u.x + u.w / 2 + 20 &&
           f.y > u.y - u.h / 2 - 20 &&
-          f.y < u.y + u.h / 2 + 20) {
-            return f;
-          }
-        })
-        .filter((f) => { return f; });
+          f.y < u.y + u.h / 2 + 20 );
 
       const visibleVirus  = virus
-          .map((f) => {
-            if ( f.x > u.x - u.w / 2 - f.radius &&
-            f.x < u.x + u.w / 2 + f.radius &&
-            f.y > u.y - u.h / 2 - f.radius &&
-            f.y < u.y + u.h / 2 + f.radius) {
-              return f;
-            }
-          })
-          .filter((f) => { return f; });
+          .filter(f => f.x > u.x - u.w / 2 - f.radius &&
+          f.x < u.x + u.w / 2 + f.radius &&
+          f.y > u.y - u.h / 2 - f.radius &&
+          f.y < u.y + u.h / 2 + f.radius );
 
       const visibleBots  = bots
-          .map((f) => {
-            if ( f.x > u.x - u.w / 2 - f.radius &&
-            f.x < u.x + u.w / 2 + f.radius &&
-            f.y > u.y - u.h / 2 - f.radius &&
-            f.y < u.y + u.h / 2 + f.radius) {
-              return f;
-            }
-          })
-          .filter((f) => { return f; });
+          .filter(f => f.x > u.x - u.w / 2 - f.radius &&
+          f.x < u.x + u.w / 2 + f.radius &&
+          f.y > u.y - u.h / 2 - f.radius &&
+          f.y < u.y + u.h / 2 + f.radius );
 
       const visibleMass = massFood
-          .map((f) => {
-            if ( f.x + f.radius > u.x - u.w / 2 - 20 &&
-            f.x - f.radius < u.x + u.w / 2 + 20 &&
-            f.y + f.radius > u.y - u.h / 2 - 20 &&
-            f.y - f.radius < u.y + u.h / 2 + 20) {
-              return f;
-            }
-          })
-          .filter((f) => { return f; });
+          .filter(f => f.x + f.radius > u.x - u.w / 2 - 20 &&
+          f.x - f.radius < u.x + u.w / 2 + 20 &&
+          f.y + f.radius > u.y - u.h / 2 - 20 &&
+          f.y - f.radius < u.y + u.h / 2 + 20 );
 
-      const visibleCells  = users
-          .map((f) => {
-            for (let z = 0; z < f.cells.length; z++) {
-              if ( f.cells[z].x + f.cells[z].radius > u.x - u.w / 2 - 20 &&
-              f.cells[z].x - f.cells[z].radius < u.x + u.w / 2 + 20 &&
-              f.cells[z].y + f.cells[z].radius > u.y - u.h / 2 - 20 &&
-              f.cells[z].y - f.cells[z].radius < u.y + u.h / 2 + 20) {
-                z = f.cells.lenth;
-                if (f.id !== u.id) {
-                  return {
-                    id: f.id,
-                    x: f.x,
-                    y: f.y,
-                    cells: f.cells,
-                    massTotal: Math.round(f.massTotal),
-                    hue: f.hue,
-                    name: f.name
-                  };
-                }
-                // console.log("Nombre: " + f.name + " Es Usuario");
-                return {
-                  x: f.x,
-                  y: f.y,
-                  cells: f.cells,
-                  massTotal: Math.round(f.massTotal),
-                  hue: f.hue
-                };
-              }
-            }
-          })
-          .filter((f) => { return f; });
+      const visibleCells = users
+        .map(f => {
+          return {
+            id: f.id !== u.id ? f.id : undefined,
+            x: Math.round(f.x),
+            y: Math.round(f.y),
+            cells: f.cells.filter(c => {
+              return c.x + c.radius > u.x - u.w / 2 - 20 &&
+                c.x - c.radius < u.x + u.w / 2 + 20 &&
+                c.y + c.radius > u.y - u.h / 2 - 20 &&
+                c.y - c.radius < u.y + u.h / 2 + 20;
+            }).map(c => {
+              return Object.assign(c, {
+                x: Math.round(c.x),
+                y: Math.round(c.y),
+                mass: Math.round(c.mass),
+                radius: Math.round(c.radius)
+              });
+            }),
+            massTotal: Math.round(f.massTotal),
+            hue: f.hue,
+            name: f.name
+          };
+        });
       sockets[u.id].emit('serverTellPlayerMove', visibleCells, visibleFood, visibleMass, visibleVirus, visibleBots);
       if (leaderboardChanged) {
         sockets[u.id].emit('leaderboard', {

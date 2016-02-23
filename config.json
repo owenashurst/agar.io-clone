@@ -16,8 +16,8 @@
     "splitMass": 180
   },
   "bots": {
-    "active": false,
-    "maxBot": 3,
+    "active": true,
+    "maxBot": 5,
     "speed": 50
   },
   "gameWidth": 5000,
