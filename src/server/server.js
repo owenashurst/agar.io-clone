@@ -595,7 +595,7 @@ function gameloop() {
 
         var topUsers = [];
 
-        for (var i = 0; i < Math.min(20, users.length); i++) {
+        for (var i = 0; i < Math.min(10, users.length); i++) {
             if(users[i].type == 'player') {
                 topUsers.push({
                     id: users[i].id,
