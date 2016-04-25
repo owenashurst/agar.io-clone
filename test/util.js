@@ -60,9 +60,9 @@ describe('util.js', function () {
       expect(n1).to.be.false;
     });
 
-    it('should disallow spaces in nicknames', function () {
+    it('should allow spaces in nicknames', function () {
         var n1 = util.validNick('Walter White');
-        expect(n1).to.be.false;
+        expect(n1).to.be.true;
     });
   });
 

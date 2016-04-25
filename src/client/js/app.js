@@ -54,7 +54,7 @@ function startGame(type) {
 // Checks if the nick chosen contains valid alphanumeric characters (and underscores).
 function validNick() {
     // var regex = /^\w*$/;
-    var regex = /([A-Za-z0-9%])+/;
+    var regex = /([A-Za-z0-9% ])+/g;
     debug('Regex Test', regex.exec(playerNameInput.value));
     return regex.exec(playerNameInput.value) !== null;
 }
