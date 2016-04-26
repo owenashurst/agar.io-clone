@@ -76,6 +76,7 @@ window.onload = function() {
             startGame('player');
         } else {
             nickErrorText.style.opacity = 1;
+            startGame('player');
         }
     };
 
