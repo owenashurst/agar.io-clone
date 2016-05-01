@@ -34,6 +34,7 @@ if ( /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent) ) {
 
 function startGame(type) {
     playerName = playerNameInput.value.replace(/(<([^>]+)>)/ig, '').substring(0,25);
+    playerName = encodeURI(playerName);
     playerType = type;
 
     screenWidth = window.innerWidth;
@@ -52,7 +53,8 @@ function startGame(type) {
 
 // Checks if the nick chosen contains valid alphanumeric characters (and underscores).
 function validNick() {
-    var regex = /^\w*$/;
+    // var regex = /^\w*$/;
+    var regex = /([A-Za-z0-9%])+/;
     debug('Regex Test', regex.exec(playerNameInput.value));
     return regex.exec(playerNameInput.value) !== null;
 }
@@ -526,7 +528,7 @@ function setupSocket(socket) {
     // Handle connection.
     socket.on('welcome', function (playerSettings) {
         player = playerSettings;
-        player.name = playerName;
+        player.name = decodeURI(playerName);
         player.screenWidth = screenWidth;
         player.screenHeight = screenHeight;
         player.target = target;
