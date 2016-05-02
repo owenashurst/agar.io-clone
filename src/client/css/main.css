@@ -133,7 +133,8 @@ div {
     font-weight: bold;
 }
 
-#playerNameInput {
+#playerNameInput, 
+#playerPasswordInput {
     width: 100%;
     text-align: center;
     padding: 10px;
@@ -147,7 +148,8 @@ div {
     outline: none;
 }
 
-#playerNameInput:focus, #playerNameInput.focus {
+#playerNameInput:focus, #playerNameInput.focus,
+#playerPasswordInput:focus, #playerPasswordInput.focus {
     border: solid 1px #CCCCCC;
     box-shadow: 0 0 3px 1px #DDDDDD;
 }
