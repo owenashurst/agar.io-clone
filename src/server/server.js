@@ -262,7 +262,7 @@ io.on('connection', function (socket) {
             socket.emit('kick', 'Invalid username.');
             socket.disconnect();
         } else if (util.badNames(player.name)) {
-            socket.emit('kick', 'Being a potty mouth.');
+            socket.emit('kick', 'Dumb name. Try again.');
             socket.disconnect();
         } else if (!util.validPass(player.password)) {
             socket.emit('kick', 'Invalid password.');
