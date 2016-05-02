@@ -3,7 +3,7 @@
 <head>
     <!-- Meta Properties -->
     <meta charset="UTF-8">
-    <title>Agar.IO Clone</title>
+    <title>Agar.IO SCMS edition</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
     <!-- CSS -->
     <link rel="stylesheet" href="css/main.css" />
@@ -27,8 +27,10 @@
     <div id="startMenuWrapper">
         <div id="startMenu">
             <p>Open Agar</p>
-            <input type="text" tabindex="0" autofocus placeholder="Enter your name here" id="playerNameInput" maxlength="25" />
-            <b class="input-error">Nick must be alphanumeric characters only!</b>
+            <input type="text" autofocus placeholder="Enter your name here" id="playerNameInput" maxlength="25" />
+            <strong class="input-error">Nick must be alphanumeric characters only!</strong>
+            <br />
+            <input type="password" placeholder="Enter your password" id="playerPasswordInput" maxlength="25" />
             <br />
             <a onclick="document.getElementById('spawn_cell').play();"><button id="startButton">Play</button></a>
             <button id="spectateButton">Spectate</button>
@@ -46,12 +48,18 @@
                 </ul>
             </div>
             <div id="instructions">
+                <h3>Password</h3>
+                <ul>
+                    <li>Don't know the password? You know who to ask.</li>
+                </ul>
                 <h3>Gameplay</h3>
                 <ul>
                     <li>Move your mouse on the screen to move your character.</li>
                     <li>Eat food and other players in order to grow your character (food respawns every time a player eats it).</li>
                     <li>A player's mass is the number of food particles eaten.</li>
                     <li>Objective: Try to get fat and eat other players.</li>
+                    <li>The website name could get change at any time depending on if it gets blocked or not.</li>
+                    <li>Please don't use profanity in your username.</li>
                 </ul>
             </div>
         </div>

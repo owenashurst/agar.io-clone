@@ -60,10 +60,33 @@ describe('util.js', function () {
       expect(n1).to.be.false;
     });
 
-    it('should disallow spaces in nicknames', function () {
+    it('should allow spaces in nicknames', function () {
         var n1 = util.validNick('Walter White');
-        expect(n1).to.be.false;
+        expect(n1).to.be.true;
     });
+  });
+
+  describe('#badWords', function () {
+
+    it('should disallow bad words', function () {
+      var n1 = util.badNames('fuck'),
+          n2 = util.badNames('shit'),
+          n3 = util.badNames('Fuck'),
+          n4 = util.badNames('FUCK'),
+          n5 = util.badNames('gary');
+          n6 = util.badNames('fucktard');
+          n7 = util.badNames('shithead');
+
+      expect(n1).to.be.true;
+      expect(n2).to.be.true;
+      expect(n3).to.be.true;
+      expect(n4).to.be.true;
+      expect(n5).to.be.false;
+      expect(n6).to.be.true;
+      expect(n7).to.be.true;
+    });
+
+   
   });
 
   describe('#log', function () {

@@ -3,10 +3,31 @@
 'use strict';
 
 var cfg = require('../../../config.json');
+var badwords = require('../../../blacklist.json');
 
 exports.validNick = function(nickname) {
-    var regex = /^\w*$/;
+    //var regex = /^\w*$/;
+    var regex = /([A-Za-z0-9% ])+/g;
     return regex.exec(nickname) !== null;
+};
+
+exports.validPass = function(password) {
+    if (password == cfg.playerPass) {
+        return true;
+    } else {
+        return false;
+    }
+};
+
+exports.badNames = function(nickname) {
+    for (var i = 0; i < badwords.blocked.length; i++) {
+        var toTest = badwords.blocked[i].toUpperCase();
+        var regex = new RegExp(toTest);    
+        if (regex.exec(nickname.toUpperCase())) {
+            return true;
+        }
+    }
+    return false;
 };
 
 // determine mass from radius of circle

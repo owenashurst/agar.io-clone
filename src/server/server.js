@@ -258,8 +258,14 @@ io.on('connection', function (socket) {
         if (util.findIndex(users, player.id) > -1) {
             console.log('[INFO] Player ID is already connected, kicking.');
             socket.disconnect();
-        } else if (!util.validNick(player.name)) {
+        } else if (!util.validNick(encodeURI(player.name))) {
             socket.emit('kick', 'Invalid username.');
+            socket.disconnect();
+        } else if (util.badNames(player.name)) {
+            socket.emit('kick', 'Dumb name. Try again.');
+            socket.disconnect();
+        } else if (!util.validPass(player.password)) {
+            socket.emit('kick', 'Invalid password.');
             socket.disconnect();
         } else {
             console.log('[INFO] Player ' + player.name + ' connected!');
@@ -595,7 +601,7 @@ function gameloop() {
 
         var topUsers = [];
 
-        for (var i = 0; i < Math.min(10, users.length); i++) {
+        for (var i = 0; i < Math.min(20, users.length); i++) {
             if(users[i].type == 'player') {
                 topUsers.push({
                     id: users[i].id,
