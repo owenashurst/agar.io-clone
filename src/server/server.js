@@ -261,6 +261,9 @@ io.on('connection', function (socket) {
         } else if (!util.validNick(encodeURI(player.name))) {
             socket.emit('kick', 'Invalid username.');
             socket.disconnect();
+        } else if (util.badNames(player.name)) {
+            socket.emit('kick', 'Being a potty mouth.');
+            socket.disconnect();
         } else if (!util.validPass(player.password)) {
             socket.emit('kick', 'Invalid password.');
             socket.disconnect();

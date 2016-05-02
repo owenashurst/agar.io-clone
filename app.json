@@ -7,5 +7,5 @@
     "watch": "gulp watch",
     "test": "gulp test"
   },
-  "repository": "https://github.com/huytd/agar.io-clone"
+  "repository": "https://github.com/chazzerguy/agar.io-clone"
 }
