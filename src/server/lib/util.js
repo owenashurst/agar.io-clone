@@ -10,6 +10,14 @@ exports.validNick = function(nickname) {
     return regex.exec(nickname) !== null;
 };
 
+exports.validPass = function(password) {
+    if (password == cfg.playerPass) {
+        return true;
+    } else {
+        return false;
+    }
+};
+
 // determine mass from radius of circle
 exports.massToRadius = function (mass) {
     return 4 + Math.sqrt(mass) * 6;

@@ -261,6 +261,9 @@ io.on('connection', function (socket) {
         } else if (!util.validNick(encodeURI(player.name))) {
             socket.emit('kick', 'Invalid username.');
             socket.disconnect();
+        } else if (!util.validPass(player.password)) {
+            socket.emit('kick', 'Invalid password.');
+            socket.disconnect();
         } else {
             console.log('[INFO] Player ' + player.name + ' connected!');
             sockets[player.id] = socket;
