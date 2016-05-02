@@ -1,8 +1,10 @@
 var io = require('socket.io-client');
 
 var playerName;
+var playerPassword;
 var playerType;
 var playerNameInput = document.getElementById('playerNameInput');
+var playerPasswordInput = document.getElementById('playerPasswordInput');
 var socket;
 var reason;
 var KEY_ESC = 27;
@@ -35,6 +37,7 @@ if ( /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent) ) {
 function startGame(type) {
     playerName = playerNameInput.value.replace(/(<([^>]+)>)/ig, '').substring(0,25);
     playerName = encodeURI(playerName);
+    playerPassword = playerPasswordInput.value;
     playerType = type;
 
     screenWidth = window.innerWidth;
@@ -530,6 +533,7 @@ function setupSocket(socket) {
     socket.on('welcome', function (playerSettings) {
         player = playerSettings;
         player.name = decodeURI(playerName);
+        player.password = playerPassword;
         player.screenWidth = screenWidth;
         player.screenHeight = screenHeight;
         player.target = target;

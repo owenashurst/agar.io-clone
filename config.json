@@ -17,6 +17,7 @@
     "gameWidth": 5000,
     "gameHeight": 5000,
     "adminPass": "90d2cd510081ad51da19e566c6",
+    "playerPass": "dogfood",
     "gameMass": 20000,
     "maxFood": 1000,
     "maxVirus": 50,
