@@ -3,6 +3,7 @@
 'use strict';
 
 var cfg = require('../../../config.json');
+var badwords = require('../../../blacklist.json');
 
 exports.validNick = function(nickname) {
     //var regex = /^\w*$/;
@@ -16,6 +17,17 @@ exports.validPass = function(password) {
     } else {
         return false;
     }
+};
+
+exports.badNames = function(nickname) {
+    for (var i = 0; i < badwords.blocked.length; i++) {
+        var toTest = badwords.blocked[i].toUpperCase();
+        var regex = new RegExp(toTest);    
+        if (regex.exec(nickname.toUpperCase())) {
+            return true;
+        }
+    }
+    return false;
 };
 
 // determine mass from radius of circle
