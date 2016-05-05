@@ -527,7 +527,7 @@ function gameloop() {
     }
     users.forEach(u => {
       u.cells.forEach(c => {
-        if (c.mass * (1 - (Config.massLossRate / 1000)) > Config.defaultPlayerMass) {
+        if (c.mass * (1 - (Config.massLossRate / 1000)) > Config.defaultPlayerMass && u.massTotal > Config.minMassLoss) {
           const massLoss = c.mass * (1 - (Config.massLossRate / 1000));
           u.massTotal -= c.mass - massLoss;
           c.mass = massLoss;
