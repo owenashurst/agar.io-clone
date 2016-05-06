@@ -33,14 +33,13 @@ import IO from 'socket.io';
 import SAT from 'sat';
 import Config from '../config.json';
 import Util from './lib/util';
-import QuadTree from './quadtree';
+import SimpleQuadTree from 'simple-quadtree';
 
 const http = (Http).Server(app);
 const io = (IO)(http);
-const args = {x: 0, y: 0, h: Config.gameHeight, w: Config.gameWidth, maxChildren: 1, maxDepth: 5};
 
 // TODO: GET THIS WORKING
-const qt = QuadTree().init(args);
+const sqt = SimpleQuadTree(0, 0, Config.gameWidth, Config.gameHeight)
 
 const users = [];
 const massFood = [];
@@ -480,14 +479,14 @@ function tickPlayer(currentPlayer) {
     sockets[currentPlayer.id].emit('playerScore', currentPlayer.score);
     currentCell.radius = Util.massToRadius(currentCell.mass);
     playerCircle.r = currentCell.radius;
-    qt.clear();
+    sqt.clear();
 
-    qt.insert(users);
-    qt.insert(bots);
+    users.forEach(sqt.put);
+    bots.forEach(sqt.put);
 
 
     // TODO: TEST TO MAKE SURE PLAYER COLLISSIONS WORK
-    qt.retrieve(currentPlayer, check);
+    sqt.get(currentPlayer, check);
 
     playerCollisions.forEach(collisionCheck);
   }
