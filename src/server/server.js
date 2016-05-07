@@ -14,12 +14,9 @@ var c = require('../../config.json');
 var util = require('./lib/util');
 
 // Import quadtree.
-var quadtree= require('../../quadtree');
+var quadtree = require('simple-quadtree');
 
-var args = {x : 0, y : 0, h : c.gameHeight, w : c.gameWidth, maxChildren : 1, maxDepth : 5};
-console.log(args);
-
-var tree = quadtree.QUAD.init(args);
+var tree = quadtree(0, 0, c.gameWidth, c.gameHeight);
 
 var users = [];
 var massFood = [];
@@ -504,6 +501,7 @@ function tickPlayer(currentPlayer) {
                 }
             }
         }
+        return true;
     }
 
     function collisionCheck(collision) {
@@ -571,10 +569,10 @@ function tickPlayer(currentPlayer) {
         playerCircle.r = currentCell.radius;
 
         tree.clear();
-        tree.insert(users);
+        users.forEach(tree.put);
         var playerCollisions = [];
 
-        var otherUsers =  tree.retrieve(currentPlayer, check);
+        var otherUsers =  tree.get(currentPlayer, check);
 
         playerCollisions.forEach(collisionCheck);
     }
@@ -618,7 +616,7 @@ function gameloop() {
         }
         for (i = 0; i < users.length; i++) {
             for(var z=0; z < users[i].cells.length; z++) {
-                if (users[i].cells[z].mass * (1 - (c.massLossRate / 1000)) > c.defaultPlayerMass) {
+                if (users[i].cells[z].mass * (1 - (c.massLossRate / 1000)) > c.defaultPlayerMass && users[i].massTotal > c.minMassLoss) {
                     var massLoss = users[i].cells[z].mass * (1 - (c.massLossRate / 1000));
                     users[i].massTotal -= users[i].cells[z].mass - massLoss;
                     users[i].cells[z].mass = massLoss;
