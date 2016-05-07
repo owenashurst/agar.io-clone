@@ -414,6 +414,7 @@ function tickPlayer(currentPlayer) {
         }
       }
     });
+    return true;
   }
 
   function eatMass(m) {
