@@ -46,6 +46,7 @@
     "gulp-nodemon": "^2.0.3",
     "gulp-uglify": "^1.2.0",
     "gulp-util": "^3.0.6",
+    "gulp-todo": "^4.1.0",
     "jshint": "^2.7.0",
     "mocha": "^2.2.5",
     "node-libs-browser": "^0.5.2",
