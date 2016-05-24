@@ -5,12 +5,13 @@ var nodemon = require('gulp-nodemon');
 var uglify = require('gulp-uglify');
 var util = require('gulp-util');
 var mocha = require('gulp-mocha');
+var todo = require('gulp-todo');
 var webpack = require('webpack-stream');
 var request = require('sync-request');
 var fs = require('fs');
 
 
-gulp.task('build', ['build-client', 'build-server', 'test']);
+gulp.task('build', ['build-client', 'build-server', 'test', 'todo']);
 
 gulp.task('test', ['lint'], function () {
     gulp.src(['test/**/*.js'])
@@ -49,6 +50,12 @@ gulp.task('watch', ['build'], function () {
   gulp.watch(['src/client/**/*.*'], ['build-client', 'move-client']);
   gulp.watch(['src/server/*.*', 'src/server/**/*.js'], ['build-server']);
   gulp.start('run-only');
+});
+
+gulp.task('todo', ['lint'], function() {
+  gulp.src('src/**/*.js')
+      .pipe(todo())
+      .pipe(gulp.dest('./'));
 });
 
 gulp.task('run', ['build'], function () {
