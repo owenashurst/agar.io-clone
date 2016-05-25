@@ -1,5 +1,6 @@
 var io = require('socket.io-client');
 var ChatClient = require('./chat-client');
+var Canvas = require('./canvas');
 
 var playerName;
 var playerType;
@@ -50,6 +51,7 @@ function startGame(type) {
         animloop();
     socket.emit('respawn');
     window.chat.socket = socket;
+    window.canvas.socket = socket;
 }
 
 // Checks if the nick chosen contains valid alphanumeric characters (and underscores).
@@ -68,6 +70,7 @@ window.onload = function() {
     btnS.onclick = function () {
         startGame('spectate');
     };
+
     btn.onclick = function () {
 
         // Checks if the nick is valid.
@@ -152,26 +155,15 @@ var fireFood = [];
 var users = [];
 var leaderboard = [];
 var target = {x: player.x, y: player.y};
-var reenviar = true;
-var directionLock = false;
-var directions = [];
 
-var c = document.getElementById('cvs');
-c.width = screenWidth; c.height = screenHeight;
-c.addEventListener('mousemove', gameInput, false);
-c.addEventListener('mouseout', outOfBounds, false);
-c.addEventListener('keypress', keyInput, false);
-c.addEventListener('keyup', function(event) {reenviar = true; directionUp(event);}, false);
-c.addEventListener('keydown', directionDown, false);
-c.addEventListener('touchstart', touchInput, false);
-c.addEventListener('touchmove', touchInput, false);
+var canvasParams = {
+    width: screenWidth,
+    height: screenHeight,
+    target: target,
+    socket: socket,
+};
 
-// Register when the mouse goes off the canvas.
-function outOfBounds() {
-    if (!continuity) {
-        target = { x : 0, y: 0 };
-    }
-}
+window.canvas = new Canvas(canvasParams);
 
 var visibleBorderSetting = document.getElementById('visBord');
 visibleBorderSetting.onchange = toggleBorder;
@@ -185,6 +177,7 @@ continuitySetting.onchange = toggleContinuity;
 var continuitySetting = document.getElementById('roundFood');
 continuitySetting.onchange = toggleRoundFood;
 
+var c = window.canvas.cv;
 var graph = c.getContext('2d');
 
 var chatParams = {
@@ -200,112 +193,16 @@ var chatParams = {
 
 window.chat = new ChatClient(chatParams);
 
-// Chat command callback functions.
-function keyInput(event) {
-	var key = event.which || event.keyCode;
-	if (key === KEY_FIREFOOD && reenviar) {
-        socket.emit('1');
-        reenviar = false;
-    }
-    else if (key === KEY_SPLIT && reenviar) {
-        document.getElementById('split_cell').play();
-        socket.emit('2');
-        reenviar = false;
-    }
-    else if (key === KEY_CHAT) {
-        document.getElementById('chatInput').focus();
-    }
-}
-
-    $( "#feed" ).click(function() {
-        socket.emit('1');
-        reenviar = false;
+$( "#feed" ).click(function() {
+    socket.emit('1');
+    window.canvas.reenviar = false;
 });
 
-    $( "#split" ).click(function() {
-        socket.emit('2');
-        reenviar = false;
+$( "#split" ).click(function() {
+    socket.emit('2');
+    window.canvas.reenviar = false;
 });
 
-// Function called when a key is pressed, will change direction if arrow key.
-function directionDown(event) {
-	var key = event.which || event.keyCode;
-
-	if (directional(key)) {
-		directionLock = true;
-		if (newDirection(key,directions, true)) {
-			updateTarget(directions);
-			socket.emit('0', target);
-		}
-	}
-}
-
-// Function called when a key is lifted, will change direction if arrow key.
-function directionUp(event) {
-	var key = event.which || event.keyCode;
-	if (directional(key)) {
-		if (newDirection(key,directions, false)) {
-			updateTarget(directions);
-			if (directions.length === 0) directionLock = false;
-			socket.emit('0', target);
-		}
-	}
-}
-
-// Updates the direction array including information about the new direction.
-function newDirection(direction, list, isAddition) {
-	var result = false;
-	var found = false;
-	for (var i = 0, len = list.length; i < len; i++) {
-		if (list[i] == direction) {
-			found = true;
-			if (!isAddition) {
-				result = true;
-				// Removes the direction.
-				list.splice(i, 1);
-			}
-			break;
-		}
-	}
-	// Adds the direction.
-	if (isAddition && found === false) {
-		result = true;
-		list.push(direction);
-	}
-
-	return result;
-}
-
-// Updates the target according to the directions in the directions array.
-function updateTarget(list) {
-	target = { x : 0, y: 0 };
-	var directionHorizontal = 0;
-	var directionVertical = 0;
-	for (var i = 0, len = list.length; i < len; i++) {
-		if (directionHorizontal === 0) {
-			if (list[i] == KEY_LEFT) directionHorizontal -= Number.MAX_VALUE;
-			else if (list[i] == KEY_RIGHT) directionHorizontal += Number.MAX_VALUE;
-		}
-		if (directionVertical === 0) {
-			if (list[i] == KEY_UP) directionVertical -= Number.MAX_VALUE;
-			else if (list[i] == KEY_DOWN) directionVertical += Number.MAX_VALUE;
-		}
-	}
-	target.x += directionHorizontal;
-	target.y += directionVertical;
-}
-
-function directional(key) {
-	return horizontal(key) || vertical(key);
-}
-
-function horizontal(key) {
-	return key == KEY_LEFT || key == KEY_RIGHT;
-}
-
-function vertical(key) {
-	return key == KEY_DOWN || key == KEY_UP;
-}
 function checkLatency() {
     // Ping.
     startPingTime = Date.now();
@@ -434,7 +331,7 @@ function setupSocket(socket) {
         player.name = playerName;
         player.screenWidth = screenWidth;
         player.screenHeight = screenHeight;
-        player.target = target;
+        player.target = window.canvas.target;
         window.chat.player = player;
         socket.emit('gotit', player);
         gameStart = true;
@@ -751,21 +648,21 @@ function drawborder() {
     }
 }
 
-function gameInput(mouse) {
-	if (!directionLock) {
-		target.x = mouse.clientX - screenWidth / 2;
-		target.y = mouse.clientY - screenHeight / 2;
-	}
-}
-
-function touchInput(touch) {
-    touch.preventDefault();
-    touch.stopPropagation();
-	if (!directionLock) {
-		target.x = touch.touches[0].clientX - screenWidth / 2;
-		target.y = touch.touches[0].clientY - screenHeight / 2;
-	}
-}
+// function gameInput(mouse) {
+// 	if (!directionLock) {
+// 		target.x = mouse.clientX - screenWidth / 2;
+// 		target.y = mouse.clientY - screenHeight / 2;
+// 	}
+// }
+//
+// function touchInput(touch) {
+//     touch.preventDefault();
+//     touch.stopPropagation();
+// 	if (!directionLock) {
+// 		target.x = touch.touches[0].clientX - screenWidth / 2;
+// 		target.y = touch.touches[0].clientY - screenHeight / 2;
+// 	}
+// }
 
 window.requestAnimFrame = (function() {
     return  window.requestAnimationFrame       ||
@@ -825,7 +722,7 @@ function gameLoop() {
             });
 
             drawPlayers(orderMass);
-            socket.emit('0', target); // playerSendTarget "Heartbeat".
+            socket.emit('0', window.canvas.target); // playerSendTarget "Heartbeat".
 
         } else {
             graph.fillStyle = '#333333';
