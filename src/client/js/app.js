@@ -1,28 +1,13 @@
 var io = require('socket.io-client');
 var ChatClient = require('./chat-client');
 var Canvas = require('./canvas');
+var constants = require('./constants');
 
 var playerName;
 var playerType;
 var playerNameInput = document.getElementById('playerNameInput');
 var socket;
 var reason;
-var KEY_ESC = 27;
-var KEY_ENTER = 13;
-var KEY_CHAT = 13;
-var KEY_FIREFOOD = 119;
-var KEY_SPLIT = 32;
-var KEY_LEFT = 37;
-var KEY_UP = 38;
-var KEY_RIGHT = 39;
-var KEY_DOWN = 40;
-var borderDraw = false;
-var animLoopHandle;
-var spin = -Math.PI;
-var enemySpin = -Math.PI;
-var mobile = false;
-var foodSides = 10;
-var virusSides = 20;
 
 var debug = function(args) {
     if (console && console.log) {
@@ -30,16 +15,18 @@ var debug = function(args) {
     }
 };
 
+debug(constants);
+
 if ( /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent) ) {
-    mobile = true;
+    constants.mobile = true;
 }
 
 function startGame(type) {
-    playerName = playerNameInput.value.replace(/(<([^>]+)>)/ig, '').substring(0,25);
-    playerType = type;
+    constants.playerName = playerNameInput.value.replace(/(<([^>]+)>)/ig, '').substring(0,25);
+    constants.playerType = type;
 
-    screenWidth = window.innerWidth;
-    screenHeight = window.innerHeight;
+    constants.screenWidth = window.innerWidth;
+    constants.screenHeight = window.innerHeight;
 
     document.getElementById('startMenuWrapper').style.maxHeight = '0px';
     document.getElementById('gameAreaWrapper').style.opacity = 1;
@@ -47,7 +34,7 @@ function startGame(type) {
         socket = io({query:"type=" + type});
         setupSocket(socket);
     }
-    if (!animLoopHandle)
+    if (!constants.animLoopHandle)
         animloop();
     socket.emit('respawn');
     window.chat.socket = socket;
@@ -97,7 +84,7 @@ window.onload = function() {
     playerNameInput.addEventListener('keypress', function (e) {
         var key = e.which || e.keyCode;
 
-        if (key === KEY_ENTER) {
+        if (key === constants.KEY_ENTER) {
             if (validNick()) {
                 nickErrorText.style.opacity = 0;
                 startGame('player');
@@ -108,25 +95,7 @@ window.onload = function() {
     });
 };
 
-// Canvas.
-var screenWidth = window.innerWidth;
-var screenHeight = window.innerHeight;
-var gameWidth = 0;
-var gameHeight = 0;
-var xoffset = -gameWidth;
-var yoffset = -gameHeight;
-
-var gameStart = false;
-var disconnected = false;
-var died = false;
-var kicked = false;
-
 // TODO: Break out into GameControls.
-var continuity = false;
-var startPingTime = 0;
-var toggleMassState = 0;
-var backgroundColor = '#f2fbff';
-var lineColor = '#000000';
 
 var foodConfig = {
     border: 0,
@@ -142,11 +111,11 @@ var playerConfig = {
 
 var player = {
     id: -1,
-    x: screenWidth / 2,
-    y: screenHeight / 2,
-    screenWidth: screenWidth,
-    screenHeight: screenHeight,
-    target: {x: screenWidth / 2, y: screenHeight / 2}
+    x: constants.screenWidth / 2,
+    y: constants.screenHeight / 2,
+    screenWidth: constants.screenWidth,
+    screenHeight: constants.screenHeight,
+    target: {x: constants.screenWidth / 2, y: constants.screenHeight / 2}
 };
 
 var foods = [];
@@ -157,8 +126,6 @@ var leaderboard = [];
 var target = {x: player.x, y: player.y};
 
 var canvasParams = {
-    width: screenWidth,
-    height: screenHeight,
     target: target,
     socket: socket,
 };
@@ -183,7 +150,7 @@ var graph = c.getContext('2d');
 var chatParams = {
     canvas: c,
     socket: socket,
-    mobile: mobile,
+    mobile: constants.mobile,
     player: player,
 };
 
@@ -201,7 +168,7 @@ $( "#split" ).click(function() {
 
 function checkLatency() {
     // Ping.
-    startPingTime = Date.now();
+    constants.startPingTime = Date.now();
     socket.emit('ping');
 }
 
@@ -211,53 +178,53 @@ function toggleDarkMode() {
     var LINELIGHT = '#000000',
         LINEDARK = '#ffffff';
 
-    if (backgroundColor === LIGHT) {
-        backgroundColor = DARK;
-        lineColor = LINEDARK;
+    if (constants.backgroundColor === LIGHT) {
+        constants.backgroundColor = DARK;
+        constants.lineColor = LINEDARK;
         window.chat.addSystemLine('Dark mode enabled.');
     } else {
-        backgroundColor = LIGHT;
-        lineColor = LINELIGHT;
+        constants.backgroundColor = LIGHT;
+        constants.lineColor = LINELIGHT;
         window.chat.addSystemLine('Dark mode disabled.');
     }
 }
 
 function toggleBorder() {
-    if (!borderDraw) {
-        borderDraw = true;
+    if (!constants.borderDraw) {
+        constants.borderDraw = true;
         window.chat.addSystemLine('Showing border.');
     } else {
-        borderDraw = false;
+        constants.borderDraw = false;
         window.chat.addSystemLine('Hiding border.');
     }
 }
 
 function toggleMass() {
-    if (toggleMassState === 0) {
-        toggleMassState = 1;
+    if (constants.toggleMassState === 0) {
+        constants.toggleMassState = 1;
         window.chat.addSystemLine('Viewing mass enabled.');
     } else {
-        toggleMassState = 0;
+        constants.toggleMassState = 0;
         window.chat.addSystemLine('Viewing mass disabled.');
     }
 }
 
 function toggleContinuity() {
-    if (!continuity) {
-        continuity = true;
+    if (!constants.continuity) {
+        constants.continuity = true;
         window.chat.addSystemLine('Continuity enabled.');
     } else {
-        continuity = false;
+        constants.continuity = false;
         window.chat.addSystemLine('Continuity disabled.');
     }
 }
 
 function toggleRoundFood(args) {
-    if (args || foodSides < 10) {
-        foodSides = (args && !isNaN(args[0]) && +args[0] >= 3) ? +args[0] : 10;
+    if (args || constants.foodSides < 10) {
+        constants.foodSides = (args && !isNaN(args[0]) && +args[0] >= 3) ? +args[0] : 10;
         window.chat.addSystemLine('Food is now rounded!');
     } else {
-        foodSides = 5;
+        constants.foodSides = 5;
         window.chat.addSystemLine('Food is no longer rounded!');
     }
 }
@@ -305,7 +272,7 @@ window.chat.registerCommand('kick', 'Kick a player, for admins only.', function 
 function setupSocket(socket) {
     // Handle ping.
     socket.on('pong', function () {
-        var latency = Date.now() - startPingTime;
+        var latency = Date.now() - constants.startPingTime;
         debug('Latency: ' + latency + 'ms');
         window.chat.addSystemLine('Ping: ' + latency + 'ms');
     });
@@ -313,36 +280,36 @@ function setupSocket(socket) {
     // Handle error.
     socket.on('connect_failed', function () {
         socket.close();
-        disconnected = true;
+        constants.disconnected = true;
     });
 
     socket.on('disconnect', function () {
         socket.close();
-        disconnected = true;
+        constants.disconnected = true;
     });
 
     // Handle connection.
     socket.on('welcome', function (playerSettings) {
         player = playerSettings;
         player.name = playerName;
-        player.screenWidth = screenWidth;
-        player.screenHeight = screenHeight;
+        player.screenWidth = constants.screenWidth;
+        player.screenHeight = constants.screenHeight;
         player.target = window.canvas.target;
         window.chat.player = player;
         socket.emit('gotit', player);
-        gameStart = true;
-        debug('Game started at: ' + gameStart);
+        constants.gameStart = true;
+        debug('Game started at: ' + constants.gameStart);
         window.chat.addSystemLine('Connected to the game!');
         window.chat.addSystemLine('Type <b>-help</b> for a list of commands.');
-        if (mobile) {
+        if (constants.mobile) {
             document.getElementById('gameAreaWrapper').removeChild(document.getElementById('chatbox'));
         }
 		c.focus();
     });
 
     socket.on('gameSetup', function(data) {
-        gameWidth = data.gameWidth;
-        gameHeight = data.gameHeight;
+        constants.gameWidth = data.gameWidth;
+        constants.gameHeight = data.gameHeight;
         resize();
     });
 
@@ -417,23 +384,23 @@ function setupSocket(socket) {
 
     // Death.
     socket.on('RIP', function () {
-        gameStart = false;
-        died = true;
+        constants.gameStart = false;
+        constants.died = true;
         window.setTimeout(function() {
             document.getElementById('gameAreaWrapper').style.opacity = 0;
             document.getElementById('startMenuWrapper').style.maxHeight = '1000px';
-            died = false;
-            if (animLoopHandle) {
-                window.cancelAnimationFrame(animLoopHandle);
-                animLoopHandle = undefined;
+            constants.died = false;
+            if (constants.animLoopHandle) {
+                window.cancelAnimationFrame(constants.animLoopHandle);
+                constants.animLoopHandle = undefined;
             }
         }, 2500);
     });
 
     socket.on('kick', function (data) {
-        gameStart = false;
+        constants.gameStart = false;
         reason = data;
-        kicked = true;
+        constants.kicked = true;
         socket.close();
     });
 
@@ -466,27 +433,33 @@ function drawFood(food) {
     graph.strokeStyle = 'hsl(' + food.hue + ', 100%, 45%)';
     graph.fillStyle = 'hsl(' + food.hue + ', 100%, 50%)';
     graph.lineWidth = foodConfig.border;
-    drawCircle(food.x - player.x + screenWidth / 2, food.y - player.y + screenHeight / 2, food.radius, foodSides);
+    drawCircle(food.x - player.x + constants.screenWidth / 2,
+               food.y - player.y + constants.screenHeight / 2,
+               food.radius, constants.foodSides);
 }
 
 function drawVirus(virus) {
     graph.strokeStyle = virus.stroke;
     graph.fillStyle = virus.fill;
     graph.lineWidth = virus.strokeWidth;
-    drawCircle(virus.x - player.x + screenWidth / 2, virus.y - player.y + screenHeight / 2, virus.radius, virusSides);
+    drawCircle(virus.x - player.x + constants.screenWidth / 2,
+               virus.y - player.y + constants.screenHeight / 2,
+               virus.radius, constants.virusSides);
 }
 
 function drawFireFood(mass) {
     graph.strokeStyle = 'hsl(' + mass.hue + ', 100%, 45%)';
     graph.fillStyle = 'hsl(' + mass.hue + ', 100%, 50%)';
     graph.lineWidth = playerConfig.border+10;
-    drawCircle(mass.x - player.x + screenWidth / 2, mass.y - player.y + screenHeight / 2, mass.radius-5, 18 + (~~(mass.masa/5)));
+    drawCircle(mass.x - player.x + constants.screenWidth / 2,
+               mass.y - player.y + constants.screenHeight / 2,
+               mass.radius-5, 18 + (~~(mass.masa/5)));
 }
 
 function drawPlayers(order) {
     var start = {
-        x: player.x - (screenWidth / 2),
-        y: player.y - (screenHeight / 2)
+        x: player.x - (constants.screenWidth / 2),
+        y: player.y - (constants.screenHeight / 2)
     };
 
     for(var z=0; z<order.length; z++)
@@ -507,7 +480,7 @@ function drawPlayers(order) {
         var xstore = [];
         var ystore = [];
 
-        spin += 0.0;
+        constants.spin += 0.0;
 
         var circle = {
             x: cellCurrent.x - start.x,
@@ -516,16 +489,20 @@ function drawPlayers(order) {
 
         for (var i = 0; i < points; i++) {
 
-            x = cellCurrent.radius * Math.cos(spin) + circle.x;
-            y = cellCurrent.radius * Math.sin(spin) + circle.y;
+            x = cellCurrent.radius * Math.cos(constants.spin) + circle.x;
+            y = cellCurrent.radius * Math.sin(constants.spin) + circle.y;
             if(typeof(userCurrent.id) == "undefined") {
-                x = valueInRange(-userCurrent.x + screenWidth / 2, gameWidth - userCurrent.x + screenWidth / 2, x);
-                y = valueInRange(-userCurrent.y + screenHeight / 2, gameHeight - userCurrent.y + screenHeight / 2, y);
+                x = valueInRange(-userCurrent.x + constants.screenWidth / 2,
+                                 constants.gameWidth - userCurrent.x + constants.screenWidth / 2, x);
+                y = valueInRange(-userCurrent.y + constants.screenHeight / 2,
+                                 constants.gameHeight - userCurrent.y + constants.screenHeight / 2, y);
             } else {
-                x = valueInRange(-cellCurrent.x - player.x + screenWidth/2 + (cellCurrent.radius/3), gameWidth - cellCurrent.x + gameWidth - player.x + screenWidth/2 - (cellCurrent.radius/3), x);
-                y = valueInRange(-cellCurrent.y - player.y + screenHeight/2 + (cellCurrent.radius/3), gameHeight - cellCurrent.y + gameHeight - player.y + screenHeight/2 - (cellCurrent.radius/3) , y);
+                x = valueInRange(-cellCurrent.x - player.x + constants.screenWidth / 2 + (cellCurrent.radius/3),
+                                 constants.gameWidth - cellCurrent.x + constants.gameWidth - player.x + constants.screenWidth / 2 - (cellCurrent.radius/3), x);
+                y = valueInRange(-cellCurrent.y - player.y + constants.screenHeight / 2 + (cellCurrent.radius/3),
+                                 constants.gameHeight - cellCurrent.y + constants.gameHeight - player.y + constants.screenHeight / 2 - (cellCurrent.radius/3) , y);
             }
-            spin += increase;
+            constants.spin += increase;
             xstore[i] = x;
             ystore[i] = y;
         }
@@ -565,7 +542,7 @@ function drawPlayers(order) {
         graph.textBaseline = 'middle';
         graph.font = 'bold ' + fontSize + 'px sans-serif';
 
-        if (toggleMassState === 0) {
+        if (constants.toggleMassState === 0) {
             graph.strokeText(nameCell, circle.x, circle.y);
             graph.fillText(nameCell, circle.x, circle.y);
         } else {
@@ -585,18 +562,18 @@ function valueInRange(min, max, value) {
 
 function drawgrid() {
      graph.lineWidth = 1;
-     graph.strokeStyle = lineColor;
+     graph.strokeStyle = constants.lineColor;
      graph.globalAlpha = 0.15;
      graph.beginPath();
 
-    for (var x = xoffset - player.x; x < screenWidth; x += screenHeight / 18) {
+    for (var x = constants.xoffset - player.x; x < constants.screenWidth; x += constants.screenHeight / 18) {
         graph.moveTo(x, 0);
-        graph.lineTo(x, screenHeight);
+        graph.lineTo(x, constants.screenHeight);
     }
 
-    for (var y = yoffset - player.y ; y < screenHeight; y += screenHeight / 18) {
+    for (var y = constants.yoffset - player.y ; y < constants.screenHeight; y += constants.screenHeight / 18) {
         graph.moveTo(0, y);
-        graph.lineTo(screenWidth, y);
+        graph.lineTo(constants.screenWidth, y);
     }
 
     graph.stroke();
@@ -608,38 +585,42 @@ function drawborder() {
     graph.strokeStyle = playerConfig.borderColor;
 
     // Left-vertical.
-    if (player.x <= screenWidth/2) {
+    if (player.x <= constants.screenWidth/2) {
         graph.beginPath();
-        graph.moveTo(screenWidth/2 - player.x, 0 ? player.y > screenHeight/2 : screenHeight/2 - player.y);
-        graph.lineTo(screenWidth/2 - player.x, gameHeight + screenHeight/2 - player.y);
-        graph.strokeStyle = lineColor;
+        graph.moveTo(constants.screenWidth/2 - player.x, 0 ? player.y > constants.screenHeight/2 : constants.screenHeight/2 - player.y);
+        graph.lineTo(constants.screenWidth/2 - player.x, constants.gameHeight + constants.screenHeight/2 - player.y);
+        graph.strokeStyle = constants.lineColor;
         graph.stroke();
     }
 
     // Top-horizontal.
-    if (player.y <= screenHeight/2) {
+    if (player.y <= constants.screenHeight/2) {
         graph.beginPath();
-        graph.moveTo(0 ? player.x > screenWidth/2 : screenWidth/2 - player.x, screenHeight/2 - player.y);
-        graph.lineTo(gameWidth + screenWidth/2 - player.x, screenHeight/2 - player.y);
-        graph.strokeStyle = lineColor;
+        graph.moveTo(0 ? player.x > constants.screenWidth/2 : constants.screenWidth/2 - player.x, constants.screenHeight/2 - player.y);
+        graph.lineTo(constants.gameWidth + constants.screenWidth/2 - player.x, constants.screenHeight/2 - player.y);
+        graph.strokeStyle = constants.lineColor;
         graph.stroke();
     }
 
     // Right-vertical.
-    if (gameWidth - player.x <= screenWidth/2) {
+    if (constants.gameWidth - player.x <= constants.screenWidth/2) {
         graph.beginPath();
-        graph.moveTo(gameWidth + screenWidth/2 - player.x, screenHeight/2 - player.y);
-        graph.lineTo(gameWidth + screenWidth/2 - player.x, gameHeight + screenHeight/2 - player.y);
-        graph.strokeStyle = lineColor;
+        graph.moveTo(constants.gameWidth + constants.screenWidth/2 - player.x,
+                     constants.screenHeight/2 - player.y);
+        graph.lineTo(constants.gameWidth + constants.screenWidth/2 - player.x,
+                     constants.gameHeight + constants.screenHeight/2 - player.y);
+        graph.strokeStyle = constants.lineColor;
         graph.stroke();
     }
 
     // Bottom-horizontal.
-    if (gameHeight - player.y <= screenHeight/2) {
+    if (constants.gameHeight - player.y <= constants.screenHeight/2) {
         graph.beginPath();
-        graph.moveTo(gameWidth + screenWidth/2 - player.x, gameHeight + screenHeight/2 - player.y);
-        graph.lineTo(screenWidth/2 - player.x, gameHeight + screenHeight/2 - player.y);
-        graph.strokeStyle = lineColor;
+        graph.moveTo(constants.gameWidth + constants.screenWidth/2 - player.x,
+                     constants.gameHeight + constants.screenHeight/2 - player.y);
+        graph.lineTo(constants.screenWidth/2 - player.x,
+                     constants.gameHeight + constants.screenHeight/2 - player.y);
+        graph.strokeStyle = constants.lineColor;
         graph.stroke();
     }
 }
@@ -660,31 +641,31 @@ window.cancelAnimFrame = (function(handle) {
 })();
 
 function animloop() {
-    animLoopHandle = window.requestAnimFrame(animloop);
+    constants.animLoopHandle = window.requestAnimFrame(animloop);
     gameLoop();
 }
 
 function gameLoop() {
-    if (died) {
+    if (constants.died) {
         graph.fillStyle = '#333333';
-        graph.fillRect(0, 0, screenWidth, screenHeight);
+        graph.fillRect(0, 0, constants.screenWidth, constants.screenHeight);
 
         graph.textAlign = 'center';
         graph.fillStyle = '#FFFFFF';
         graph.font = 'bold 30px sans-serif';
-        graph.fillText('You died!', screenWidth / 2, screenHeight / 2);
+        graph.fillText('You died!', constants.screenWidth / 2, constant.screenHeight / 2);
     }
-    else if (!disconnected) {
-        if (gameStart) {
-            graph.fillStyle = backgroundColor;
-            graph.fillRect(0, 0, screenWidth, screenHeight);
+    else if (!constants.disconnected) {
+        if (constants.gameStart) {
+            graph.fillStyle = constants.backgroundColor;
+            graph.fillRect(0, 0, constants.screenWidth, constants.screenHeight);
 
             drawgrid();
             foods.forEach(drawFood);
             fireFood.forEach(drawFireFood);
             viruses.forEach(drawVirus);
 
-            if (borderDraw) {
+            if (constants.borderDraw) {
                 drawborder();
             }
             var orderMass = [];
@@ -697,7 +678,7 @@ function gameLoop() {
                     });
                 }
             }
-            orderMass.sort(function(obj1,obj2) {
+            orderMass.sort(function(obj1, obj2) {
                 return obj1.mass - obj2.mass;
             });
 
@@ -706,31 +687,31 @@ function gameLoop() {
 
         } else {
             graph.fillStyle = '#333333';
-            graph.fillRect(0, 0, screenWidth, screenHeight);
+            graph.fillRect(0, 0, constants.screenWidth, constants.screenHeight);
 
             graph.textAlign = 'center';
             graph.fillStyle = '#FFFFFF';
             graph.font = 'bold 30px sans-serif';
-            graph.fillText('Game Over!', screenWidth / 2, screenHeight / 2);
+            graph.fillText('Game Over!', constants.screenWidth / 2, constants.screenHeight / 2);
         }
     } else {
         graph.fillStyle = '#333333';
-        graph.fillRect(0, 0, screenWidth, screenHeight);
+        graph.fillRect(0, 0, constants.screenWidth, constants.screenHeight);
 
         graph.textAlign = 'center';
         graph.fillStyle = '#FFFFFF';
         graph.font = 'bold 30px sans-serif';
-        if (kicked) {
+        if (constants.kicked) {
             if (reason !== '') {
-                graph.fillText('You were kicked for:', screenWidth / 2, screenHeight / 2 - 20);
-                graph.fillText(reason, screenWidth / 2, screenHeight / 2 + 20);
+                graph.fillText('You were kicked for:', constants.screenWidth / 2, constants.screenHeight / 2 - 20);
+                graph.fillText(reason, constants.screenWidth / 2, constants.screenHeight / 2 + 20);
             }
             else {
-                graph.fillText('You were kicked!', screenWidth / 2, screenHeight / 2);
+                graph.fillText('You were kicked!', constants.screenWidth / 2, constants.screenHeight / 2);
             }
         }
         else {
-              graph.fillText('Disconnected!', screenWidth / 2, screenHeight / 2);
+              graph.fillText('Disconnected!', constants.screenWidth / 2, constants.screenHeight / 2);
         }
     }
 }
@@ -738,7 +719,7 @@ function gameLoop() {
 window.addEventListener('resize', resize);
 
 function resize() {
-    player.screenWidth = c.width = screenWidth = playerType == 'player' ? window.innerWidth : gameWidth;
-    player.screenHeight = c.height = screenHeight = playerType == 'player' ? window.innerHeight : gameHeight;
-    socket.emit('windowResized', { screenWidth: screenWidth, screenHeight: screenHeight });
+    player.screenWidth = c.width = constants.screenWidth = playerType == 'player' ? window.innerWidth : constants.gameWidth;
+    player.screenHeight = c.height = constants.screenHeight = playerType == 'player' ? window.innerHeight : constants.gameHeight;
+    socket.emit('windowResized', { screenWidth: constants.screenWidth, screenHeight: constants.screenHeight });
 }
