@@ -648,22 +648,6 @@ function drawborder() {
     }
 }
 
-// function gameInput(mouse) {
-// 	if (!directionLock) {
-// 		target.x = mouse.clientX - screenWidth / 2;
-// 		target.y = mouse.clientY - screenHeight / 2;
-// 	}
-// }
-//
-// function touchInput(touch) {
-//     touch.preventDefault();
-//     touch.stopPropagation();
-// 	if (!directionLock) {
-// 		target.x = touch.touches[0].clientX - screenWidth / 2;
-// 		target.y = touch.touches[0].clientY - screenHeight / 2;
-// 	}
-// }
-
 window.requestAnimFrame = (function() {
     return  window.requestAnimationFrame       ||
             window.webkitRequestAnimationFrame ||
