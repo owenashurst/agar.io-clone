@@ -14,14 +14,4 @@ module.exports = {
     mobile: false,
     foodSides: 10,
     virusSides: 20,
-    // screenWidth = window.innerWidth;
-    // screenHeight = window.innerHeight;
-    // gameWidth = 0;
-    // gameHeight = 0;
-    // xoffset = -gameWidth;
-    // yoffset = -gameHeight;
-    // gameStart = false;
-    // disconnected = false;
-    // died = false;
-    // kicked = false;
 };

@@ -185,10 +185,6 @@ var chatParams = {
     socket: socket,
     mobile: mobile,
     player: player,
-    keys: {
-        KEY_ESC: KEY_ESC,
-        KEY_ENTER: KEY_ENTER,
-    }
 };
 
 window.chat = new ChatClient(chatParams);

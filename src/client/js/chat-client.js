@@ -1,10 +1,11 @@
+var constants = require('./constants');
+
 class ChatClient {
     constructor(params) {
         this.canvas = params.canvas;
         this.socket = params.socket;
         this.mobile = params.mobile;
         this.player = params.player;
-        this.keys = params.keys;
         var self = this;
         this.commands = {};
         var input = document.getElementById('chatInput');
@@ -12,7 +13,7 @@ class ChatClient {
         input.addEventListener('keyup', function(key) {
             input = document.getElementById('chatInput');
             key = key.which || key.keyCode;
-            if (key === self.keys.KEY_ESC) {
+            if (key === constants.KEY_ESC) {
                 input.value = '';
                 self.canvas.focus();
             }
@@ -67,7 +68,7 @@ class ChatClient {
 
         key = key.which || key.keyCode;
 
-        if (key === this.keys.KEY_ENTER) {
+        if (key === constants.KEY_ENTER) {
             var text = input.value.replace(/(<([^>]+)>)/ig,'');
             if (text !== '') {
 
