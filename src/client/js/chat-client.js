@@ -5,17 +5,16 @@ class ChatClient {
         this.mobile = params.mobile;
         this.player = params.player;
         this.keys = params.keys;
-        var keys = this.keys;
-        var canvas = this.canvas;
+        var self = this;
         this.commands = {};
         var input = document.getElementById('chatInput');
         input.addEventListener('keypress', this.sendChat.bind(this));
         input.addEventListener('keyup', function(key) {
             input = document.getElementById('chatInput');
             key = key.which || key.keyCode;
-            if (key === keys.KEY_ESC) {
+            if (key === self.keys.KEY_ESC) {
                 input.value = '';
-                canvas.focus();
+                self.canvas.focus();
             }
         });
     }

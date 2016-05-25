@@ -1,4 +1,5 @@
 var io = require('socket.io-client');
+var ChatClient = require('./chat-client');
 
 var playerName;
 var playerType;
@@ -48,6 +49,7 @@ function startGame(type) {
     if (!animLoopHandle)
         animloop();
     socket.emit('respawn');
+    window.chat.socket = socket;
 }
 
 // Checks if the nick chosen contains valid alphanumeric characters (and underscores).
@@ -185,115 +187,18 @@ continuitySetting.onchange = toggleRoundFood;
 
 var graph = c.getContext('2d');
 
-function ChatClient(config) {
-    this.commands = {};
-    var input = document.getElementById('chatInput');
-    input.addEventListener('keypress', this.sendChat.bind(this));
-    input.addEventListener('keyup', function(key) {
-        input = document.getElementById('chatInput');
-
-        key = key.which || key.keyCode;
-        if (key === KEY_ESC) {
-            input.value = '';
-            c.focus();
-        }
-    });
-}
-
-// Chat box implementation for the users.
-ChatClient.prototype.addChatLine = function (name, message, me) {
-    if (mobile) {
-        return;
-    }
-    var newline = document.createElement('li');
-
-    // Colours the chat input correctly.
-    newline.className = (me) ? 'me' : 'friend';
-    newline.innerHTML = '<b>' + ((name.length < 1) ? 'An unnamed cell' : name) + '</b>: ' + message;
-
-    this.appendMessage(newline);
-};
-
-
-// Chat box implementation for the system.
-ChatClient.prototype.addSystemLine = function (message) {
-    if (mobile) {
-        return;
-    }
-    var newline = document.createElement('li');
-
-    // Colours the chat input correctly.
-    newline.className = 'system';
-    newline.innerHTML = message;
-
-    // Append messages to the logs.
-    this.appendMessage(newline);
-};
-
-// Places the message DOM node into the chat box.
-ChatClient.prototype.appendMessage = function (node) {
-    if (mobile) {
-        return;
-    }
-    var chatList = document.getElementById('chatList');
-    if (chatList.childNodes.length > 10) {
-        chatList.removeChild(chatList.childNodes[0]);
-    }
-    chatList.appendChild(node);
-};
-
-// Sends a message or executes a command on the click of enter.
-ChatClient.prototype.sendChat = function (key) {
-    var commands = this.commands,
-        input = document.getElementById('chatInput');
-
-    key = key.which || key.keyCode;
-
-    if (key === KEY_ENTER) {
-        var text = input.value.replace(/(<([^>]+)>)/ig,'');
-        if (text !== '') {
-
-            // Chat command.
-            if (text.indexOf('-') === 0) {
-                var args = text.substring(1).split(' ');
-                if (commands[args[0]]) {
-                    commands[args[0]].callback(args.slice(1));
-                } else {
-                    this.addSystemLine('Unrecognized Command: ' + text + ', type -help for more info.');
-                }
-
-            // Allows for regular messages to be sent to the server.
-            } else {
-                socket.emit('playerChat', { sender: player.name, message: text });
-                this.addChatLine(player.name, text, true);
-            }
-
-            // Resets input.
-            input.value = '';
-            c.focus();
-        }
+var chatParams = {
+    canvas: c,
+    socket: socket,
+    mobile: mobile,
+    player: player,
+    keys: {
+        KEY_ESC: KEY_ESC,
+        KEY_ENTER: KEY_ENTER,
     }
 };
 
-// Allows for addition of commands.
-ChatClient.prototype.registerCommand = function (name, description, callback) {
-    this.commands[name] = {
-        description: description,
-        callback: callback
-    };
-};
-
-// Allows help to print the list of all the commands and their descriptions.
-ChatClient.prototype.printHelp = function () {
-    var commands = this.commands;
-    for (var cmd in commands) {
-        if (commands.hasOwnProperty(cmd)) {
-            this.addSystemLine('-' + cmd + ': ' + commands[cmd].description);
-        }
-    }
-};
-
-var chat = new ChatClient();
+window.chat = new ChatClient(chatParams);
 
 // Chat command callback functions.
 function keyInput(event) {
@@ -303,7 +208,7 @@ function keyInput(event) {
         reenviar = false;
     }
     else if (key === KEY_SPLIT && reenviar) {
-       document.getElementById('split_cell').play();
+        document.getElementById('split_cell').play();
         socket.emit('2');
         reenviar = false;
     }
@@ -416,89 +321,89 @@ function toggleDarkMode() {
     if (backgroundColor === LIGHT) {
         backgroundColor = DARK;
         lineColor = LINEDARK;
-        chat.addSystemLine('Dark mode enabled.');
+        window.chat.addSystemLine('Dark mode enabled.');
     } else {
         backgroundColor = LIGHT;
         lineColor = LINELIGHT;
-        chat.addSystemLine('Dark mode disabled.');
+        window.chat.addSystemLine('Dark mode disabled.');
     }
 }
 
 function toggleBorder() {
     if (!borderDraw) {
         borderDraw = true;
-        chat.addSystemLine('Showing border.');
+        window.chat.addSystemLine('Showing border.');
     } else {
         borderDraw = false;
-        chat.addSystemLine('Hiding border.');
+        window.chat.addSystemLine('Hiding border.');
     }
 }
 
 function toggleMass() {
     if (toggleMassState === 0) {
         toggleMassState = 1;
-        chat.addSystemLine('Viewing mass enabled.');
+        window.chat.addSystemLine('Viewing mass enabled.');
     } else {
         toggleMassState = 0;
-        chat.addSystemLine('Viewing mass disabled.');
+        window.chat.addSystemLine('Viewing mass disabled.');
     }
 }
 
 function toggleContinuity() {
     if (!continuity) {
         continuity = true;
-        chat.addSystemLine('Continuity enabled.');
+        window.chat.addSystemLine('Continuity enabled.');
     } else {
         continuity = false;
-        chat.addSystemLine('Continuity disabled.');
+        window.chat.addSystemLine('Continuity disabled.');
     }
 }
 
 function toggleRoundFood(args) {
     if (args || foodSides < 10) {
         foodSides = (args && !isNaN(args[0]) && +args[0] >= 3) ? +args[0] : 10;
-        chat.addSystemLine('Food is now rounded!');
+        window.chat.addSystemLine('Food is now rounded!');
     } else {
         foodSides = 5;
-        chat.addSystemLine('Food is no longer rounded!');
+        window.chat.addSystemLine('Food is no longer rounded!');
     }
 }
 
 // TODO: Break out many of these GameControls into separate classes.
 
-chat.registerCommand('ping', 'Check your latency.', function () {
+window.chat.registerCommand('ping', 'Check your latency.', function () {
     checkLatency();
 });
 
-chat.registerCommand('dark', 'Toggle dark mode.', function () {
+window.chat.registerCommand('dark', 'Toggle dark mode.', function () {
     toggleDarkMode();
 });
 
-chat.registerCommand('border', 'Toggle visibility of border.', function () {
+window.chat.registerCommand('border', 'Toggle visibility of border.', function () {
     toggleBorder();
 });
 
-chat.registerCommand('mass', 'Toggle visibility of mass.', function () {
+window.chat.registerCommand('mass', 'Toggle visibility of mass.', function () {
     toggleMass();
 });
 
-chat.registerCommand('continuity', 'Toggle continuity.', function () {
+window.chat.registerCommand('continuity', 'Toggle continuity.', function () {
     toggleContinuity();
 });
 
-chat.registerCommand('roundfood', 'Toggle food drawing.', function (args) {
+window.chat.registerCommand('roundfood', 'Toggle food drawing.', function (args) {
     toggleRoundFood(args);
 });
 
-chat.registerCommand('help', 'Information about the chat commands.', function () {
+window.chat.registerCommand('help', 'Information about the chat commands.', function () {
     chat.printHelp();
 });
 
-chat.registerCommand('login', 'Login as an admin.', function (args) {
+window.chat.registerCommand('login', 'Login as an admin.', function (args) {
     socket.emit('pass', args);
 });
 
-chat.registerCommand('kick', 'Kick a player, for admins only.', function (args) {
+window.chat.registerCommand('kick', 'Kick a player, for admins only.', function (args) {
     socket.emit('kick', args);
 });
 
@@ -509,7 +414,7 @@ function setupSocket(socket) {
     socket.on('pong', function () {
         var latency = Date.now() - startPingTime;
         debug('Latency: ' + latency + 'ms');
-        chat.addSystemLine('Ping: ' + latency + 'ms');
+        window.chat.addSystemLine('Ping: ' + latency + 'ms');
     });
 
     // Handle error.
@@ -530,11 +435,12 @@ function setupSocket(socket) {
         player.screenWidth = screenWidth;
         player.screenHeight = screenHeight;
         player.target = target;
+        window.chat.player = player;
         socket.emit('gotit', player);
         gameStart = true;
         debug('Game started at: ' + gameStart);
-        chat.addSystemLine('Connected to the game!');
-        chat.addSystemLine('Type <b>-help</b> for a list of commands.');
+        window.chat.addSystemLine('Connected to the game!');
+        window.chat.addSystemLine('Type <b>-help</b> for a list of commands.');
         if (mobile) {
             document.getElementById('gameAreaWrapper').removeChild(document.getElementById('chatbox'));
         }
@@ -548,15 +454,15 @@ function setupSocket(socket) {
     });
 
     socket.on('playerDied', function (data) {
-        chat.addSystemLine('{GAME} - <b>' + (data.name.length < 1 ? 'An unnamed cell' : data.name) + '</b> was eaten.');
+        window.chat.addSystemLine('{GAME} - <b>' + (data.name.length < 1 ? 'An unnamed cell' : data.name) + '</b> was eaten.');
     });
 
     socket.on('playerDisconnect', function (data) {
-        chat.addSystemLine('{GAME} - <b>' + (data.name.length < 1 ? 'An unnamed cell' : data.name) + '</b> disconnected.');
+        window.chat.addSystemLine('{GAME} - <b>' + (data.name.length < 1 ? 'An unnamed cell' : data.name) + '</b> disconnected.');
     });
 
     socket.on('playerJoin', function (data) {
-        chat.addSystemLine('{GAME} - <b>' + (data.name.length < 1 ? 'An unnamed cell' : data.name) + '</b> joined.');
+        window.chat.addSystemLine('{GAME} - <b>' + (data.name.length < 1 ? 'An unnamed cell' : data.name) + '</b> joined.');
     });
 
     socket.on('leaderboard', function (data) {
@@ -581,12 +487,12 @@ function setupSocket(socket) {
     });
 
     socket.on('serverMSG', function (data) {
-        chat.addSystemLine(data);
+        window.chat.addSystemLine(data);
     });
 
     // Chat.
     socket.on('serverSendPlayerChat', function (data) {
-        chat.addChatLine(data.sender, data.message, false);
+        window.chat.addChatLine(data.sender, data.message, false);
     });
 
     // Handle movement.
@@ -900,7 +806,7 @@ function gameLoop() {
             foods.forEach(drawFood);
             fireFood.forEach(drawFireFood);
             viruses.forEach(drawVirus);
-            
+
             if (borderDraw) {
                 drawborder();
             }
