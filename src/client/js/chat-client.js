@@ -1,11 +1,11 @@
-var constants = require('./constants');
+var global = require('./global');
 
 class ChatClient {
     constructor(params) {
-        this.canvas = params.canvas;
-        this.socket = params.socket;
-        this.mobile = params.mobile;
-        this.player = params.player;
+        this.canvas = global.canvas;
+        this.socket = global.socket;
+        this.mobile = global.mobile;
+        this.player = global.player;
         var self = this;
         this.commands = {};
         var input = document.getElementById('chatInput');
@@ -13,11 +13,12 @@ class ChatClient {
         input.addEventListener('keyup', function(key) {
             input = document.getElementById('chatInput');
             key = key.which || key.keyCode;
-            if (key === constants.KEY_ESC) {
+            if (key === global.KEY_ESC) {
                 input.value = '';
-                self.canvas.focus();
+                self.canvas.cv.focus();
             }
         });
+        global.chatClient = this;
     }
 
     // Chat box implementation for the users.
@@ -68,7 +69,7 @@ class ChatClient {
 
         key = key.which || key.keyCode;
 
-        if (key === constants.KEY_ENTER) {
+        if (key === global.KEY_ENTER) {
             var text = input.value.replace(/(<([^>]+)>)/ig,'');
             if (text !== '') {
 
@@ -89,7 +90,7 @@ class ChatClient {
 
                 // Resets input.
                 input.value = '';
-                this.canvas.focus();
+                this.canvas.cv.focus();
             }
         }
     }
