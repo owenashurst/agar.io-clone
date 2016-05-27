@@ -34,6 +34,7 @@ function startGame(type) {
         animloop();
     socket.emit('respawn');
     window.chat.socket = socket;
+    window.chat.registerFunctions();
     window.canvas.socket = socket;
     global.socket = socket;
 }
@@ -125,23 +126,22 @@ var target = {x: player.x, y: player.y};
 global.target = target;
 
 window.canvas = new Canvas();
+window.chat = new ChatClient();
 
 var visibleBorderSetting = document.getElementById('visBord');
-visibleBorderSetting.onchange = toggleBorder;
+visibleBorderSetting.onchange = settings.toggleBorder;
 
 var showMassSetting = document.getElementById('showMass');
-showMassSetting.onchange = toggleMass;
+showMassSetting.onchange = settings.toggleMass;
 
 var continuitySetting = document.getElementById('continuity');
-continuitySetting.onchange = toggleContinuity;
+continuitySetting.onchange = settings.toggleContinuity;
 
 var continuitySetting = document.getElementById('roundFood');
-continuitySetting.onchange = toggleRoundFood;
+continuitySetting.onchange = settings.toggleRoundFood;
 
 var c = window.canvas.cv;
 var graph = c.getContext('2d');
-
-window.chat = new ChatClient();
 
 $( "#feed" ).click(function() {
     socket.emit('1');
@@ -152,108 +152,6 @@ $( "#split" ).click(function() {
     socket.emit('2');
     window.canvas.reenviar = false;
 });
-
-function checkLatency() {
-    // Ping.
-    global.startPingTime = Date.now();
-    socket.emit('ping');
-}
-
-function toggleDarkMode() {
-    var LIGHT = '#f2fbff',
-        DARK = '#181818';
-    var LINELIGHT = '#000000',
-        LINEDARK = '#ffffff';
-
-    if (global.backgroundColor === LIGHT) {
-        global.backgroundColor = DARK;
-        global.lineColor = LINEDARK;
-        window.chat.addSystemLine('Dark mode enabled.');
-    } else {
-        global.backgroundColor = LIGHT;
-        global.lineColor = LINELIGHT;
-        window.chat.addSystemLine('Dark mode disabled.');
-    }
-}
-
-function toggleBorder() {
-    if (!global.borderDraw) {
-        global.borderDraw = true;
-        window.chat.addSystemLine('Showing border.');
-    } else {
-        global.borderDraw = false;
-        window.chat.addSystemLine('Hiding border.');
-    }
-}
-
-function toggleMass() {
-    if (global.toggleMassState === 0) {
-        global.toggleMassState = 1;
-        window.chat.addSystemLine('Viewing mass enabled.');
-    } else {
-        global.toggleMassState = 0;
-        window.chat.addSystemLine('Viewing mass disabled.');
-    }
-}
-
-function toggleContinuity() {
-    if (!global.continuity) {
-        global.continuity = true;
-        window.chat.addSystemLine('Continuity enabled.');
-    } else {
-        global.continuity = false;
-        window.chat.addSystemLine('Continuity disabled.');
-    }
-}
-
-function toggleRoundFood(args) {
-    if (args || global.foodSides < 10) {
-        global.foodSides = (args && !isNaN(args[0]) && +args[0] >= 3) ? +args[0] : 10;
-        window.chat.addSystemLine('Food is now rounded!');
-    } else {
-        global.foodSides = 5;
-        window.chat.addSystemLine('Food is no longer rounded!');
-    }
-}
-
-// TODO: Break out many of these GameControls into separate classes.
-
-window.chat.registerCommand('ping', 'Check your latency.', function () {
-    checkLatency();
-});
-
-window.chat.registerCommand('dark', 'Toggle dark mode.', function () {
-    toggleDarkMode();
-});
-
-window.chat.registerCommand('border', 'Toggle visibility of border.', function () {
-    toggleBorder();
-});
-
-window.chat.registerCommand('mass', 'Toggle visibility of mass.', function () {
-    toggleMass();
-});
-
-window.chat.registerCommand('continuity', 'Toggle continuity.', function () {
-    toggleContinuity();
-});
-
-window.chat.registerCommand('roundfood', 'Toggle food drawing.', function (args) {
-    toggleRoundFood(args);
-});
-
-window.chat.registerCommand('help', 'Information about the chat commands.', function () {
-    chat.printHelp();
-});
-
-window.chat.registerCommand('login', 'Login as an admin.', function (args) {
-    socket.emit('pass', args);
-});
-
-window.chat.registerCommand('kick', 'Kick a player, for admins only.', function (args) {
-    socket.emit('kick', args);
-});
-
 
 // socket stuff.
 function setupSocket(socket) {

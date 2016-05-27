@@ -21,6 +21,48 @@ class ChatClient {
         global.chatClient = this;
     }
 
+    // TODO: Break out many of these GameControls into separate classes.
+    
+    registerFunctions() {
+        var self = this;
+        this.registerCommand('ping', 'Check your latency.', function () {
+            self.checkLatency();
+        });
+
+        this.registerCommand('dark', 'Toggle dark mode.', function () {
+            self.toggleDarkMode();
+        });
+
+        this.registerCommand('border', 'Toggle visibility of border.', function () {
+            self.toggleBorder();
+        });
+
+        this.registerCommand('mass', 'Toggle visibility of mass.', function () {
+            self.toggleMass();
+        });
+
+        this.registerCommand('continuity', 'Toggle continuity.', function () {
+            self.toggleContinuity();
+        });
+
+        this.registerCommand('roundfood', 'Toggle food drawing.', function (args) {
+            self.toggleRoundFood(args);
+        });
+
+        this.registerCommand('help', 'Information about the chat commands.', function () {
+            self.printHelp();
+        });
+
+        this.registerCommand('login', 'Login as an admin.', function (args) {
+            self.socket.emit('pass', args);
+        });
+
+        this.registerCommand('kick', 'Kick a player, for admins only.', function (args) {
+            self.socket.emit('kick', args);
+        });
+        global.chatClient = this;
+    }
+
     // Chat box implementation for the users.
     addChatLine(name, message, me) {
         if (this.mobile) {
@@ -110,6 +152,69 @@ class ChatClient {
             if (commands.hasOwnProperty(cmd)) {
                 this.addSystemLine('-' + cmd + ': ' + commands[cmd].description);
             }
+        }
+    }
+
+    checkLatency() {
+        // Ping.
+        global.startPingTime = Date.now();
+        socket.emit('ping');
+    }
+
+    toggleDarkMode() {
+        var LIGHT = '#f2fbff',
+            DARK = '#181818';
+        var LINELIGHT = '#000000',
+            LINEDARK = '#ffffff';
+
+        if (global.backgroundColor === LIGHT) {
+            global.backgroundColor = DARK;
+            global.lineColor = LINEDARK;
+            this.addSystemLine('Dark mode enabled.');
+        } else {
+            global.backgroundColor = LIGHT;
+            global.lineColor = LINELIGHT;
+            this.addSystemLine('Dark mode disabled.');
+        }
+    }
+
+    toggleBorder() {
+        if (!global.borderDraw) {
+            global.borderDraw = true;
+            this.addSystemLine('Showing border.');
+        } else {
+            global.borderDraw = false;
+            this.addSystemLine('Hiding border.');
+        }
+    }
+
+    toggleMass() {
+        if (global.toggleMassState === 0) {
+            global.toggleMassState = 1;
+            this.addSystemLine('Viewing mass enabled.');
+        } else {
+            global.toggleMassState = 0;
+            this.addSystemLine('Viewing mass disabled.');
+        }
+    }
+
+    toggleContinuity() {
+        if (!global.continuity) {
+            global.continuity = true;
+            this.addSystemLine('Continuity enabled.');
+        } else {
+            global.continuity = false;
+            this.addSystemLine('Continuity disabled.');
+        }
+    }
+
+    toggleRoundFood(args) {
+        if (args || global.foodSides < 10) {
+            global.foodSides = (args && !isNaN(args[0]) && +args[0] >= 3) ? +args[0] : 10;
+            this.addSystemLine('Food is now rounded!');
+        } else {
+            global.foodSides = 5;
+            this.addSystemLine('Food is no longer rounded!');
         }
     }
 }
