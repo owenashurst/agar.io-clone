@@ -22,7 +22,7 @@ class ChatClient {
     }
 
     // TODO: Break out many of these GameControls into separate classes.
-    
+
     registerFunctions() {
         var self = this;
         this.registerCommand('ping', 'Check your latency.', function () {
@@ -219,4 +219,4 @@ class ChatClient {
     }
 }
 
-export default ChatClient;
+module.exports = ChatClient;

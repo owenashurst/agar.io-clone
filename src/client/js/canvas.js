@@ -151,4 +151,4 @@ class Canvas {
     }
 }
 
-export default Canvas;
+module.exports = Canvas;

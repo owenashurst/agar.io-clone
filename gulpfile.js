@@ -29,8 +29,9 @@ gulp.task('lint', function () {
 
 gulp.task('build-client', ['lint', 'move-client'], function () {
   return gulp.src(['src/client/js/app.js'])
+    .pipe(uglify())
     .pipe(webpack(require('./webpack.config.js')))
-    //.pipe(uglify())
+    .pipe(babel())
     .pipe(gulp.dest('bin/client/js/'));
 });
 
