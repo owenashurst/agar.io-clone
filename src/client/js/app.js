@@ -137,8 +137,8 @@ showMassSetting.onchange = settings.toggleMass;
 var continuitySetting = document.getElementById('continuity');
 continuitySetting.onchange = settings.toggleContinuity;
 
-var continuitySetting = document.getElementById('roundFood');
-continuitySetting.onchange = settings.toggleRoundFood;
+var roundFoodSetting = document.getElementById('roundFood');
+roundFoodSetting.onchange = settings.toggleRoundFood;
 
 var c = window.canvas.cv;
 var graph = c.getContext('2d');
