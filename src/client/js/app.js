@@ -607,5 +607,11 @@ window.addEventListener('resize', resize);
 function resize() {
     player.screenWidth = c.width = global.screenWidth = global.playerType == 'player' ? window.innerWidth : global.gameWidth;
     player.screenHeight = c.height = global.screenHeight = global.playerType == 'player' ? window.innerHeight : global.gameHeight;
+
+    if (global.playerType == 'spectate') {
+        player.x = global.gameWidth / 2;
+        player.y = global.gameHeight / 2;
+    }
+
     socket.emit('windowResized', { screenWidth: global.screenWidth, screenHeight: global.screenHeight });
 }
