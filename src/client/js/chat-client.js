@@ -25,7 +25,7 @@ class ChatClient {
 
     registerFunctions() {
         var self = this;
-        this.registerCommand('ping', 'Check your latency.', function () {
+        this.registerCommand('marco', 'Check your latency.', function () {
             self.checkLatency();
         });
 
@@ -158,7 +158,7 @@ class ChatClient {
     checkLatency() {
         // Ping.
         global.startPingTime = Date.now();
-        socket.emit('ping');
+        socket.emit('marco');
     }
 
     toggleDarkMode() {

@@ -156,7 +156,7 @@ $( "#split" ).click(function() {
 // socket stuff.
 function setupSocket(socket) {
     // Handle ping.
-    socket.on('pong', function () {
+    socket.on('polo', function () {
         var latency = Date.now() - global.startPingTime;
         debug('Latency: ' + latency + 'ms');
         window.chat.addSystemLine('Ping: ' + latency + 'ms');

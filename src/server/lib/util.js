@@ -14,6 +14,15 @@ exports.massToRadius = function (mass) {
     return 4 + Math.sqrt(mass) * 6;
 };
 
+exports.numberOfPlayers = function(users) {
+    var players = 0;
+    users.forEach(function(u) {
+        if (u.type === 'player') {
+            players += 1;
+        }
+    });
+    return players;
+};
 
 // overwrite Math.log function
 exports.log = (function () {

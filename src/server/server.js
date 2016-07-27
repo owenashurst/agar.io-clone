@@ -27,10 +27,17 @@ var sockets = {};
 var leaderboard = [];
 var leaderboardChanged = false;
 
+
 var V = SAT.Vector;
 var C = SAT.Circle;
 
 var initMassLog = util.log(c.defaultPlayerMass, c.slowBase);
+
+// If hunger games, need to wait for the number of players
+var gameStart = (c.gameMode !== 'hunger-games');
+var maxPlayers = (c.gameMode === 'hunger-games') ? c.hungerGamesMaxPlayers : undefined;
+var lastWinner = null;
+
 
 app.use(express.static(__dirname + '/../client'));
 
@@ -260,6 +267,12 @@ io.on('connection', function (socket) {
         } else if (!util.validNick(player.name)) {
             socket.emit('kick', 'Invalid username.');
             socket.disconnect();
+        } else if (c.gameMode == 'hunger-games' && type === 'player' && gameStart) {
+            // TODO: for now players entering an ongoing hunger games game are
+            // kicked. The right find would be to let them enter a pool and wait
+            // for the next game.
+            socket.emit('kick', 'Wait the next game.');
+            socket.disconnect();
         } else {
             console.log('[INFO] Player ' + player.name + ' connected!');
             sockets[player.id] = socket;
@@ -289,19 +302,27 @@ io.on('connection', function (socket) {
             currentPlayer.lastHeartbeat = new Date().getTime();
             users.push(currentPlayer);
 
+
             io.emit('playerJoin', { name: currentPlayer.name });
 
             socket.emit('gameSetup', {
                 gameWidth: c.gameWidth,
                 gameHeight: c.gameHeight
             });
+
+            // start game if we have enough players
+            if (c.gameMode == 'hunger-games' && util.numberOfPlayers(users) == maxPlayers) {
+                lastWinner = false;
+                gameStart = true;
+            }
+
             console.log('Total players: ' + users.length);
         }
 
     });
 
-    socket.on('ping', function () {
-        socket.emit('pong');
+    socket.on('marco', function () {
+        socket.emit('polo');
     });
 
     socket.on('windowResized', function (data) {
@@ -322,6 +343,7 @@ io.on('connection', function (socket) {
         console.log('[INFO] User ' + currentPlayer.name + ' disconnected!');
 
         socket.broadcast.emit('playerDisconnect', { name: currentPlayer.name });
+        checkEnd();
     });
 
     socket.on('playerChat', function(data) {
@@ -387,7 +409,8 @@ io.on('connection', function (socket) {
     // Heartbeat function, update everytime.
     socket.on('0', function(target) {
         currentPlayer.lastHeartbeat = new Date().getTime();
-        if (target.x !== currentPlayer.x || target.y !== currentPlayer.y) {
+
+        if (gameStart && (target.x !== currentPlayer.x || target.y !== currentPlayer.y)) {
             currentPlayer.target = target;
         }
     });
@@ -455,6 +478,19 @@ io.on('connection', function (socket) {
     });
 });
 
+function checkEnd() {
+    if (c.gameMode !== 'hunger-games') {
+        return false;
+    }
+
+    // we have a winner
+    if (util.numberOfPlayers(users) == 1) {
+        users.sort( function(a, b) { return b.massTotal - a.massTotal; });
+        lastWinner = users[0];
+        gameStart = false;
+    }
+}
+
 function tickPlayer(currentPlayer) {
     if(currentPlayer.lastHeartbeat < new Date().getTime() - c.maxHeartbeatInterval) {
         sockets[currentPlayer.id].emit('kick', 'Last heartbeat received over ' + c.maxHeartbeatInterval + ' ago.');
@@ -520,6 +556,7 @@ function tickPlayer(currentPlayer) {
                 } else {
                     users.splice(numUser, 1);
                     io.emit('playerDied', { name: collision.bUser.name });
+                    checkEnd();
                     sockets[collision.bUser.id].emit('RIP');
                 }
             }
@@ -581,6 +618,11 @@ function tickPlayer(currentPlayer) {
 }
 
 function moveloop() {
+
+    if (!gameStart) {
+        return;
+    }
+
     for (var i = 0; i < users.length; i++) {
         tickPlayer(users[i]);
     }
@@ -590,7 +632,30 @@ function moveloop() {
 }
 
 function gameloop() {
-    if (users.length > 0) {
+
+    // in hunger games mode show leaderboard as the number of missing players
+    if (!gameStart) {
+
+        leaderboard = [];
+
+        var players = util.numberOfPlayers(users);
+        var msg = 'Waiting for players: ' + players + '/' + maxPlayers;
+
+        if (lastWinner) {
+            leaderboard.push({
+                id: null,
+                name: 'WINNER: ' + lastWinner.name
+            });
+        }
+
+        leaderboard.push({
+            id: null,
+            name: msg
+        });
+
+        leaderboardChanged = true;
+    }
+    else if (users.length > 0) {
         users.sort( function(a, b) { return b.massTotal - a.massTotal; });
 
         var topUsers = [];
@@ -625,8 +690,8 @@ function gameloop() {
                 }
             }
         }
+        balanceMass();
     }
-    balanceMass();
 }
 
 function sendUpdates() {
@@ -668,7 +733,7 @@ function sendUpdates() {
             })
             .filter(function(f) { return f; });
 
-        var visibleCells  = users
+        var visibleCells = users
             .map(function(f) {
                 for(var z=0; z<f.cells.length; z++)
                 {
