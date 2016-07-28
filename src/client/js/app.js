@@ -303,11 +303,16 @@ function drawCircle(centerX, centerY, radius, sides) {
 
     graph.beginPath();
 
-    for (var i = 0; i < sides; i++) {
-        theta = (i / sides) * 2 * Math.PI;
-        x = centerX + radius * Math.sin(theta);
-        y = centerY + radius * Math.cos(theta);
-        graph.lineTo(x, y);
+    // viruses should look a bit different
+    if (sides) {
+        for (var i = 0; i < sides; i++) {
+            theta = (i / sides) * 2 * Math.PI;
+            x = centerX + radius * Math.sin(theta);
+            y = centerY + radius * Math.cos(theta);
+            graph.lineTo(x, y);
+        }
+    } else {
+        graph.arc(centerX, centerY, radius, 0, 2*Math.PI);
     }
 
     graph.closePath();
@@ -321,7 +326,7 @@ function drawFood(food) {
     graph.lineWidth = foodConfig.border;
     drawCircle(food.x - player.x + global.screenWidth / 2,
                food.y - player.y + global.screenHeight / 2,
-               food.radius, global.foodSides);
+               food.radius);
 }
 
 function drawVirus(virus) {
@@ -447,10 +452,12 @@ function valueInRange(min, max, value) {
 }
 
 function drawgrid() {
-     graph.lineWidth = 1;
-     graph.strokeStyle = global.lineColor;
-     graph.globalAlpha = 0.15;
-     graph.beginPath();
+
+
+    graph.lineWidth = 1;
+    graph.strokeStyle = global.lineColor;
+    graph.globalAlpha = 0.15;
+    graph.beginPath();
 
     for (var x = global.xoffset - player.x; x < global.screenWidth; x += global.screenHeight / 18) {
         graph.moveTo(x, 0);
@@ -526,9 +533,29 @@ window.cancelAnimFrame = (function(handle) {
             window.mozCancelAnimationFrame;
 })();
 
+var fpsCountStart = null;
+var fps = 0;
+
 function animloop() {
+
     global.animLoopHandle = window.requestAnimFrame(animloop);
     gameLoop();
+
+    if (showFPS) {
+        if(!fpsCountStart) {
+            fpsCountStart = Date.now();
+            fps = 0;
+            return;
+        } else {
+            var now = Date.now();
+            var diff = (now - fpsCountStart) / 1000;
+            fps += 1;
+            if (diff >= 1) {
+                console.log('FPS:', fps);
+                fpsCountStart = null;
+            }
+        }
+    }
 }
 
 function gameLoop() {

@@ -13,7 +13,6 @@ module.exports = {
     spin: -Math.PI,
     enemySpin: -Math.PI,
     mobile: false,
-    foodSides: 10,
     virusSides: 20,
 
     // Canvas
@@ -32,4 +31,6 @@ module.exports = {
     toggleMassState: 0,
     backgroundColor: '#f2fbff',
     lineColor: '#000000',
+
+    showFPS: false,
 };
