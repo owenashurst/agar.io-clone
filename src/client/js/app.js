@@ -541,16 +541,16 @@ function animloop() {
     global.animLoopHandle = window.requestAnimFrame(animloop);
     gameLoop();
 
-    if (showFPS) {
+    if (global.showFPS) {
         if(!fpsCountStart) {
             fpsCountStart = Date.now();
             fps = 0;
             return;
         } else {
             var now = Date.now();
-            var diff = (now - fpsCountStart) / 1000;
+            var diff = (now - fpsCountStart);
             fps += 1;
-            if (diff >= 1) {
+            if (diff >= 1000) {
                 console.log('FPS:', fps);
                 fpsCountStart = null;
             }
