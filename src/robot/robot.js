@@ -39,7 +39,7 @@ module.exports = {
 
         socket.on('serverTellPlayerMove', function (userData, foodsList, massList, virusList) {
             var move = controller.step(userData, foodsList, massList, virusList);
-            console.log('[INFO] Robot name move:', move);
+            //console.log('[INFO] Robot name move:', move);
 
             if (move && move.x && move.y) {
                 socket.emit('0', move);
@@ -52,7 +52,6 @@ module.exports = {
 
         socket.on('leaderboard', function (data) {
             leaderboard = data.leaderboard;
-            console.log('leaderboard', leaderboard);
         });
 
         // Death.

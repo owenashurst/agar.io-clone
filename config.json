@@ -9,7 +9,7 @@
   	"stroke": "#19D119",
 		"strokeWidth": 20,
 		"defaultMass": {
-            "from": 100,
+            "from": 50,
             "to": 150
         },
 		"splitMass": 180
@@ -18,7 +18,10 @@
     "gameHeight": 1080,
     "adminPass": "DEFAULT",
     "gameMode": "free-for-all",
-    "hungerGamesMaxPlayers": 2,
+    "hungerGames": {
+        "maxPlayers": 2,
+        "timeLimit": 300
+    },
     "gameMass": 5000,
     "maxFood": 80,
     "maxVirus": 5,

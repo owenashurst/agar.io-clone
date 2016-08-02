@@ -34,10 +34,19 @@ var C = SAT.Circle;
 var initMassLog = util.log(c.defaultPlayerMass, c.slowBase);
 
 // If hunger games, need to wait for the number of players
-var gameStart = (c.gameMode !== 'hunger-games');
-var maxPlayers = (c.gameMode === 'hunger-games') ? c.hungerGamesMaxPlayers : undefined;
-var lastWinner = null;
-
+var shouldRun = c.gameMode !== 'hunger-games';
+var startTime = shouldRun? new Date().getTime : undefined;
+var gameStatus = {
+    mode: c.gameMode,
+    running: shouldRun,
+    startTime: startTime,
+    timeLimit: c.hungerGames.timeLimit,
+    maxPlayers: c.hungerGames.maxPlayers,
+    players: 0,
+    spectators: 0,
+    lastWinner: undefined,
+    finishReason: undefined
+};
 
 app.use(express.static(__dirname + '/../client'));
 
@@ -267,7 +276,7 @@ io.on('connection', function (socket) {
         } else if (!util.validNick(player.name)) {
             socket.emit('kick', 'Invalid username.');
             socket.disconnect();
-        } else if (c.gameMode == 'hunger-games' && type === 'player' && gameStart) {
+        } else if (gameStatus.mode == 'hunger-games' && type === 'player' && gameStatus.running) {
             // TODO: for now players entering an ongoing hunger games game are
             // kicked. The right find would be to let them enter a pool and wait
             // for the next game.
@@ -292,16 +301,17 @@ io.on('connection', function (socket) {
                     radius: radius
                 }];
                 player.massTotal = c.defaultPlayerMass;
+                gameStatus.players += 1;
             }
             else {
-                 player.cells = [];
-                 player.massTotal = 0;
+                gameStatus.spectators += 1;
+                player.cells = [];
+                player.massTotal = 0;
             }
             player.hue = Math.round(Math.random() * 360);
             currentPlayer = player;
             currentPlayer.lastHeartbeat = new Date().getTime();
             users.push(currentPlayer);
-
 
             io.emit('playerJoin', { name: currentPlayer.name });
 
@@ -311,9 +321,8 @@ io.on('connection', function (socket) {
             });
 
             // start game if we have enough players
-            if (c.gameMode == 'hunger-games' && util.numberOfPlayers(users) == maxPlayers) {
-                lastWinner = false;
-                gameStart = true;
+            if (gameStatus.mode == 'hunger-games' && gameStatus.players == gameStatus.maxPlayers) {
+                startGame();
             }
 
             console.log('Total players: ' + users.length);
@@ -341,6 +350,12 @@ io.on('connection', function (socket) {
         if (util.findIndex(users, currentPlayer.id) > -1)
             users.splice(util.findIndex(users, currentPlayer.id), 1);
         console.log('[INFO] User ' + currentPlayer.name + ' disconnected!');
+
+        if (currentPlayer.type === 'player') {
+            gameStatus.players -= 1;
+        } else {
+            gameStatus.spectators -= 1;
+        }
 
         socket.broadcast.emit('playerDisconnect', { name: currentPlayer.name });
         checkEnd();
@@ -393,6 +408,11 @@ io.on('connection', function (socket) {
                     socket.emit('serverMSG', 'User ' + users[e].name + ' was kicked by ' + currentPlayer.name);
                     sockets[users[e].id].emit('kick', reason);
                     sockets[users[e].id].disconnect();
+                    if (currentPlayer.type === 'player') {
+                        gameStatus.players -= 1;
+                    } else {
+                        gameStatus.spectators -= 1;
+                    }
                     users.splice(e, 1);
                     worked = true;
                 }
@@ -410,7 +430,7 @@ io.on('connection', function (socket) {
     socket.on('0', function(target) {
         currentPlayer.lastHeartbeat = new Date().getTime();
 
-        if (gameStart && (target.x !== currentPlayer.x || target.y !== currentPlayer.y)) {
+        if (gameStatus.running && (target.x !== currentPlayer.x || target.y !== currentPlayer.y)) {
             currentPlayer.target = target;
         }
     });
@@ -479,16 +499,33 @@ io.on('connection', function (socket) {
     });
 });
 
-function checkEnd() {
-    if (c.gameMode !== 'hunger-games') {
-        return false;
-    }
+function startGame() {
+    gameStatus.lastWinner = false;
+    gameStatus.running = true;
+    gameStatus.startTime = new Date().getTime();
+}
 
-    // we have a winner
-    if (util.numberOfPlayers(users) == 1) {
-        users.sort( function(a, b) { return b.massTotal - a.massTotal; });
-        lastWinner = users[0];
-        gameStart = false;
+function finishGame(reason) {
+    users.sort( function(a, b) { return b.massTotal - a.massTotal; });
+    gameStatus.lastWinner = users[0];
+    gameStatus.running = false;
+    gameStatus.startTime = undefined;
+    gameStatus.finishReason = reason;
+}
+
+function checkEnd() {
+
+    if (gameStatus.mode === 'hunger-games' && gameStatus.running) {
+        // time is over?
+        var elapsed = new Date().getTime() - gameStatus.startTime;
+        if (gameStatus.timeLimit && elapsed >= gameStatus.timeLimit) {
+            finishGame('time-limit');
+        // do we have a winner?
+    } else if (gameStatus.players == 1) {
+            finishGame('winner');
+        }
+    } else {
+        return false;
     }
 }
 
@@ -520,12 +557,16 @@ function tickPlayer(currentPlayer) {
     }
 
     function check(user) {
+        if (user.id === currentPlayer.id) {
+            return true;
+        }
+
         for(var i=0; i<user.cells.length; i++) {
-            if(user.cells[i].mass > 10 && user.id !== currentPlayer.id) {
+            if(user.cells[i].mass > c.defaultPlayerMass) {
                 var response = new SAT.Response();
-                var collided = SAT.testCircleCircle(playerCircle,
-                    new C(new V(user.cells[i].x, user.cells[i].y), user.cells[i].radius),
-                    response);
+                var vector = new V(user.cells[i].x, user.cells[i].y);
+                var circle = new C(vector, user.cells[i].radius);
+                var collided = SAT.testCircleCircle(playerCircle, circle, response);
                 if (collided) {
                     response.aUser = currentCell;
                     response.bUser = {
@@ -544,25 +585,32 @@ function tickPlayer(currentPlayer) {
     }
 
     function collisionCheck(collision) {
-        if (collision.aUser.mass > collision.bUser.mass * 1.1  && collision.aUser.radius > Math.sqrt(Math.pow(collision.aUser.x - collision.bUser.x, 2) + Math.pow(collision.aUser.y - collision.bUser.y, 2))*1.75) {
-            console.log('[DEBUG] Killing user: ' + collision.bUser.id);
+
+        var aUser = collision.aUser;
+        var bUser = collision.bUser;
+        var distance = util.distance(aUser, bUser);
+        console.log('collided A', aUser);
+        console.log('collided B', bUser);
+        if (aUser.mass > bUser.mass * 1.1 && aUser.radius > distance*1.75) {
+            console.log('[DEBUG] Killing user: ' + bUser.id);
             console.log('[DEBUG] Collision info:');
             console.log(collision);
 
-            var numUser = util.findIndex(users, collision.bUser.id);
+            var numUser = util.findIndex(users, bUser.id);
             if (numUser > -1) {
                 if(users[numUser].cells.length > 1) {
-                    users[numUser].massTotal -= collision.bUser.mass;
-                    users[numUser].cells.splice(collision.bUser.num, 1);
+                    users[numUser].massTotal -= bUser.mass;
+                    users[numUser].cells.splice(bUser.num, 1);
                 } else {
                     users.splice(numUser, 1);
-                    io.emit('playerDied', { name: collision.bUser.name });
+                    io.emit('playerDied', { name: bUser.name });
+                    gameStatus.players -= 1;
                     checkEnd();
-                    sockets[collision.bUser.id].emit('RIP');
+                    sockets[bUser.id].emit('RIP');
                 }
             }
-            currentPlayer.massTotal += collision.bUser.mass;
-            collision.aUser.mass += collision.bUser.mass;
+            currentPlayer.massTotal += bUser.mass;
+            aUser.mass += bUser.mass;
         }
     }
 
@@ -610,17 +658,16 @@ function tickPlayer(currentPlayer) {
 
         tree.clear();
         users.forEach(tree.put);
+
         var playerCollisions = [];
-
         var otherUsers =  tree.get(currentPlayer, check);
-
         playerCollisions.forEach(collisionCheck);
     }
 }
 
 function moveloop() {
 
-    if (!gameStart) {
+    if (!gameStatus.running) {
         return;
     }
 
@@ -635,17 +682,18 @@ function moveloop() {
 function gameloop() {
 
     // in hunger games mode show leaderboard as the number of missing players
-    if (!gameStart) {
+    if (!gameStatus.running) {
 
         leaderboard = [];
 
-        var players = util.numberOfPlayers(users);
+        var players = gameStatus.players;
+        var maxPlayers = gameStatus.maxPlayers;
         var msg = 'Waiting for players: ' + players + '/' + maxPlayers;
 
-        if (lastWinner) {
+        if (gameStatus.lastWinner) {
             leaderboard.push({
                 id: null,
-                name: 'WINNER: ' + lastWinner.name
+                name: 'WINNER: ' + gameStatus.lastWinner.name
             });
         }
 
