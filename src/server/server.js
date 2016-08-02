@@ -446,34 +446,35 @@ io.on('connection', function (socket) {
     });
     socket.on('2', function(virusCell) {
         function splitCell(cell) {
-            if(cell.mass >= c.defaultPlayerMass*2) {
-                cell.mass = cell.mass/2;
-                cell.radius = util.massToRadius(cell.mass);
-                currentPlayer.cells.push({
-                    mass: cell.mass,
-                    x: cell.x,
-                    y: cell.y,
-                    radius: cell.radius,
-                    speed: 25
-                });
-            }
+            cell.mass = cell.mass/2;
+            cell.radius = util.massToRadius(cell.mass);
+            currentPlayer.cells.push({
+                mass: cell.mass,
+                x: cell.x,
+                y: cell.y,
+                radius: cell.radius,
+                speed: 25
+            });
+            currentPlayer.lastSplit = new Date().getTime();
         }
 
-        if(currentPlayer.cells.length < c.limitSplit && currentPlayer.massTotal >= c.defaultPlayerMass*2) {
-            //Split single cell from virus
-            if(virusCell) {
-              splitCell(currentPlayer.cells[virusCell]);
+        if (currentPlayer.cells.length < c.limitSplit) {
+            // Split all cells when colide with virus
+            if (virusCell !== undefined) {
+                for (var c_idx=0; c_idx < currentPlayer.cells.length; c_idx++) {
+                    var cell = currentPlayer.cells[c_idx];
+                    if (cell.mass > c.limitSplit) {
+                        splitCell(cell);
+                    }
+                }
             }
-            else {
-              //Split all cells
-              if(currentPlayer.cells.length < c.limitSplit && currentPlayer.massTotal >= c.defaultPlayerMass*2) {
-                  var numMax = currentPlayer.cells.length;
-                  for(var d=0; d<numMax; d++) {
-                      splitCell(currentPlayer.cells[d]);
-                  }
-              }
+            //Split all cells (user split command)
+            else if (currentPlayer.massTotal >= c.defaultPlayerMass*2) {
+                var numMax = currentPlayer.cells.length;
+                for(var d=0; d<numMax; d++) {
+                    splitCell(currentPlayer.cells[d]);
+                }
             }
-            currentPlayer.lastSplit = new Date().getTime();
         }
     });
 });
