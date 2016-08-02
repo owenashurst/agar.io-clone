@@ -32,5 +32,5 @@ module.exports = {
     backgroundColor: '#f2fbff',
     lineColor: '#000000',
 
-    showFPS: true,
+    showFPS: false,
 };
