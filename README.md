@@ -89,6 +89,14 @@ docker run -it -p 3000:3000 agarioclone_agar
 
 ---
 
+## Playing with Robots
+
+Just run `node src/robot/index.js` and all .js files (robots) on `src/robot/robots/` will join the game.
+
+How to make a robot? Look at the example on `src/robot/robots/example.js` and you will get it, hope so :)
+
+---
+
 ## FAQ
 1. **What is this game?**
 

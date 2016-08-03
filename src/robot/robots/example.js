@@ -6,14 +6,16 @@ var target_food;
 var dims;
 
 module.exports = {
+    // The robots name
     name: 'ExampleRobot',
 
-    // this function is called just once and it provides the board size
+    // This function is called just once and it provides the board size
     game_setup: function(data) {
         // example of data: { gameWidth: 1920, gameHeight: 1080 }
         dims = { width: data.gameWidth, height: data.gameHeight };
     },
 
+    // MANDATORY FUNCTION
     // this function is called approximately 60 times per second. It better be
     // fast, or you will loose some moves.
     step: function(userData, foodsList, massList, virusList) {
