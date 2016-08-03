@@ -34,16 +34,20 @@ module.exports = {
         });
 
         socket.on('gameSetup', function(data) {
-            console.log('gamesetup', data);
+            if (isFunction(controller.game_setup)) {
+                controller.game_setup(data);
+            }
         });
 
         socket.on('serverTellPlayerMove', function (userData, foodsList, massList, virusList) {
-            var move = controller.step(userData, foodsList, massList, virusList);
+            var move = controller.step(userData[0], foodsList, massList, virusList);
             //console.log('[INFO] Robot name move:', move);
 
-            if (move && move.x && move.y) {
+            if (move && !isNaN(move.x) && !isNaN(move.y)) {
                 socket.emit('0', move);
-            } else if (move && move == 'split') {
+            } else if (move === 'fire-food') {
+                socket.emit('1');
+            } else if (move === 'split') {
                 socket.emit('2');
             } else {
                 console.log('[WARN] Robot name, invalid move:', move);
@@ -51,7 +55,9 @@ module.exports = {
         });
 
         socket.on('leaderboard', function (data) {
-            leaderboard = data.leaderboard;
+            if (isFunction(controller.leaderboard)) {
+                controller.leaderboard(data.leaderboard);
+            }
         });
 
         // Death.
@@ -64,8 +70,7 @@ module.exports = {
         });
 
         socket.on('virusSplit', function (virusCell) {
-            //socket.emit('2', virusCell);
-            console.log('virusSplit');
+            socket.emit('2', virusCell);
         });
 
         socket.on('disconnect', function () {
@@ -92,6 +97,9 @@ module.exports = {
 
         return socket;
     }
-
-
 };
+
+function isFunction(functionToCheck) {
+    var getType = {};
+    return functionToCheck && getType.toString.call(functionToCheck) === '[object Function]';
+}
