@@ -589,8 +589,6 @@ function tickPlayer(currentPlayer) {
         var aUser = collision.aUser;
         var bUser = collision.bUser;
         var distance = util.distance(aUser, bUser);
-        console.log('collided A', aUser);
-        console.log('collided B', bUser);
         if (aUser.mass > bUser.mass * 1.1 && aUser.radius > distance*1.75) {
             console.log('[DEBUG] Killing user: ' + bUser.id);
             console.log('[DEBUG] Collision info:');
