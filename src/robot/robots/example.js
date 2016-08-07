@@ -18,13 +18,13 @@ module.exports = {
     // MANDATORY FUNCTION
     // this function is called approximately 60 times per second. It better be
     // fast, or you will loose some moves.
-    step: function(userData, foodsList, massList, virusList) {
-        console.log(massList);
+    step: function(playerData, userData, foodsList, massList, virusList) {
+
         var target_position = {x: 0, y:0};
         var closest_food;
 
         // get biggest cell
-        var biggest_cell = get_my_biggest_cell(userData.cells);
+        var biggest_cell = get_my_biggest_cell(playerData.cells);
 
         // get a new target food if we don't have a target or it was eaten already
         if (!target_food || was_eaten(target_food, foodsList)) {
