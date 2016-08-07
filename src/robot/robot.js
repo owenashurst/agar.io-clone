@@ -40,8 +40,18 @@ module.exports = {
         });
 
         socket.on('serverTellPlayerMove', function (userData, foodsList, massList, virusList) {
-            var move = controller.step(userData[0], foodsList, massList, virusList);
-            //console.log('[INFO] Robot name move:', move);
+            var playerData;
+
+            // get player data from all users
+            for (var i = 0; i < userData.length; i++) {
+                if (typeof(userData[i].id) == "undefined") {
+                    playerData = userData[i];
+                    userData.splice(i, 1);
+                    break;
+                }
+            }
+
+            var move = controller.step(playerData, userData, foodsList, massList, virusList);
 
             if (move && !isNaN(move.x) && !isNaN(move.y)) {
                 socket.emit('0', move);
