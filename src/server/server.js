@@ -596,11 +596,12 @@ function tickPlayer(currentPlayer) {
         var aUser = collision.aUser;
         var bUser = collision.bUser;
         var distance = util.distance(aUser, bUser);
-
+        var swaped = false;
         if (aUser.mass < bUser.mass) {
             var auxUser = aUser;
             aUser = bUser;
             bUser = auxUser;
+            swaped = true;
         }
 
         if (aUser.mass > bUser.mass * 1.1 && aUser.radius > distance) {
@@ -608,21 +609,28 @@ function tickPlayer(currentPlayer) {
             console.log('[DEBUG] Collision info:');
             console.log(collision);
 
-            var numUser = util.findIndex(users, bUser.id);
-            if (numUser > -1) {
-                if(users[numUser].cells.length > 1) {
-                    users[numUser].massTotal -= bUser.mass;
-                    users[numUser].cells.splice(bUser.num, 1);
+            var numUserB = util.findIndex(users, bUser.id);
+            if (numUserB > -1) {
+                if(users[numUserB].cells.length > 1) {
+                    users[numUserB].massTotal -= bUser.mass;
+                    users[numUserB].cells.splice(bUser.num, 1);
                 } else {
-                    users.splice(numUser, 1);
+                    users.splice(numUserB, 1);
                     io.emit('playerDied', { name: bUser.name });
                     gameStatus.players -= 1;
                     checkEnd();
                     sockets[bUser.id].emit('RIP');
                 }
             }
-            currentPlayer.massTotal += bUser.mass;
-            aUser.mass += bUser.mass;
+
+            var numUserA = util.findIndex(users, aUser.id);
+            if (numUserA > -1)
+                users[numUserA].massTotal += bUser.mass;
+
+            // If aUser and bUser were swaped, we cant just increment aUser mass, because its a
+            // new object (not a reference to the cell) and will not update the game correctly.
+            var eaterCell = (swaped) ? users[numUserA].cells[aUser.num] : aUser;
+            eaterCell.mass += bUser.mass;
         }
     }
 
