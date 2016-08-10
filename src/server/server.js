@@ -489,10 +489,12 @@ io.on('connection', function (socket) {
                 }
             }
             //Split all cells (user split command)
-            else if (currentPlayer.massTotal >= c.defaultPlayerMass*2) {
+            else {
                 var numMax = currentPlayer.cells.length;
                 for(var d=0; d<numMax; d++) {
-                    splitCell(currentPlayer.cells[d]);
+                    if(currentPlayer.cells[d].mass >= c.defaultPlayerMass*2) {
+                        splitCell(currentPlayer.cells[d]);
+                    }
                 }
             }
         }
@@ -556,31 +558,36 @@ function tickPlayer(currentPlayer) {
         return false;
     }
 
-    function check(user) {
+    function check(params) {
+        var user = params.user;
+        var cell = params.cell;
+
         if (user.id === currentPlayer.id) {
             return true;
         }
 
-        for(var i=0; i<user.cells.length; i++) {
-            if(user.cells[i].mass > c.defaultPlayerMass) {
-                var response = new SAT.Response();
-                var vector = new V(user.cells[i].x, user.cells[i].y);
-                var circle = new C(vector, user.cells[i].radius);
-                var collided = SAT.testCircleCircle(playerCircle, circle, response);
-                if (collided) {
-                    response.aUser = currentCell;
-                    response.bUser = {
-                        id: user.id,
-                        name: user.name,
-                        x: user.cells[i].x,
-                        y: user.cells[i].y,
-                        num: i,
-                        mass: user.cells[i].mass
-                    };
-                    playerCollisions.push(response);
-                }
+        if(cell.mass > c.defaultPlayerMass) {
+            var response = new SAT.Response();
+            var vector = new V(cell.x, cell.y);
+            var circle = new C(vector, cell.radius);
+            var collided = SAT.testCircleCircle(playerCircle, circle, response);
+            var i = params.index;
+            if (collided) {
+                response.aUser = currentCell;
+                response.aUser.id = currentPlayer.id;
+                response.bUser = {
+                    num: i,
+                    id: user.id,
+                    name: user.name,
+                    x: cell.x,
+                    y: cell.y,
+                    mass: cell.mass,
+                    radius: cell.radius
+                };
+                playerCollisions.push(response);
             }
         }
+
         return true;
     }
 
@@ -589,7 +596,14 @@ function tickPlayer(currentPlayer) {
         var aUser = collision.aUser;
         var bUser = collision.bUser;
         var distance = util.distance(aUser, bUser);
-        if (aUser.mass > bUser.mass * 1.1 && aUser.radius > distance*1.75) {
+
+        if (aUser.mass < bUser.mass) {
+            var auxUser = aUser;
+            aUser = bUser;
+            bUser = auxUser;
+        }
+
+        if (aUser.mass > bUser.mass * 1.1 && aUser.radius > distance) {
             console.log('[DEBUG] Killing user: ' + bUser.id);
             console.log('[DEBUG] Collision info:');
             console.log(collision);
@@ -609,6 +623,23 @@ function tickPlayer(currentPlayer) {
             }
             currentPlayer.massTotal += bUser.mass;
             aUser.mass += bUser.mass;
+        }
+    }
+
+    function forEachCell(user) {
+        var length = user.cells.length;
+
+        for (var i=0; i<length; ++i) {
+            var cell = user.cells[i];
+            tree.put({
+                x: cell.x - cell.radius,
+                y: cell.y - cell.radius,
+                w: cell.radius * 2,
+                h: cell.radius * 2,
+                user: user,
+                cell: cell,
+                index: i
+            });
         }
     }
 
@@ -655,10 +686,11 @@ function tickPlayer(currentPlayer) {
         playerCircle.r = currentCell.radius;
 
         tree.clear();
-        users.forEach(tree.put);
+
+        users.forEach(forEachCell);
 
         var playerCollisions = [];
-        var otherUsers =  tree.get(currentPlayer, check);
+        var otherUsers = tree.get(currentPlayer, check);
         playerCollisions.forEach(collisionCheck);
     }
 }
