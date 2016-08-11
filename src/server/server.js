@@ -27,22 +27,21 @@ var sockets = {};
 var leaderboard = [];
 var leaderboardChanged = false;
 
-
 var V = SAT.Vector;
 var C = SAT.Circle;
 
 var initMassLog = util.log(c.defaultPlayerMass, c.slowBase);
 
 // If hunger games, need to wait for the number of players
-var shouldRun = c.gameMode !== 'hunger-games';
-var startTime = shouldRun? new Date().getTime : undefined;
+var shouldRun = c.gameMode !== 'robot';
+var startTime = shouldRun? new Date().getTime() : undefined;
 var gameStatus = {
     mode: c.gameMode,
     running: shouldRun,
     startTime: startTime,
-    timeLimit: c.hungerGames.timeLimit || c.forPoints.timeLimit, //FIXME: xunxo
-    maxPlayers: c.hungerGames.maxPlayers,
-    maxMass: c.forPoints.maxMass,
+    timeLimit: c.robotModeConf.timeLimit * 1000, // seconds to miliseconds
+    maxPlayers: c.robotModeConf.maxPlayers,
+    maxMass: c.robotModeConf.maxMass,
     players: 0,
     spectators: 0,
     lastWinner: undefined,
@@ -283,7 +282,7 @@ io.on('connection', function (socket) {
         } else if (!util.validNick(player.name)) {
             socket.emit('kick', 'Invalid username.');
             socket.disconnect();
-        } else if (gameStatus.mode == 'hunger-games' && type === 'player' && gameStatus.running) {
+        } else if (gameStatus.mode == 'robot' && type === 'player' && gameStatus.running) {
             // TODO: for now players entering an ongoing hunger games game are
             // kicked. The right find would be to let them enter a pool and wait
             // for the next game.
@@ -330,7 +329,7 @@ io.on('connection', function (socket) {
             });
 
             // start game if we have enough players
-            if (gameStatus.mode == 'hunger-games' && gameStatus.players == gameStatus.maxPlayers) {
+            if (gameStatus.mode == 'robot' && gameStatus.players == gameStatus.maxPlayers) {
                 startGame();
             }
 
@@ -367,7 +366,6 @@ io.on('connection', function (socket) {
         }
 
         socket.broadcast.emit('playerDisconnect', { name: currentPlayer.name });
-        checkEnd();
     });
 
     socket.on('playerChat', function(data) {
@@ -517,7 +515,8 @@ function startGame() {
 }
 
 function finishGame(reason) {
-    users.sort( function(a, b) { return b.massTotal - a.massTotal; });
+    console.log('finish', reason);
+    sortUsersByPoints();
     gameStatus.lastWinner = users[0];
     gameStatus.running = false;
     gameStatus.startTime = undefined;
@@ -526,10 +525,10 @@ function finishGame(reason) {
 
 function checkEnd() {
 
-    if (gameStatus.mode === 'hunger-games' && gameStatus.running) {
+    if (gameStatus.mode === 'robot' && gameStatus.running) {
         // time is over?
         var elapsed = new Date().getTime() - gameStatus.startTime;
-        if (gameStatus.timeLimit && elapsed >= gameStatus.timeLimit) {
+        if (gameStatus.timeLimit > 0 && elapsed >= gameStatus.timeLimit) {
             finishGame('time-limit');
         // do we have a winner?
     } else if (gameStatus.players == 1) {
@@ -627,7 +626,6 @@ function tickPlayer(currentPlayer) {
                     users.splice(numUserB, 1);
                     io.emit('playerDied', { name: bUser.name });
                     gameStatus.players -= 1;
-                    checkEnd();
                     sockets[bUser.id].emit('RIP');
                 }
             }
@@ -718,18 +716,18 @@ function tickPlayer(currentPlayer) {
 }
 
 function checkPoint(player) {
-    if (gameStatus.mode === 'for-points' || currentPlayer.massTotal >= gameStatus.maxMass) {
+    if (gameStatus.mode === 'robot' && player.massTotal >= gameStatus.maxMass) {
 
-        currentPlayer.cells = [{
+        player.cells = [{
             mass: c.defaultPlayerMass,
             x: player.x,
             y: player.y,
             radius: util.massToRadius(c.defaultPlayerMass)
         }];
 
-        currentPlayer.massTotal = c.defaultPlayerMass;
+        player.massTotal = c.defaultPlayerMass;
 
-        currentPlayer.points += 1;
+        player.points += 1;
 
     }
 
@@ -745,9 +743,24 @@ function moveloop() {
     for (var i = 0; i < users.length; i++) {
         tickPlayer(users[i]);
     }
+
+    checkEnd();
+
     for (i=0; i < massFood.length; i++) {
         if(massFood[i].speed > 0) moveMass(massFood[i]);
     }
+}
+
+function sortUsersByPoints() {
+    var score_attr;
+    if (gameStatus.mode === 'robot') {
+        score_attr = 'points';
+        users.sort( function(a, b) { return b.points - a.points; });
+    } else {
+        score_attr = 'massTotal';
+        users.sort( function(a, b) { return b.massTotal - a.massTotal; });
+    }
+    return score_attr;
 }
 
 function gameloop() {
@@ -777,14 +790,7 @@ function gameloop() {
 
         leaderboardChanged = true;
     } else if (users.length > 0) {
-        var score_attr;
-        if (gameStatus.mode === 'for-points') {
-            score_attr = 'points';
-            users.sort( function(a, b) { return b.points - a.points; });
-        } else {
-            score_attr = 'massTotal';
-            users.sort( function(a, b) { return b.massTotal - a.massTotal; });
-        }
+        var score_attr = sortUsersByPoints();
 
         var topUsers = [];
 
