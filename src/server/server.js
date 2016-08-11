@@ -40,8 +40,9 @@ var gameStatus = {
     mode: c.gameMode,
     running: shouldRun,
     startTime: startTime,
-    timeLimit: c.hungerGames.timeLimit,
+    timeLimit: c.hungerGames.timeLimit || c.forPoints.timeLimit, //FIXME: xunxo
     maxPlayers: c.hungerGames.maxPlayers,
+    maxMass: c.forPoints.maxMass,
     players: 0,
     spectators: 0,
     lastWinner: undefined,
@@ -601,12 +602,12 @@ function tickPlayer(currentPlayer) {
         var aUser = collision.aUser;
         var bUser = collision.bUser;
         var distance = util.distance(aUser, bUser);
-        var swaped = false;
+        var swapped = false;
         if (aUser.mass < bUser.mass) {
             var auxUser = aUser;
             aUser = bUser;
             bUser = auxUser;
-            swaped = true;
+            swapped = true;
         }
 
         if (aUser.mass > bUser.mass * 1.1 && aUser.radius > distance) {
@@ -629,12 +630,14 @@ function tickPlayer(currentPlayer) {
             }
 
             var numUserA = util.findIndex(users, aUser.id);
-            if (numUserA > -1)
+            if (numUserA > -1) {
                 users[numUserA].massTotal += bUser.mass;
+                checkPoint(users[numUserA]);
+            }
 
-            // If aUser and bUser were swaped, we cant just increment aUser mass, because its a
+            // If aUser and bUser were swapped, we cant just increment aUser mass, because its a
             // new object (not a reference to the cell) and will not update the game correctly.
-            var eaterCell = (swaped) ? users[numUserA].cells[aUser.num] : aUser;
+            var eaterCell = (swapped) ? users[numUserA].cells[aUser.num] : aUser;
             eaterCell.mass += bUser.mass;
         }
     }
@@ -708,6 +711,24 @@ function tickPlayer(currentPlayer) {
     }
 }
 
+function checkPoint(player) {
+    if (gameStatus.gameMode === 'for-points'
+        || player.massTotal >= gameStatus.maxMass) {
+
+        player.cells = [{
+            mass: c.defaultPlayerMass,
+            x: player.x,
+            y: player.y,
+            radius: util.massToRadius(c.defaultPlayerMass);
+        }];
+
+        player.massTotal = c.defaultPlayerMass;
+
+    }
+
+    return true;
+}
+
 function moveloop() {
 
     if (!gameStatus.running) {
@@ -748,6 +769,7 @@ function gameloop() {
         leaderboardChanged = true;
     }
     else if (users.length > 0) {
+        
         users.sort( function(a, b) { return b.massTotal - a.massTotal; });
 
         var topUsers = [];

@@ -25,6 +25,10 @@
         "maxPlayers": 2,
         "timeLimit": 300
     },
+    "forPoints": {
+        "maxMass": 200,
+        "timeLimit": 300
+    },
     "gameMass": 5000,
     "maxFood": 80,
     "maxVirus": 5,
