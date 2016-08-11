@@ -527,6 +527,8 @@ function checkEnd() {
 
     if (gameStatus.mode === 'robot' && gameStatus.running) {
         // time is over?
+        // TODO: it's not necessary to check for this all the time. It could be
+        // a setInterval(startTime + gameStatus.timeLimit, ...)
         var elapsed = new Date().getTime() - gameStatus.startTime;
         if (gameStatus.timeLimit > 0 && elapsed >= gameStatus.timeLimit) {
             finishGame('time-limit');
