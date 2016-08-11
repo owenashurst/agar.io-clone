@@ -91,7 +91,7 @@ function removeFood(toRem) {
 }
 
 function movePlayer(player) {
-    var x =0,y =0;
+    var x=0,y=0;
     for(var i=0; i<player.cells.length; i++)
     {
         var target = {
@@ -101,16 +101,21 @@ function movePlayer(player) {
         var dist = Math.sqrt(Math.pow(target.y, 2) + Math.pow(target.x, 2));
         var deg = Math.atan2(target.y, target.x);
         var slowDown = 1;
-        if(player.cells[i].speed <= 6.25) {
+        if(player.cells[i].speed > c.defaultSpeed) {
+            player.cells[i].speed -= c.disacceleration;
+        } else {
+            // Since split cell - n*desacceleration might not equal to c.defaultSpeed,
+            // we have to make sure the cell wont have less than the default speed
+            // (before calculating the slow speed from having more mass than 10).
+            player.cells[i].speed = c.defaultSpeed;
+        }
+        if(player.cells[i].speed <= c.defaultSpeed) {
             slowDown = util.log(player.cells[i].mass, c.slowBase) - initMassLog + 1;
         }
 
-        var deltaY = player.cells[i].speed * Math.sin(deg)/ slowDown;
-        var deltaX = player.cells[i].speed * Math.cos(deg)/ slowDown;
+        var deltaY = player.cells[i].speed * Math.sin(deg) / slowDown;
+        var deltaX = player.cells[i].speed * Math.cos(deg) / slowDown;
 
-        if(player.cells[i].speed > 6.25) {
-            player.cells[i].speed -= 0.5;
-        }
         if (dist < (50 + player.cells[i].radius)) {
             deltaY *= dist / (50 + player.cells[i].radius);
             deltaX *= dist / (50 + player.cells[i].radius);
@@ -174,7 +179,7 @@ function moveMass(mass) {
     var deltaY = mass.speed * Math.sin(deg);
     var deltaX = mass.speed * Math.cos(deg);
 
-    mass.speed -= 0.5;
+    mass.speed -= c.disacceleration;
     if(mass.speed < 0) {
         mass.speed = 0;
     }
@@ -473,7 +478,7 @@ io.on('connection', function (socket) {
                 x: cell.x,
                 y: cell.y,
                 radius: cell.radius,
-                speed: 25
+                speed: c.splitSpeed
             });
             currentPlayer.lastSplit = new Date().getTime();
         }
@@ -686,7 +691,7 @@ function tickPlayer(currentPlayer) {
         }
 
         if(typeof(currentCell.speed) == "undefined")
-            currentCell.speed = 6.25;
+            currentCell.speed = c.defaultSpeed;
         masaGanada += (foodEaten.length * c.foodMass);
         currentCell.mass += masaGanada;
         currentPlayer.massTotal += masaGanada;
