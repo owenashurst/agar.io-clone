@@ -20,14 +20,14 @@
     "gameWidth": 1920,
     "gameHeight": 1080,
     "adminPass": "DEFAULT",
-    "gameMode": "free-for-all",
+    "gameMode": "for-points",
     "hungerGames": {
         "maxPlayers": 2,
         "timeLimit": 300
     },
     "forPoints": {
-        "maxMass": 200,
-        "timeLimit": 300
+        "maxMass": 100,
+        "timeLimit": 600
     },
     "gameMass": 5000,
     "maxFood": 80,

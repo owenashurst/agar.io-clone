@@ -196,6 +196,7 @@ function setupSocket(socket) {
     socket.on('gameSetup', function(data) {
         global.gameWidth = data.gameWidth;
         global.gameHeight = data.gameHeight;
+        global.gameMode = data.gameMode;
         resize();
     });
 
@@ -213,20 +214,20 @@ function setupSocket(socket) {
 
     socket.on('leaderboard', function (data) {
         leaderboard = data.leaderboard;
+
+        var name = '';
         var status = '<span class="title">Leaderboard</span>';
         for (var i = 0; i < leaderboard.length; i++) {
+            name = leaderboard[i].name;
+            name = name.length !== 0 ? name : 'Unnamed cell';
             status += '<br />';
-            if (leaderboard[i].id == player.id){
-                if(leaderboard[i].name.length !== 0)
-                    status += '<span class="me">' + (i + 1) + '. ' + leaderboard[i].name + "</span>";
-                else
-                    status += '<span class="me">' + (i + 1) + ". An unnamed cell</span>";
+            if (leaderboard[i].id == player.id) {
+                status += '<span class="me">' + (i + 1) + '. ' + name + "</span>";
             } else {
-                if(leaderboard[i].name.length !== 0)
-                    status += (i + 1) + '. ' + leaderboard[i].name;
-                else
-                    status += (i + 1) + '. An unnamed cell';
+                status += (i + 1) + '. ' + name;
             }
+
+            status += ' - ' + leaderboard[i].score;
         }
         //status += '<br />Players: ' + data.players;
         document.getElementById('status').innerHTML = status;
