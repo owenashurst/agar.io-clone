@@ -212,6 +212,26 @@ function setupSocket(socket) {
         window.chat.addSystemLine('{GAME} - <b>' + (data.name.length < 1 ? 'An unnamed cell' : data.name) + '</b> joined.');
     });
 
+    socket.on('checkPoint', function (data) {
+        window.chat.addSystemLine('{GAME} - Player <b>' + (data.length < 1 ? 'An unnamed cell' : data) + '</b> got a point!');
+    });
+
+    socket.on('waitingForPlayer', function (data) {
+        if(data > 0) {
+            var plural = (data === 1) ? 's' : '';
+            window.chat.addSystemLine('{GAME} - Waiting for ' + data + ' player' + plural + '.');
+        } else {
+            window.chat.addSystemLine('{GAME} - Game starting...');
+        }
+    });
+
+    socket.on('ranking', function (data) {
+        window.chat.addSystemLine('{GAME} - Game finished. Ranking:<br>');
+        data.forEach(function(element, index) {
+            window.chat.addSystemLine((index+1) + ' : ' + element.name + ' - ' + element.points + ' points and ' + element.mass + ' mass.');
+        });
+    });
+
     socket.on('leaderboard', function (data) {
         leaderboard = data.leaderboard;
 

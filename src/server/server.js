@@ -19,6 +19,7 @@ var quadtree = require('simple-quadtree');
 var tree = quadtree(0, 0, c.gameWidth, c.gameHeight);
 
 var users = [];
+var scores = [];
 var massFood = [];
 var food = [];
 var virus = [];
@@ -322,6 +323,10 @@ io.on('connection', function (socket) {
 
             io.emit('playerJoin', { name: currentPlayer.name });
 
+            if(gameStatus.players < gameStatus.maxPlayers) {
+                io.emit('waitingForPlayer', gameStatus.maxPlayers - gameStatus.players);
+            }
+
             socket.emit('gameSetup', {
                 gameWidth: c.gameWidth,
                 gameHeight: c.gameHeight,
@@ -453,7 +458,7 @@ io.on('connection', function (socket) {
                 else
                     masa = currentPlayer.cells[i].mass*0.1;
                 currentPlayer.cells[i].mass -= masa;
-                currentPlayer.massTotal -=masa;
+                currentPlayer.massTotal -= masa;
                 massFood.push({
                     id: currentPlayer.id,
                     num: i,
@@ -495,7 +500,7 @@ io.on('connection', function (socket) {
                     }
                 }
             }
-            //Split all cells (user split command)
+            // Split all cells (user split command)
             else {
                 var numMax = currentPlayer.cells.length;
                 for(var d=0; d<numMax; d++) {
@@ -516,7 +521,11 @@ function startGame() {
 
 function finishGame(reason) {
     console.log('finish', reason);
+    users.forEach(function(element) {
+        scores.push({ name: element.name, points: element.points, mass: element.massTotal });
+    });
     sortUsersByPoints();
+    io.emit('ranking', scores);
     gameStatus.lastWinner = users[0];
     gameStatus.running = false;
     gameStatus.startTime = undefined;
@@ -625,6 +634,8 @@ function tickPlayer(currentPlayer) {
                     users[numUserB].massTotal -= bUser.mass;
                     users[numUserB].cells.splice(bUser.num, 1);
                 } else {
+                    var user = users[numUserB];
+                    scores.push({ name: user.name, points: user.points, mass: user.massTotal });
                     users.splice(numUserB, 1);
                     io.emit('playerDied', { name: bUser.name });
                     gameStatus.players -= 1;
@@ -731,6 +742,7 @@ function checkPoint(player) {
 
         player.points += 1;
 
+        io.emit('checkPoint', player.name);
     }
 
     return true;
@@ -757,10 +769,16 @@ function sortUsersByPoints() {
     var score_attr;
     if (gameStatus.mode === 'robot') {
         score_attr = 'points';
-        users.sort( function(a, b) { return b.points - a.points; });
+        scores.sort( function(a, b) {
+            if(a.points != b.points) {
+                return b.points - a.points;
+            } else {
+                return b.mass - a.mass;
+            }
+        });
     } else {
         score_attr = 'massTotal';
-        users.sort( function(a, b) { return b.massTotal - a.massTotal; });
+        scores.sort( function(a, b) { return b.massTotal - a.massTotal; });
     }
     return score_attr;
 }
@@ -795,6 +813,18 @@ function gameloop() {
         var score_attr = sortUsersByPoints();
 
         var topUsers = [];
+
+        if (gameStatus.mode === 'robot') {
+            users.sort( function(a, b) {
+                if(a.points != b.points) {
+                    return b.points - a.points;
+                } else {
+                    return b.massTotal - a.massTotal;
+                }
+            });
+        } else {
+            users.sort( function(a, b) { return b.massTotal - a.massTotal; });
+        }
 
         for (var i = 0; i < Math.min(10, users.length); i++) {
             if (users[i].type == 'player') {
