@@ -89,17 +89,17 @@ module.exports = {
         });
 
         socket.on('playerDied', function (data) {
-            var name = (data.name.length < 1 ? 'An unnamed cell' : data.name);
+            var name = (data.name? 'An unnamed cell' : data.name);
             console.log('{GAME} - <b>' + name + '</b> was eaten.');
         });
 
         socket.on('playerDisconnect', function (data) {
-            var name = (data.name.length < 1 ? 'An unnamed cell' : data.name);
+            var name = (data.name? 'An unnamed cell' : data.name);
             console.log('{GAME} - <b>' + name + '</b> disconnected.');
         });
 
         socket.on('playerJoin', function (data) {
-            var name = (data.name.length < 1 ? 'An unnamed cell' : data.name);
+            var name = (data.name? 'An unnamed cell' : data.name);
             console.log('{GAME} - <b>' + name + '</b> joined.');
         });
 
