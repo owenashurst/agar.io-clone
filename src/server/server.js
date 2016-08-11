@@ -102,7 +102,7 @@ function movePlayer(player) {
         var deg = Math.atan2(target.y, target.x);
         var slowDown = 1;
         if(player.cells[i].speed > c.defaultSpeed) {
-            player.cells[i].speed -= c.disacceleration;
+            player.cells[i].speed -= c.slowdown;
         } else {
             // Since split cell - n*desacceleration might not equal to c.defaultSpeed,
             // we have to make sure the cell wont have less than the default speed
@@ -179,7 +179,7 @@ function moveMass(mass) {
     var deltaY = mass.speed * Math.sin(deg);
     var deltaX = mass.speed * Math.cos(deg);
 
-    mass.speed -= c.disacceleration;
+    mass.speed -= c.slowdown;
     if(mass.speed < 0) {
         mass.speed = 0;
     }

@@ -5,7 +5,7 @@
     "limitSplit": 16,
     "splitSpeed": 25,
     "defaultSpeed": 6.25,
-    "disacceleration": 0.5,
+    "slowdown": 0.5,
     "defaultPlayerMass": 10,
 	"virus": {
     "fill": "#33ff33",
