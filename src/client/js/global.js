@@ -3,6 +3,7 @@ module.exports = {
     KEY_ESC: 27,
     KEY_ENTER: 13,
     KEY_CHAT: 13,
+    KEY_TOGGLE_CHAT: 99,
     KEY_FIREFOOD: 119,
     KEY_SPLIT: 32,
     KEY_LEFT: 37,

@@ -148,6 +148,9 @@ class Canvas {
         else if (key === global.KEY_CHAT) {
             document.getElementById('chatInput').focus();
         }
+        else if (key === global.KEY_TOGGLE_CHAT) {
+            $('#chatbox').toggle();
+        }
     }
 }
 

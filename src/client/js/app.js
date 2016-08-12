@@ -190,6 +190,9 @@ function setupSocket(socket) {
         if (global.mobile) {
             document.getElementById('gameAreaWrapper').removeChild(document.getElementById('chatbox'));
         }
+        if (global.playerType === 'spectate') {
+            $('#chatbox').hide();
+        }
 		c.focus();
     });
 
