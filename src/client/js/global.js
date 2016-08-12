@@ -3,6 +3,7 @@ module.exports = {
     KEY_ESC: 27,
     KEY_ENTER: 13,
     KEY_CHAT: 13,
+    KEY_TOGGLE_CHAT: 99,
     KEY_FIREFOOD: 119,
     KEY_SPLIT: 32,
     KEY_LEFT: 37,
@@ -13,7 +14,6 @@ module.exports = {
     spin: -Math.PI,
     enemySpin: -Math.PI,
     mobile: false,
-    foodSides: 10,
     virusSides: 20,
 
     // Canvas
@@ -29,7 +29,9 @@ module.exports = {
     kicked: false,
     continuity: false,
     startPingTime: 0,
-    toggleMassState: 0,
+    toggleMassState: 1,
     backgroundColor: '#f2fbff',
     lineColor: '#000000',
+
+    showFPS: false,
 };

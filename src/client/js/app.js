@@ -156,7 +156,7 @@ $( "#split" ).click(function() {
 // socket stuff.
 function setupSocket(socket) {
     // Handle ping.
-    socket.on('pong', function () {
+    socket.on('polo', function () {
         var latency = Date.now() - global.startPingTime;
         debug('Latency: ' + latency + 'ms');
         window.chat.addSystemLine('Ping: ' + latency + 'ms');
@@ -190,12 +190,16 @@ function setupSocket(socket) {
         if (global.mobile) {
             document.getElementById('gameAreaWrapper').removeChild(document.getElementById('chatbox'));
         }
+        if (global.playerType === 'spectate') {
+            $('#chatbox').hide();
+        }
 		c.focus();
     });
 
     socket.on('gameSetup', function(data) {
         global.gameWidth = data.gameWidth;
         global.gameHeight = data.gameHeight;
+        global.gameMode = data.gameMode;
         resize();
     });
 
@@ -211,22 +215,42 @@ function setupSocket(socket) {
         window.chat.addSystemLine('{GAME} - <b>' + (data.name.length < 1 ? 'An unnamed cell' : data.name) + '</b> joined.');
     });
 
+    socket.on('checkPoint', function (data) {
+        window.chat.addSystemLine('{GAME} - Player <b>' + (data.length < 1 ? 'An unnamed cell' : data) + '</b> got a point!');
+    });
+
+    socket.on('waitingForPlayer', function (data) {
+        if(data > 0) {
+            var plural = (data === 1) ? 's' : '';
+            window.chat.addSystemLine('{GAME} - Waiting for ' + data + ' player' + plural + '.');
+        } else {
+            window.chat.addSystemLine('{GAME} - Game starting...');
+        }
+    });
+
+    socket.on('ranking', function (data) {
+        window.chat.addSystemLine('{GAME} - Game finished. Ranking:<br>');
+        data.forEach(function(element, index) {
+            window.chat.addSystemLine((index+1) + ' : ' + element.name + ' - ' + element.points + ' points and ' + element.mass + ' mass.');
+        });
+    });
+
     socket.on('leaderboard', function (data) {
         leaderboard = data.leaderboard;
+
+        var name = '';
         var status = '<span class="title">Leaderboard</span>';
         for (var i = 0; i < leaderboard.length; i++) {
+            name = leaderboard[i].name;
+            name = name.length !== 0 ? name : 'Unnamed cell';
             status += '<br />';
-            if (leaderboard[i].id == player.id){
-                if(leaderboard[i].name.length !== 0)
-                    status += '<span class="me">' + (i + 1) + '. ' + leaderboard[i].name + "</span>";
-                else
-                    status += '<span class="me">' + (i + 1) + ". An unnamed cell</span>";
+            if (leaderboard[i].id == player.id) {
+                status += '<span class="me">' + (i + 1) + '. ' + name + "</span>";
             } else {
-                if(leaderboard[i].name.length !== 0)
-                    status += (i + 1) + '. ' + leaderboard[i].name;
-                else
-                    status += (i + 1) + '. An unnamed cell';
+                status += (i + 1) + '. ' + name;
             }
+
+            status += ' - ' + leaderboard[i].score;
         }
         //status += '<br />Players: ' + data.players;
         document.getElementById('status').innerHTML = status;
@@ -303,11 +327,16 @@ function drawCircle(centerX, centerY, radius, sides) {
 
     graph.beginPath();
 
-    for (var i = 0; i < sides; i++) {
-        theta = (i / sides) * 2 * Math.PI;
-        x = centerX + radius * Math.sin(theta);
-        y = centerY + radius * Math.cos(theta);
-        graph.lineTo(x, y);
+    // viruses should look a bit different
+    if (sides) {
+        for (var i = 0; i < sides; i++) {
+            theta = (i / sides) * 2 * Math.PI;
+            x = centerX + radius * Math.sin(theta);
+            y = centerY + radius * Math.cos(theta);
+            graph.lineTo(x, y);
+        }
+    } else {
+        graph.arc(centerX, centerY, radius, 0, 2*Math.PI);
     }
 
     graph.closePath();
@@ -321,7 +350,7 @@ function drawFood(food) {
     graph.lineWidth = foodConfig.border;
     drawCircle(food.x - player.x + global.screenWidth / 2,
                food.y - player.y + global.screenHeight / 2,
-               food.radius, global.foodSides);
+               food.radius);
 }
 
 function drawVirus(virus) {
@@ -447,10 +476,12 @@ function valueInRange(min, max, value) {
 }
 
 function drawgrid() {
-     graph.lineWidth = 1;
-     graph.strokeStyle = global.lineColor;
-     graph.globalAlpha = 0.15;
-     graph.beginPath();
+
+
+    graph.lineWidth = 1;
+    graph.strokeStyle = global.lineColor;
+    graph.globalAlpha = 0.15;
+    graph.beginPath();
 
     for (var x = global.xoffset - player.x; x < global.screenWidth; x += global.screenHeight / 18) {
         graph.moveTo(x, 0);
@@ -526,9 +557,29 @@ window.cancelAnimFrame = (function(handle) {
             window.mozCancelAnimationFrame;
 })();
 
+var fpsCountStart = null;
+var fps = 0;
+
 function animloop() {
+
     global.animLoopHandle = window.requestAnimFrame(animloop);
     gameLoop();
+
+    if (global.showFPS) {
+        if(!fpsCountStart) {
+            fpsCountStart = Date.now();
+            fps = 0;
+            return;
+        } else {
+            var now = Date.now();
+            var diff = (now - fpsCountStart);
+            fps += 1;
+            if (diff >= 1000) {
+                console.log('FPS:', fps);
+                fpsCountStart = null;
+            }
+        }
+    }
 }
 
 function gameLoop() {
