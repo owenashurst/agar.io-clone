@@ -300,8 +300,8 @@ io.on('connection', function (socket) {
 
     });
 
-    socket.on('ping', function () {
-        socket.emit('pong');
+    socket.on('pingcheck', function () {
+        socket.emit('pongcheck');
     });
 
     socket.on('windowResized', function (data) {
