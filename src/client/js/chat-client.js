@@ -158,7 +158,7 @@ class ChatClient {
     checkLatency() {
         // Ping.
         global.startPingTime = Date.now();
-        socket.emit('ping');
+        this.socket.emit('pingcheck');
     }
 
     toggleDarkMode() {
