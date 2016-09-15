@@ -109,7 +109,7 @@ class Canvas {
 
     // Register when the mouse goes off the canvas.
     outOfBounds() {
-        if (!continuity) {
+        if (!global.continuity) {
             this.parent.target = { x : 0, y: 0 };
             global.target = this.parent.target;
         }
