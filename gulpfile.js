@@ -31,7 +31,11 @@ gulp.task('build-client', ['lint', 'move-client'], function () {
   return gulp.src(['src/client/js/app.js'])
     .pipe(uglify())
     .pipe(webpack(require('./webpack.config.js')))
-    .pipe(babel())
+    .pipe(babel({
+      presets: [
+        ['es2015', { 'modules': false }]
+      ]
+    }))
     .pipe(gulp.dest('bin/client/js/'));
 });
 
