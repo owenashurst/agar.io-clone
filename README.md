@@ -83,7 +83,7 @@ The game will then be accessible at `http://localhost:3000` or the respective se
 If you have [Docker](https://www.docker.com/) installed, after cloning the repository you can run the following commands to start the server and make it acessible at `http://localhost:3000`:
 
 ```
-docker built -t agarioclone_agar .
+docker build -t agarioclone_agar .
 docker run -it -p 3000:3000 agarioclone_agar
 ```
 
