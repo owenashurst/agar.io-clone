@@ -457,7 +457,7 @@ io.on('connection', function (socket) {
 
 function tickPlayer(currentPlayer) {
     if(currentPlayer.lastHeartbeat < new Date().getTime() - c.maxHeartbeatInterval) {
-        sockets[currentPlayer.id].emit('kick', 'Last heartbeat received over ' + c.maxHeartbeatInterval + ' ticks ago.');
+        sockets[currentPlayer.id].emit('kick', 'Last heartbeat received over ' + c.maxHeartbeatInterval + ' ago.');
         sockets[currentPlayer.id].disconnect();
     }
 
@@ -713,8 +713,8 @@ function sendUpdates() {
     leaderboardChanged = false;
 }
 
-setInterval(gameloop,1000);
 setInterval(moveloop, 1000 / 60);
+setInterval(gameloop, 1000);
 setInterval(sendUpdates, 1000 / c.networkUpdateFactor);
 
 // Don't touch, IP configurations.
