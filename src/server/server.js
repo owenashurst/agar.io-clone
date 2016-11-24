@@ -716,7 +716,7 @@ function animloop(){
   requestAnimationFrame(animloop);
   gameloop();
 }
-animloop();
+setInterval(gameloop,1000);
 setInterval(moveloop, 1000 / 60);
 setInterval(sendUpdates, 1000 / c.networkUpdateFactor);
 
