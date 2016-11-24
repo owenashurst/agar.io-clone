@@ -28,6 +28,7 @@ div {
     width: 100px;
     height: 100px;
     padding: 5px;
+    border: none;
 }
 
 #feed {
@@ -37,6 +38,7 @@ div {
     width: 100px;
     height: 100px;
     padding: 5px;
+    border: none;
 }
 
 #status {
