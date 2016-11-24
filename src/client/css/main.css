@@ -270,9 +270,10 @@ display: none;
         }
 }
 
-img {
+input [type="image"]{
  border:none;
  outline: 1px solid transparent;
+ border-style: none;
 }
 
 *:focus {
