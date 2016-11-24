@@ -140,9 +140,6 @@ continuitySetting.onchange = settings.toggleContinuity;
 var roundFoodSetting = document.getElementById('roundFood');
 roundFoodSetting.onchange = settings.toggleRoundFood;
 
-//var darkModeSetting = document.getElementById ('darkMode');
-//darkModeSetting.onchange = settings.toggleDarkMode;
-
 var c = window.canvas.cv;
 var graph = c.getContext('2d');
 
