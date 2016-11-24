@@ -715,7 +715,7 @@ function sendUpdates() {
 }
 
 setInterval(gameloop,1000);
-setInterval(moveloop, 1000 / 60);
+//setInterval(moveloop, 1000 / 60);
 setInterval(sendUpdates, 1000 / c.networkUpdateFactor);
 
 // Don't touch, IP configurations.
