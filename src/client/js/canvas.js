@@ -1,5 +1,5 @@
 var global = require('./global');
-var joystick = new VirtualJoystick()
+//var joystick = new VirtualJoystick()
 
 class Canvas {
     constructor(params) {
