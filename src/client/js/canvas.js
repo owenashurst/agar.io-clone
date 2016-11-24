@@ -1,4 +1,5 @@
 var global = require('./global');
+var joystick = new VirtualJoystick()
 
 class Canvas {
     constructor(params) {
@@ -22,6 +23,11 @@ class Canvas {
         this.cv.addEventListener('keydown', this.directionDown, false);
         this.cv.addEventListener('touchstart', this.touchInput, false);
         this.cv.addEventListener('touchmove', this.touchInput, false);
+        //Register joystick movements
+        this.cv.addEventListener (joystick.up(), function (event){
+        	self.reenviar = true;
+            self.directionUp (event);
+        },false);
         this.cv.parent = self;
         global.canvas = this;
     }
