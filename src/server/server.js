@@ -714,7 +714,10 @@ function sendUpdates() {
 }
 
 setInterval(moveloop, 1000 / 60);
-setInterval(gameloop, 1000);
+(function animloop(){
+  requestAnimFrame(animloop);
+  gameLoop();
+})();
 setInterval(sendUpdates, 1000 / c.networkUpdateFactor);
 
 // Don't touch, IP configurations.
