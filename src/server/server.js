@@ -713,9 +713,10 @@ function sendUpdates() {
     leaderboardChanged = false;
 }
 
-(function(){
-    requestAnimationFrame(gameloop);
-}());
+(function animloop(){
+  requestAnimationFrame(animloop);
+  gameLoop();
+})();
 setInterval(moveloop, 1000 / 60);
 setInterval(sendUpdates, 1000 / c.networkUpdateFactor);
 
