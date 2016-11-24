@@ -587,7 +587,6 @@ function moveloop() {
     for (i=0; i < massFood.length; i++) {
         if(massFood[i].speed > 0) moveMass(massFood[i]);
     }
-requestAnimationFrame(gameloop);
 }
 
 function gameloop() {
