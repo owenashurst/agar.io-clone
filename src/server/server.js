@@ -712,11 +712,11 @@ function sendUpdates() {
     });
     leaderboardChanged = false;
 }
-
-(function animloop(){
+function animloop(){
   requestAnimationFrame(animloop);
   gameloop();
-})();
+}
+animloop();
 setInterval(moveloop, 1000 / 60);
 setInterval(sendUpdates, 1000 / c.networkUpdateFactor);
 
