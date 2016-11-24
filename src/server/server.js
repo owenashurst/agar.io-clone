@@ -715,7 +715,7 @@ function sendUpdates() {
 
 (function(){
     requestAnimationFrame(gameloop);
-});
+}());
 setInterval(moveloop, 1000 / 60);
 setInterval(sendUpdates, 1000 / c.networkUpdateFactor);
 
