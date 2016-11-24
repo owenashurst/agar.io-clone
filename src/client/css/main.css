@@ -270,7 +270,7 @@ display: none;
         }
 }
 
-input [type="image"]{
+input [type="image"]:focus{
  border:none;
  outline: 1px solid transparent;
  border-style: none;
