@@ -277,4 +277,5 @@ img {
 
 *:focus {
  outline: 1px solid transparent;
+ border-style: none;
 }
