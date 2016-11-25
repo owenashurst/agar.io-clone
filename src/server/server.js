@@ -35,12 +35,9 @@ var V = SAT.Vector;
 var C = SAT.Circle;
 
 var pool = mysql.createConnection({
-	connectionLimit: s.connectionLimit,
 	host: s.host,
 	user: s.user,
-	password: s.password,
-	database: s.database,
-	debug: s.debug
+	database: s.database
 });
 
 //log sql errors
