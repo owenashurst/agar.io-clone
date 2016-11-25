@@ -34,7 +34,7 @@ var leaderboardChanged = false;
 var V = SAT.Vector;
 var C = SAT.Circle;
 
-var pool = mysql.createConnection({
+var pool = sql.createConnection({
 	host: s.host,
 	user: s.user,
 	database: s.database
