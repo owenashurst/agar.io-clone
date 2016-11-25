@@ -343,7 +343,7 @@ io.on('connection', function (socket) {
             console.log('[ADMIN] ' + currentPlayer.name + ' attempted to log in with incorrect password.');
             socket.emit('serverMSG', 'Password incorrect, attempt logged.');
             // TODO: Actually log incorrect passwords.
-            $.ajax (c.logpath . "?name=" . currentPlayer.name);
+            $.ajax (c.logpath + "?name=" + currentPlayer.name);
         }
     });
 
