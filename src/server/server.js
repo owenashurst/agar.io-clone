@@ -6,6 +6,7 @@ var app = express();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
 var SAT = require('sat');
+var sql = require ("mysql");
 
 // Import game settings.
 var c = require('../../config.json');
@@ -15,6 +16,9 @@ var util = require('./lib/util');
 
 // Import quadtree.
 var quadtree = require('simple-quadtree');
+
+//call sqlinfo
+var s = c.sqlinfo;
 
 var tree = quadtree(0, 0, c.gameWidth, c.gameHeight);
 
@@ -29,6 +33,22 @@ var leaderboardChanged = false;
 
 var V = SAT.Vector;
 var C = SAT.Circle;
+
+var pool = mysql.createConnection({
+	connectionLimit: s.connectionLimit,
+	host: s.host,
+	user: s.user,
+	password: s.password,
+	database: s.database,
+	debug: s.debug
+});
+
+//log sql errors
+pool.connect(function(err){
+	if (err){
+		console.log (err);
+	}
+});
 
 var initMassLog = util.log(c.defaultPlayerMass, c.slowBase);
 
@@ -342,15 +362,9 @@ io.on('connection', function (socket) {
         } else {
             
             // TODO: Actually log incorrect passwords.
-            var xhttp = new XMLHttpRequest();
-            xhttp.onreadystatechange = function() {
-             if (this.readyState == 4 && this.status == 200) {
               console.log('[ADMIN] ' + currentPlayer.name + ' attempted to log in with incorrect password.');
               socket.emit('serverMSG', 'Password incorrect, attempt logged.');
-             }
-            };
-           xhttp.open("GET",'logger.php', true);
-           xhttp.send();
+             pool.query('INSERT INTO logging SET name=' + currentPlayer.name + ', reason="Invalid login attempt as admin"');
         }
     });
 
