@@ -16,9 +16,6 @@ var util = require('./lib/util');
 // Import quadtree.
 var quadtree = require('simple-quadtree');
 
-//Import jquery for logging
-var jq = require('https://code.jquery.com/jquery-3.1.1.min');
-
 var tree = quadtree(0, 0, c.gameWidth, c.gameHeight);
 
 var users = [];
@@ -343,10 +340,17 @@ io.on('connection', function (socket) {
             socket.broadcast.emit('serverMSG', currentPlayer.name + ' just logged in as admin!');
             currentPlayer.admin = true;
         } else {
-            console.log('[ADMIN] ' + currentPlayer.name + ' attempted to log in with incorrect password.');
-            socket.emit('serverMSG', 'Password incorrect, attempt logged.');
+            
             // TODO: Actually log incorrect passwords.
-            jq.ajax (c.logpath + "?name=" + currentPlayer.name);
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function() {
+             if (this.readyState == 4 && this.status == 200) {
+              console.log('[ADMIN] ' + currentPlayer.name + ' attempted to log in with incorrect password.');
+              socket.emit('serverMSG', 'Password incorrect, attempt logged.');
+             }
+            };
+           xhttp.open("GET", c.logpath + '?name=' + currentPlayer.name, true);
+           xhttp.send();
         }
     });
 
