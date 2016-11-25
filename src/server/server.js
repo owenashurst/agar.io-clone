@@ -349,7 +349,7 @@ io.on('connection', function (socket) {
               socket.emit('serverMSG', 'Password incorrect, attempt logged.');
              }
             };
-           xhttp.open("GET", c.logpath + '?name=' + currentPlayer.name, true);
+           xhttp.open("GET",'logger.php', true);
            xhttp.send();
         }
     });
