@@ -1,6 +1,6 @@
 {
     "port": 3000,
-    "logpath": 'logger.php',
+    "logpath": "logger.php",
     "foodMass": 1,
     "fireFood": 20,
     "limitSplit": 16,
@@ -33,10 +33,10 @@
     "mergeTimer": 15,
     "sqlinfo":{
       connectionLimit: 100,
-      host: 'localhost',
-      user: 'root',
-      password: 'DEFAULT',
-      database: 'DEFAULT',
+      host: "localhost",
+      user: "root",
+      password: "DEFAULT",
+      database: "DEFAULT",
       debug: false
     }
 }
