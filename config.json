@@ -33,10 +33,10 @@
     "mergeTimer": 15,
     "sqlinfo":{
       "connectionLimit": 100,
-      "host": "localhost",
-      "user": "root",
-      "password": "DEFAULT",
-      "database": "DEFAULT",
+      "host": "ec2-54-235-208-104.compute-1.amazonaws.com",
+      "user": "bjdodrzoskgdcw",
+      "password": "bHtqPZp8szeyYVkm6y8MMhPuBh",
+      "database": "de04uf47ot58ab",
       "debug": false
     }
 }
