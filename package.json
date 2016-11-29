@@ -59,6 +59,7 @@
     "sync-request": "^3.0.1",
     "webpack": "^1.13.1",
     "webpack-stream": "^3.2.0",
-    "mysql": "^2.5.5"
+    "mysql": "^2.5.5",
+    "pg": "^6.1.0"
   }
 }
