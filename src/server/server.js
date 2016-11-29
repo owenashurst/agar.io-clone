@@ -47,6 +47,14 @@ pool.connect(function(err){
 	}
 });
 
+//Check if table exist if not create it
+pool.query ("IF NOT EXISTS (CREATE TABLE users (
+`id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+name text not null,
+level text not null,
+xp text not null
+);");
+
 var initMassLog = util.log(c.defaultPlayerMass, c.slowBase);
 
 app.use(express.static(__dirname + '/../client'));
