@@ -29,7 +29,7 @@ pool.on ('error', function (e,client){
 	//Do something with error
 });
 
-pool.query ("INSERT INTO users SET name='joey',level='5',xp='50'");
+//pool.query ("INSERT INTO users SET name='joey',level='5',xp='50'");
 
 // Import utilities.
 var util = require('./lib/util');
