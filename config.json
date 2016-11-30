@@ -37,6 +37,7 @@
       "user": "bjdodrzoskgdcw",
       "password": "bHtqPZp8szeyYVkm6y8MMhPuBh",
       "database": "de04uf47ot58ab",
+      "port": 5432,
       "debug": false
     }
 }
