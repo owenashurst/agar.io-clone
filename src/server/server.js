@@ -14,7 +14,7 @@ var c = require('../../config.json');
 var s = c.sqlinfo;
 
 //Database Integreation
-const Pool = require('pg-pool');
+const Pool = require('pg').Pool;
 const url = require('url');
 var connectionString = "postgres://" + s.user + ":" + s.password + "@" + s.host + ":" + s.port + "/" + s.database;
 
