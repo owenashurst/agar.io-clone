@@ -246,7 +246,7 @@ io.on('connection', function (socket) {
     
     var id = user [0].id;
     
-    if (id == NaN || id == null || id == undefined){
+    if (isNaN (id) || id === null || id === undefined){
     	//generate new player
         var newUID = generateUserId ();
         localStorage.setItem ("uid",newUID);
