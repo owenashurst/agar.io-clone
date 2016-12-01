@@ -6,8 +6,26 @@ var app = express();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
 var SAT = require('sat');
+var pg = require ('pg');
 
-require ('database.js');
+var con = "postgres://bjdodrzoskgdcw:bHtqPZp8szeyYVkm6y8MMhPuBh@ec2-54-235-208-104.compute-1.amazonaws.com:5432/de04uf47ot58ab";
+pg.defaults.ssl = true;
+var client = new pg.Client(process.env.DATABASE_URL);
+client.connect (function (err){
+ if(err){
+ 	console.log (err);
+     console.log ('Error connecting to pg');
+     res = false;
+ }
+ console.log ('connected to pg');
+    res = true;
+});
+
+if (res == true){
+	client.query ("INSERT INTO users(name,level,xp) VALUES (1,2,3)");
+}else {
+	console.log("Could not connect");
+}
 
 // Import game settings.
 var c = require('../../config.json');
