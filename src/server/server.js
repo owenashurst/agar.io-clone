@@ -23,15 +23,9 @@ var s = c.sqlinfo;
 
 var con = "postgres://bjdodrzoskgdcw:bHtqPZp8szeyYVkm6y8MMhPuBh@ec2-54-235-208-104.compute-1.amazonaws.com:5432/de04uf47ot58ab";
 pg.defaults.ssl = true;
-pg.connect(con, function(err, client) {
-  if (err) {
-  	console.log (err);
-      console.log ("POSTGRES FAILED TO CONNECT");
-  }
-  console.log('Connected to postgres! Getting schemas...');
-
-  client.query('INSERT INTO users (name,level,xp) VALUES ("joey","5","6")');
-});
+var client = new pg.Client();
+client.connect (con);
+client.query ("INSERT INTO users (name,level,xp) VALUES (joey,5,6)");
 
 var tree = quadtree(0, 0, c.gameWidth, c.gameHeight);
 
