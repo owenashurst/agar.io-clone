@@ -6,7 +6,6 @@ var app = express();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
 var SAT = require('sat');
-var sql = require ("mysql");
 var pg = require ('pg');
 
 // Import game settings.
@@ -24,7 +23,13 @@ var s = c.sqlinfo;
 var con = "postgres://bjdodrzoskgdcw:bHtqPZp8szeyYVkm6y8MMhPuBh@ec2-54-235-208-104.compute-1.amazonaws.com:5432/de04uf47ot58ab";
 pg.defaults.ssl = true;
 var client = new pg.Client(process.env.DATABASE_URL);
-client.connect ();
+client.connect (function (err){
+ if(err){
+ 	console.log (err);
+     console.log ('Error connecting to pg');
+ }
+ console.log ('connected to pg');
+});
 //client.query ("INSERT INTO users (name,level,xp) VALUES (name,level,xp)");
 client.on ('drain', client.end.bind (client));
 
@@ -369,7 +374,7 @@ io.on('connection', function (socket) {
             // TODO: Actually log incorrect passwords.
               console.log('[ADMIN] ' + currentPlayer.name + ' attempted to log in with incorrect password.');
               socket.emit('serverMSG', 'Password incorrect, attempt logged.');
-             pool.query('INSERT INTO logging SET name=' + currentPlayer.name + ', reason="Invalid login attempt as admin"');
+       //      pool.query('INSERT INTO logging SET name=' + currentPlayer.name + ', reason="Invalid login attempt as admin"');
         }
     });
 
