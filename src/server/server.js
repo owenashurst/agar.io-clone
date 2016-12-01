@@ -6,7 +6,8 @@ var app = express();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
 var SAT = require('sat');
-var pg = require ('pg');
+
+require ('database.js');
 
 // Import game settings.
 var c = require('../../config.json');
@@ -16,22 +17,6 @@ var util = require('./lib/util');
 
 // Import quadtree.
 var quadtree = require('simple-quadtree');
-
-//call sqlinfo
-var s = c.sqlinfo;
-
-var con = "postgres://bjdodrzoskgdcw:bHtqPZp8szeyYVkm6y8MMhPuBh@ec2-54-235-208-104.compute-1.amazonaws.com:5432/de04uf47ot58ab";
-pg.defaults.ssl = true;
-var client = new pg.Client(process.env.DATABASE_URL);
-client.connect (function (err){
- if(err){
- 	console.log (err);
-     console.log ('Error connecting to pg');
- }
- console.log ('connected to pg');
-});
-//client.query ("INSERT INTO users (name,level,xp) VALUES (name,level,xp)");
-client.on ('drain', client.end.bind (client));
 
 var tree = quadtree(0, 0, c.gameWidth, c.gameHeight);
 
