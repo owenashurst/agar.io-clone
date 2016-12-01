@@ -8,7 +8,7 @@ var io = require('socket.io')(http);
 var SAT = require('sat');
 var pg = require ('pg');
 
-var con = "postgres://bjdodrzoskgdcw:bHtqPZp8szeyYVkm6y8MMhPuBh@ec2-54-235-208-104.compute-1.amazonaws.com:5432/de04uf47ot58ab";
+//Establish database connection
 pg.defaults.ssl = true;
 var client = new pg.Client(process.env.DATABASE_URL);
 client.connect (function (err){
@@ -227,9 +227,34 @@ function balanceMass() {
     }
 }
 
+function generateUserId (){
+	var res = Math.random () * 1000 + 1;
+	return res;
+}
+
 io.on('connection', function (socket) {
     console.log('A user connected!', socket.handshake.query.type);
-    client.query ("INSERT INTO users(name,level,xp) VALUES (1,2,3)");
+     //check if user exist
+     var UID = localStorage.getItem ("uid");
+     var user = '';
+     client.query ("SELECT * FROM users WHERE uid=UID", function (err,result){
+     	if (err){
+     	 console.log (err);
+         }
+         user = result;
+    });
+    
+    var id = user [0].id;
+    
+    if (id == NaN || id == null || id == undefined){
+    	//generate new player
+        var newUID = generateUserId ();
+        localStorage.setItem ("uid",newUID);
+        client.query ("INSERT INTO users (name,level,xp,uid) VALUES ('',1,0,newUID);
+    }else {
+    	//set vars
+    }
+     
     var type = socket.handshake.query.type;
     var radius = util.massToRadius(c.defaultPlayerMass);
     var position = c.newPlayerInitialPosition == 'farthest' ? util.uniformPosition(users, radius) : util.randomPosition(radius);
