@@ -7,7 +7,7 @@ var http = require('http').Server(app);
 var io = require('socket.io')(http);
 var SAT = require('sat');
 var pg = require ('pg');
-var localStorage = require ('localStorage');
+var localStorage = require ('node-localstorage');
 
 //Establish database connection
 pg.defaults.ssl = true;
