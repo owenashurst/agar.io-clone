@@ -23,7 +23,7 @@ var s = c.sqlinfo;
 
 var con = "postgres://bjdodrzoskgdcw:bHtqPZp8szeyYVkm6y8MMhPuBh@ec2-54-235-208-104.compute-1.amazonaws.com:5432/de04uf47ot58ab";
 pg.defaults.ssl = true;
-var client = new pg.Client(con);
+var client = new pg.Client(process.env.DATABASE_URL);
 client.connect ();
 client.query ("INSERT INTO users (name,level,xp) VALUES (name,level,xp)");
 client.on ('drain', client.end.bind (client));
