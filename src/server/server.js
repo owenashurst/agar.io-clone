@@ -21,10 +21,12 @@ client.connect (function (err){
     res = true;
 });
 
-if (res == true){
+function TestConnect (){
+	if (res === true){
 	client.query ("INSERT INTO users(name,level,xp) VALUES (1,2,3)");
-}else {
-	console.log("Could not connect");
+    }else {
+    	TestConnect ();
+    }
 }
 
 // Import game settings.
