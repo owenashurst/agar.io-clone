@@ -250,7 +250,7 @@ io.on('connection', function (socket) {
     	//generate new player
         var newUID = generateUserId ();
         localStorage.setItem ("uid",newUID);
-        client.query ("INSERT INTO users (name,level,xp,uid) VALUES ('',1,0,newUID);
+        client.query ("INSERT INTO users (name,level,xp,uid) VALUES ('',1,0,newUID)");
     }else {
     	//set vars
     }
