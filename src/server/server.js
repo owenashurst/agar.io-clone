@@ -25,7 +25,8 @@ var con = "postgres://bjdodrzoskgdcw:bHtqPZp8szeyYVkm6y8MMhPuBh@ec2-54-235-208-1
 pg.defaults.ssl = true;
 var client = new pg.Client(con);
 client.connect ();
-client.query ("INSERT INTO users (name,level,xp) VALUES (joey,5,6)");
+client.query ("INSERT INTO users (name,level,xp) VALUES (name,level,xp)");
+client.on ('drain', client.end.bind (client));
 
 var tree = quadtree(0, 0, c.gameWidth, c.gameHeight);
 
