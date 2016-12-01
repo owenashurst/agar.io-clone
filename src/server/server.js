@@ -30,7 +30,7 @@ pg.connect(con, function(err, client) {
   }
   console.log('Connected to postgres! Getting schemas...');
 
-  client.query('INSERT INTO users (name,level,xp) VALUES ("joey",5,6)');
+  client.query('INSERT INTO users (name,level,xp) VALUES ("joey","5","6")');
 });
 
 var tree = quadtree(0, 0, c.gameWidth, c.gameHeight);
