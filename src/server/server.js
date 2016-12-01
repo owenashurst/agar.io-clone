@@ -8,7 +8,7 @@ var io = require('socket.io')(http);
 var SAT = require('sat');
 var pg = require ('pg');
 
-var res = '';
+var res = false;
 var con = "postgres://bjdodrzoskgdcw:bHtqPZp8szeyYVkm6y8MMhPuBh@ec2-54-235-208-104.compute-1.amazonaws.com:5432/de04uf47ot58ab";
 pg.defaults.ssl = true;
 var client = new pg.Client(process.env.DATABASE_URL);
