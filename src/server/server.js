@@ -31,10 +31,9 @@ pg.connect(con, function(err, client) {
   console.log('Connected to postgres! Getting schemas...');
 
   client
-    .query('SELECT table_schema,table_name FROM information_schema.tables;')
+    .query('INSERT INTO users SET name="joey",level="5",xp="6"')
     .on('row', function(row) {
-      var ind = document.getElementById('ind');
-      ind.innerHTML = JSON.stringify(row);
+      console.log (JSON.stringify(row));
     });
 });
 
