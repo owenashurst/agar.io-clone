@@ -228,34 +228,8 @@ function balanceMass() {
     }
 }
 
-function generateUserId (){
-	var res = Math.random () * 1000 + 1;
-	return res;
-}
-
 io.on('connection', function (socket) {
     console.log('A user connected!', socket.handshake.query.type);
-     //check if user exist
-     var UID = localStorage.getItem ("uid");
-     var user = '';
-     client.query ("SELECT * FROM users WHERE uid=UID", function (err,result){
-     	if (err){
-     	 console.log (err);
-         }
-         user = result;
-    });
-    
-    var id = user [0].id;
-    
-    if (isNaN (id) || id === null || id === "undefined"){
-    	//generate new player
-        var newUID = generateUserId ();
-        localStorage.setItem ("uid",newUID);
-        client.query ("INSERT INTO users (name,level,xp,uid) VALUES ('',1,0,newUID)");
-    }else {
-    	//set vars
-    }
-     
     var type = socket.handshake.query.type;
     var radius = util.massToRadius(c.defaultPlayerMass);
     var position = c.newPlayerInitialPosition == 'farthest' ? util.uniformPosition(users, radius) : util.randomPosition(radius);
@@ -336,6 +310,13 @@ io.on('connection', function (socket) {
             console.log('Total players: ' + users.length);
         }
 
+    });
+    
+    socket.on ('CreateUser',function (data){
+    	var UID = data.uid;
+        client.query ("INSERT INTO users(name,level,xp,uid) VALUES ('',1,0," + UID + ")", function (err){
+        	console.log ("Error creating user");
+        });
     });
 
     socket.on('pingcheck', function () {
