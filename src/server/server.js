@@ -311,13 +311,6 @@ io.on('connection', function (socket) {
         }
 
     });
-    
-    socket.on ('CreateUser',function (data){
-    	var UID = data.uid;
-        client.query ("INSERT INTO users(name,level,xp,uid) VALUES ('',1,0," + UID + ")", function (err){
-        	console.log ("Error creating user");
-        });
-    });
 
     socket.on('pingcheck', function () {
         socket.emit('pongcheck');
@@ -363,7 +356,8 @@ io.on('connection', function (socket) {
             // TODO: Actually log incorrect passwords.
               console.log('[ADMIN] ' + currentPlayer.name + ' attempted to log in with incorrect password.');
               socket.emit('serverMSG', 'Password incorrect, attempt logged.');
-       //      pool.query('INSERT INTO logging SET name=' + currentPlayer.name + ', reason="Invalid login attempt as admin"');
+              
+              client.query('INSERT INTO logging(name,reason) VALUES(' + currentPlayer.name + ', "invalid login attempt as admin)');
         }
     });
 
