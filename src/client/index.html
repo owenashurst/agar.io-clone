@@ -21,6 +21,7 @@
         <div id="mobile">
            <input type="image" id="split" class="split" src="img/split.png" alt="splitBtn">
            <input type="image" id="feed" class="feed" src="img/feed.png" alt="feedBtn">
+           <button type="button" onclick="chatToggle">Chat</button>
            <div class="chatbox" id="chatbox">
             <ul id="chatList" class="chat-list"></ul>
             <input id="chatInput" type="text" class="chat-input" placeholder="Chat here..." maxlength="35" />
@@ -65,5 +66,10 @@
   <!--  <script src="virtualjoystick.js"></script>-->
     <script src="//code.jquery.com/jquery-2.2.0.min.js"></script>
     <script src="js/app.js"></script>
+    <script>
+    	function chatToggle (){
+    	  $('.chatbox').toggle ();
+        }
+    </script>
 </body>
 </html>
