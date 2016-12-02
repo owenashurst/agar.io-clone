@@ -52,12 +52,6 @@ function generateUserId (){
 }
 
 window.onload = function() {
-    var UID = localStorage.getItem ('uid');
-    
-    if (UID === null){
-    	localStorage.setItem ('uid',generateUserId ());
-        this.socket.emit ('CreateUser', {uid: UID});
-    }
     var btn = document.getElementById('startButton'),
         btnS = document.getElementById('spectateButton'),
         nickErrorText = document.querySelector('#startMenu .input-error');
