@@ -722,10 +722,10 @@ var ipaddress = process.env.OPENSHIFT_NODEJS_IP || process.env.IP || '127.0.0.1'
 var serverport = process.env.OPENSHIFT_NODEJS_PORT || process.env.PORT || c.port;
 if (process.env.OPENSHIFT_NODEJS_IP !== undefined) {
     http.listen( serverport, ipaddress, function() {
-        console.log('[DEBUG] Listening on *:' + serverport);
+        console.log('[DEBUG] Listening on localhost:' + serverport);
     });
 } else {
     http.listen( serverport, function() {
-        console.log('[DEBUG] Listening on *:' + c.port);
+        console.log('[DEBUG] Listening on 127.0.0.1:' + c.port);
     });
 }
