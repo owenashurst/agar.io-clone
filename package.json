@@ -58,6 +58,7 @@
     "socket.io-client": "^1.4.6",
     "sync-request": "^3.0.1",
     "webpack": "^1.13.1",
-    "webpack-stream": "^3.2.0"
+    "webpack-stream": "^3.2.0",
+    "mysql": "^2.5.5"
   }
 }
