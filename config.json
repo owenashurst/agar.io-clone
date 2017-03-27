@@ -12,7 +12,7 @@
 		"strokeWidth": 20,
 		"defaultMass": {
             "from": 100,
-            "to": 150
+            "to": 200
         },
 		"splitMass": 180
 	},
