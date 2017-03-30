@@ -32,12 +32,12 @@
     "minMassLoss": 50,
     "mergeTimer": 15,
     "sqlinfo":{
-      "connectionLimit": 100,
-      "host": "ec2-54-235-208-104.compute-1.amazonaws.com",
-      "user": "bjdodrzoskgdcw",
-      "password": "bHtqPZp8szeyYVkm6y8MMhPuBh",
-      "database": "de04uf47ot58ab",
-      "port": 5432,
+      "connectionLimit": 100,//Higher values may cause lag
+      "host": "localhost",
+      "user": "username",
+      "password": "password",
+      "database": "db",
+      "port": 5432,//Change this to your databases speicfied port if unsure remove this line
       "debug": false
     }
 }
