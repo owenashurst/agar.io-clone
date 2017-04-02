@@ -32,12 +32,12 @@
     "minMassLoss": 50,
     "mergeTimer": 15,
     "sqlinfo":{
-      "connectionLimit": 100,//Higher values may cause lag
+      "connectionLimit": 100,
       "host": "localhost",
       "user": "username",
       "password": "password",
       "database": "db",
-      "port": 5432,//Change this to your databases speicfied port if unsure remove this line
+      "port": 5432,
       "debug": false
     }
 }
