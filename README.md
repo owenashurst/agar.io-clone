@@ -1,4 +1,4 @@
-Agar.io Clone
+Agar.io 2
 =============
 
 **CONTRIBUTOR WANTED: I'm really sorry for not have enough time to maintain this project. I'm looking for contributors who willing to keep this project going. If you feel happy to join. Please contact me via my Twitter: @huydotnet. Thank you so much!**
