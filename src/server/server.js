@@ -572,7 +572,7 @@ function tickPlayer(currentPlayer) {
 
         if(virusCollision.length > 0 && currentCell.mass > virus[virusCollision].mass) {
             sockets[currentPlayer.id].emit('virusSplit', z);
- +          virusCollision.forEach(deleteVirus);
+ +          virusCollision.forEach(deleteVirus());
         }
 
         var masaGanada = 0;
