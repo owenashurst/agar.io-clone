@@ -570,7 +570,7 @@ function tickPlayer(currentPlayer) {
         var virusCollision = virus.map(funcFood)
            .reduce( function(a, b, c) { return b ? a.concat(c) : a; }, []);
 
-        if(virusCollision > 0 && currentCell.mass > virus[virusCollision].mass) {) {
+        if(virusCollision > 0 && currentCell.mass > virus[virusCollision].mass) { {
             sockets[currentPlayer.id].emit('virusSplit', z);
  +          virusCollision.forEach(deleteVirus());
         }
