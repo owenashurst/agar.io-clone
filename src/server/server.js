@@ -37,6 +37,7 @@ var C = SAT.Circle;
 var pool = sql.createConnection({
 	host: s.host,
 	user: s.user,
+    password: s.password,
 	database: s.database
 });
 
