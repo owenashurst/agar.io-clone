@@ -491,7 +491,12 @@ function tickPlayer(currentPlayer) {
         food[f] = {};
         food.splice(f, 1);
     }
-
+    
+    function deleteVirus(f){
+        virus[f] = {};
+        virus.splice(f, 1);
+    }
+    
     function eatMass(m) {
         if(SAT.pointInCircle(new V(m.x, m.y), playerCircle)){
             if(m.id == currentPlayer.id && m.speed > 0 && z == m.num)
@@ -566,8 +571,9 @@ function tickPlayer(currentPlayer) {
         var virusCollision = virus.map(funcFood)
            .reduce( function(a, b, c) { return b ? a.concat(c) : a; }, []);
 
-        if(virusCollision > 0 && currentCell.mass > virus[virusCollision].mass) {
-          sockets[currentPlayer.id].emit('virusSplit', z);
+        if(virusCollision > 0 && currentCell.mass > virus[virusCollision].mass) { {
+            sockets[currentPlayer.id].emit('virusSplit', z);
+ +          virusCollision.forEach(deleteVirus());
         }
 
         var masaGanada = 0;
