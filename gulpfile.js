@@ -10,7 +10,7 @@ var webpack = require('webpack-stream');
 var fs = require('fs');
 
 
-gulp.task('build', ['build-client', 'build-server', 'test', 'todo']);
+gulp.task('build', ['build-client', 'build-server', 'test']);
 
 gulp.task('test', ['lint'], function () {
     gulp.src(['test/**/*.js'])
