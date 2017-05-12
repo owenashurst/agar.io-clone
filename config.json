@@ -34,7 +34,7 @@
     "mergeTimer": 15,
     "sqlinfo":{
       "connectionLimit": 100,
-      "host": "localhost",
+      "host": "DEFAULT",
       "user": "root",
       "password": "DEFAULT",
       "database": "DEFAULT",

@@ -34,19 +34,21 @@ var leaderboardChanged = false;
 var V = SAT.Vector;
 var C = SAT.Circle;
 
-var pool = sql.createConnection({
-	host: s.host,
-	user: s.user,
-    password: s.password,
-	database: s.database
-});
+if(s.host !== "DEFAULT") {
+    var pool = sql.createConnection({
+        host: s.host,
+        user: s.user,
+        password: s.password,
+        database: s.database
+    });
 
-//log sql errors
-pool.connect(function(err){
-	if (err){
-		console.log (err);
-	}
-});
+    //log sql errors
+    pool.connect(function(err){
+        if (err){
+            console.log (err);
+        }
+    });
+}
 
 var initMassLog = util.log(c.defaultPlayerMass, c.slowBase);
 
