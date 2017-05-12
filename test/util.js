@@ -74,7 +74,7 @@ describe('util.js', function () {
 
       var identity = util.log(10, 10);
 
-      var logNineThree = util.log(9,3);
+      var logNineThree = Math.round(util.log(9,3) * 1e5) / 1e5; // Tolerate rounding errors
 
       //  log(1) should equal 0, no matter the base
       expect(base10).to.eql(base2);
