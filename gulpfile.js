@@ -7,11 +7,10 @@ var util = require('gulp-util');
 var mocha = require('gulp-mocha');
 var todo = require('gulp-todo');
 var webpack = require('webpack-stream');
-var request = require('sync-request');
 var fs = require('fs');
 
 
-gulp.task('build', ['build-client', 'build-server', 'test', 'todo']);
+gulp.task('build', ['build-client', 'build-server', 'test']);
 
 gulp.task('test', ['lint'], function () {
     gulp.src(['test/**/*.js'])
@@ -86,39 +85,6 @@ gulp.task('run-only', function () {
     })
     .on('restart', function () {
         util.log('server restarted!');
-    });
-});
-
-gulp.task('contributors', function(){
-    var project = JSON.parse(fs.readFileSync('package.json').toString());
-    var repo_pattern = /https:\/\/github.com\/(.+)\.git/i;
-    var parsed_repo = project.repository.url.match(repo_pattern);
-    var repo_endpoint = parsed_repo&&parsed_repo[1];
-
-    var contributorsResponse = request('GET',
-                        'https://api.github.com/repos/' + repo_endpoint + '/stats/contributors',
-                            {
-                            'headers': {
-                                'user-agent': 'auto-contributors-grabber-' + Date.now()
-                                }
-                            });
-    var contributors = JSON.parse(contributorsResponse.getBody().toString());
-    var contributorsList = contributors.reduce(function(result, current){
-        console.log('Adding ' + current.author.login + '...');
-        var userResponse = request('GET', current.author.url, {
-                                'headers': {
-                                    'user-agent': 'auto-contributors-grabber-' + Date.now()
-                                }
-                            });
-        var user = JSON.parse(userResponse.getBody().toString());
-        return result.concat(user.name + '<' + (user.email !== null)?user.email:((user.login !== null)?user.login:'') + '>' + '(' + user.html_url + ')');
-    }, []);
-
-    project.contributors = contributorsList;
-
-    fs.writeFile('package.json', JSON.stringify(project), function(err){
-        if (err) console.log('ERROR!!!', err);
-        console.log('DONE!');
     });
 });
 

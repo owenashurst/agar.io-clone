@@ -1,4 +1,5 @@
 {
+    "host": "0.0.0.0",
     "port": 3000,
     "logpath": "logger.php",
     "foodMass": 1,
@@ -38,6 +39,10 @@
       "password": "password",
       "database": "db",
       "port": 5432,
+      "host": "DEFAULT",
+      "user": "root",
+      "password": "DEFAULT",
+      "database": "DEFAULT",
       "debug": false
     }
 }
