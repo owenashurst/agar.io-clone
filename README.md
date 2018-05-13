@@ -38,7 +38,7 @@ You can check out how to play on our [wiki](https://github.com/huytd/agar.io-clo
 
 ## Latest Changes
 - Game logic is handled by the server
-- The client side is for rendering of the canvas and it's items only.
+- The client side is for rendering of the canvas and its items only.
 - Mobile optimisation.
 - Implementation of working viruses.
 - Display player name.
