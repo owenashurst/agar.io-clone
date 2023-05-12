@@ -1,23 +1,14 @@
-var gulp = require('gulp');
-var babel = require('gulp-babel');
-var jshint = require('gulp-jshint');
-var nodemon = require('gulp-nodemon');
-var uglify = require('gulp-uglify');
-var util = require('gulp-util');
-var mocha = require('gulp-mocha');
-var todo = require('gulp-todo');
-var webpack = require('webpack-stream');
-var fs = require('fs');
+const gulp = require('gulp');
+const babel = require('gulp-babel');
+const jshint = require('gulp-jshint');
+const nodemon = require('gulp-nodemon');
+const uglify = require('gulp-uglify');
+const util = require('gulp-util');
+const mocha = require('gulp-mocha');
+const todo = require('gulp-todo');
+const webpack = require('webpack-stream');
 
-
-gulp.task('build', ['build-client', 'build-server', 'test']);
-
-gulp.task('test', ['lint'], function () {
-    gulp.src(['test/**/*.js'])
-        .pipe(mocha());
-});
-
-gulp.task('lint', function () {
+gulp.task('lint', () => {
   return gulp.src(['**/*.js', '!node_modules/**/*.js', '!bin/**/*.js'])
     .pipe(jshint({
           esnext: true
@@ -26,43 +17,61 @@ gulp.task('lint', function () {
     .pipe(jshint.reporter('fail'));
 });
 
-gulp.task('build-client', ['lint', 'move-client'], function () {
+gulp.task('test', gulp.series('lint', () => {
+  return gulp.src(['test/**/*.js']).pipe(mocha());
+}));
+
+gulp.task('move-client', () => {
+  return gulp.src(['src/client/**/*.*', '!client/js/*.js'])
+    .pipe(gulp.dest('./bin/client/'));
+});
+
+gulp.task('build-client', gulp.parallel('lint', 'move-client', () => {
   return gulp.src(['src/client/js/app.js'])
     .pipe(uglify())
     .pipe(webpack(require('./webpack.config.js')))
     .pipe(babel({
       presets: [
-        ['es2015', { 'modules': false }]
+        ['@babel/preset-env', { 'modules': false }]
       ]
     }))
     .pipe(gulp.dest('bin/client/js/'));
-});
+}));
 
-gulp.task('move-client', function () {
-  return gulp.src(['src/client/**/*.*', '!client/js/*.js'])
-    .pipe(gulp.dest('./bin/client/'));
-});
-
-
-gulp.task('build-server', ['lint'], function () {
+gulp.task('build-server', gulp.series('lint', () => {
   return gulp.src(['src/server/**/*.*', 'src/server/**/*.js'])
     .pipe(babel())
     .pipe(gulp.dest('bin/server/'));
-});
+}));
 
-gulp.task('watch', ['build'], function () {
+gulp.task('build', gulp.parallel('build-client', 'build-server', 'test'));
+
+gulp.task('watch', gulp.series('build', () => {
   gulp.watch(['src/client/**/*.*'], ['build-client', 'move-client']);
   gulp.watch(['src/server/*.*', 'src/server/**/*.js'], ['build-server']);
   gulp.start('run-only');
-});
+}));
 
-gulp.task('todo', ['lint'], function() {
-  gulp.src('src/**/*.js')
-      .pipe(todo())
-      .pipe(gulp.dest('./'));
-});
+gulp.task('todo', gulp.series('lint', () => {
+  return gulp.src('src/**/*.js')
+    .pipe(todo())
+    .pipe(gulp.dest('./'));
+}));
 
-gulp.task('run', ['build'], function () {
+gulp.task('run', gulp.series('build', () => {
+    nodemon({
+        delay: 10,
+        script: './server/server.js',
+        cwd: "./bin/",
+        args: ["config.json"],
+        ext: 'html,js,css'
+    })
+    .on('restart', function () {
+        util.log('server restarted!');
+    });
+}));
+
+gulp.task('run-only', () => {
     nodemon({
         delay: 10,
         script: './server/server.js',
@@ -75,17 +84,4 @@ gulp.task('run', ['build'], function () {
     });
 });
 
-gulp.task('run-only', function () {
-    nodemon({
-        delay: 10,
-        script: './server/server.js',
-        cwd: "./bin/",
-        args: ["config.json"],
-        ext: 'html js css'
-    })
-    .on('restart', function () {
-        util.log('server restarted!');
-    });
-});
-
-gulp.task('default', ['run']);
+gulp.task('default', gulp.series('run'));
