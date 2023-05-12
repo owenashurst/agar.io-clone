@@ -1,13 +1,12 @@
 Agar.io Clone
 =============
 
-**CONTRIBUTOR WANTED: I'm really sorry for not have enough time to maintain this project. I'm looking for contributors who willing to keep this project going. If you feel happy to join. Please contact me via my Twitter: @huydotnet. Thank you so much!**
+This project was originally created by @huytd. I have since taken ownership of the repository to revive the project.
 
 [![GitHub Stars](https://img.shields.io/github/stars/huytd/agar.io-clone.svg)](https://github.com/huytd/agar.io-clone/stargazers)
 [![GitHub Issues](https://img.shields.io/github/issues/huytd/agar.io-clone.svg)](https://github.com/huytd/agar.io-clone/issues)
 [![GitHub Wiki](https://img.shields.io/badge/project-wiki-ff69b4.svg)](https://github.com/huytd/agar.io-clone/wiki/Home)
-![Build Status](https://api.travis-ci.org/huytd/agar.io-clone.svg)
-[![Live Demo](https://img.shields.io/badge/demo-online-green.svg)](#live-demo) -
+[![Live Demo](https://img.shields.io/badge/demo-online-green.svg)](#live-demo)
 [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/huytd/agar.io-clone?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 A simple but powerful Agar.IO clone built with socket.IO and HTML5 canvas on top of NodeJS.
@@ -15,12 +14,12 @@ A simple but powerful Agar.IO clone built with socket.IO and HTML5 canvas on top
 ![Image](screenshot.png)
 
 ## Live Demos
-An updated and live list of live demos can be found on the [Live Demos wiki page](https://github.com/huytd/agar.io-clone/wiki/Live-Demos).
+An updated and live list of live demos can be found on the [Live Demos wiki page](https://github.com/owenashurst/agar.io-clone/wiki/Live-Demos).
 
 ---
 
 ## How to Play
-You can check out how to play on our [wiki](https://github.com/huytd/agar.io-clone/wiki/How-to-Play).
+You can check out how to play on our [wiki](https://github.com/owenashurst/agar.io-clone/wiki/How-to-Play).
 
 #### Game Basics
 - Move your mouse around the screen to move your cell.
@@ -50,12 +49,11 @@ You can check out how to play on our [wiki](https://github.com/huytd/agar.io-clo
 ## Installation
 You can simply click one of the buttons below to easily deploy this repo to Bluemix or Heroku:
 
-[![Deploy to Bluemix](https://bluemix.net/deploy/button.png)](https://bluemix.net/deploy?repository=https://github.com/huytd/agar.io-clone)
 [![Deploy to Heroku](https://www.herokucdn.com/deploy/button.png)](https://heroku.com/deploy)
 
 Or...
 
->You can check out a more detailed setup tutorial on our [wiki](https://github.com/huytd/agar.io-clone/wiki/Setup).
+>You can check out a more detailed setup tutorial on our [wiki](https://github.com/owenashurst/agar.io-clone/wiki/Setup).
 
 #### Requirements
 To run / install this game, you'll need: 
@@ -78,7 +76,7 @@ After downloading all the dependencies, you can run the server with the followin
 npm start
 ```
 
-The game will then be accessible at `http://localhost:3000` or the respective server installed on. The default port is `3000`, however this can be changed in config. Further elaboration is available on our [wiki](https://github.com/huytd/agar.io-clone/wiki/Setup).
+The game will then be accessible at `http://localhost:3000`. The default port is `3000`, however this can be changed in config. Further elaboration is available on our [wiki](https://github.com/owenashurst/agar.io-clone/wiki/Setup).
 
 
 ### Running the Server with Docker
@@ -117,14 +115,14 @@ docker run -it -p 3000:3000 agarioclone_agar
   Yes you can.
 
 ## For Developers
- - [Game Architecture](https://github.com/huytd/agar.io-clone/wiki/Game-Architecture) to understand how the backend works.
- - If you want to start your own project, I recommend you use [this template](https://github.com/huytd/node-online-game-template). Happy developing!
+ - [Game Architecture](https://github.com/owenashurst/agar.io-clone/wiki/Game-Architecture) to understand how the backend works.
+ - If you want to start your own project, I recommend you use [this template](https://github.com/owenashurst/node-online-game-template). Happy developing!
  -
 
 ## TODOs
- We have an explicit [TODO](https://github.com/huytd/agar.io-clone/wiki/Coming-Features) list for the all the features we aim to develop in the future. Feel free to contribute, we'll be more than grateful.
+ We have an explicit [TODO](https://github.com/owenashurst/agar.io-clone/wiki/Coming-Features) list for the all the features we aim to develop in the future. Feel free to contribute, we'll be more than grateful.
 
 ## License
->You can check out the full license [here](https://github.com/huytd/agar.io-clone/blob/master/LICENSE).
+>You can check out the full license [here](https://github.com/owenashurst/agar.io-clone/blob/master/LICENSE).
 
 This project is licensed under the terms of the **MIT** license.
