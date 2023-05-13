@@ -1,8 +1,7 @@
 /*jshint expr:true */
 
-var expect = require('chai').expect,
-    util   = require('../src/server/lib/util');
-
+const expect = require('chai').expect;
+const util = require('../src/server/lib/util');
 
 /**
  * Tests for server/lib/util.js
@@ -11,17 +10,15 @@ var expect = require('chai').expect,
  * is preserved throughout changes to the server infrastructure.
  */
 
-describe('util.js', function () {
-
-  describe('#massToRadius', function () {
-
-    it('should return non-zero radius on zero input', function () {
+describe('util.js', () => {
+  describe('massToRadius', () => {
+    it('should return non-zero radius on zero input', () => {
       var r = util.massToRadius(0);
       expect(r).to.be.a('number');
       expect(r).to.equal(4);
     });
 
-    it('should convert masses to a circle radius', function () {
+    it('should convert masses to a circle radius', () => {
       var r1 = util.massToRadius(4),
           r2 = util.massToRadius(16),
           r3 = util.massToRadius(1);
@@ -32,15 +29,13 @@ describe('util.js', function () {
     });
   });
 
-
-  describe('#validNick', function () {
-
-    it('should allow empty player nicknames', function () {
+  describe('validNick', () => {
+    it.skip('should allow empty player nicknames', () => {
       var bool = util.validNick('');
-      //expect(bool).to.be.true;
+      expect(bool).to.be.true;
     });
 
-    it('should allow ascii character nicknames', function () {
+    it('should allow ascii character nicknames', () => {
       var n1 = util.validNick('Walter_White'),
           n2 = util.validNick('Jesse_Pinkman'),
           n3 = util.validNick('hank'),
@@ -54,29 +49,26 @@ describe('util.js', function () {
       expect(n5).to.be.true;
     });
 
-    it('should disallow unicode-dependent alphabets', function () {
+    it('should disallow unicode-dependent alphabets', () => {
       var n1 = util.validNick('Йèæü');
 
       expect(n1).to.be.false;
     });
 
-    it('should disallow spaces in nicknames', function () {
+    it('should disallow spaces in nicknames', () => {
         var n1 = util.validNick('Walter White');
         expect(n1).to.be.false;
     });
   });
 
-  describe('#log', function () {
+  describe('log', () => {
+    it('should compute the log_{base} of a number', () => {
+      const base10 = util.mathLog(1, 10);
+      const base2  = util.mathLog(1, 2);
+      const identity = util.mathLog(10, 10);
+      const logNineThree = Math.round(util.mathLog(9,3) * 1e5) / 1e5; // Tolerate rounding errors
 
-    it('should compute the log_{base} of a number', function () {
-      var base10 = util.log(1, 10),
-          base2  = util.log(1, 2);
-
-      var identity = util.log(10, 10);
-
-      var logNineThree = Math.round(util.log(9,3) * 1e5) / 1e5; // Tolerate rounding errors
-
-      //  log(1) should equal 0, no matter the base
+      // log(1) should equal 0, no matter the base
       expect(base10).to.eql(base2);
 
       // log(n,n) === 1
@@ -88,24 +80,21 @@ describe('util.js', function () {
 
   });
 
-  describe('#getDistance', function () {
-
-    // helper class
-    function Point(x,y,r) {
+  describe('getDistance', () => {
+    const Point = (x, y, r) => {
       return {
-        x      : x,
-        y      : y,
-        radius : r
+        x,
+        y,
+        radius: r
       };
     }
 
-    var p1 = Point(-100, 20, 1),
-        p2 = Point(0, 40, 5),
-        p3 = Point(0,0,100);
+    const p1 = Point(-100, 20, 1);
+    const p2 = Point(0, 40, 5);
 
-    it('should return a positive number', function () {
-      var d = util.getDistance(p1, p2);
-      expect(d).to.be.above(-1);
+    it('should return a positive number', () => {
+      var distance = util.getDistance(p1, p2);
+      expect(distance).to.be.above(-1);
     });
   });
 });
