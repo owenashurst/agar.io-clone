@@ -27,6 +27,8 @@ let leaderboardChanged = false;
 const Vector = SAT.Vector;
 const Circle = SAT.Circle;
 
+let playerCircle = new Circle(new Vector(0, 0), 0); 
+
 app.use(express.static(__dirname + '/../client'));
 
 io.on('connection', function (socket) {
@@ -267,8 +269,8 @@ io.on('connection', function (socket) {
                 // Split all cells
                 if(currentPlayer.cells.length < config.limitSplit && currentPlayer.massTotal >= config.defaultPlayerMass*2) {
                     const currentPlayersCells = currentPlayer.cells;
-                    for (let i = 0; i < numMax; i++) {
-                        splitCell(currentPlayersCells[d]);
+                    for (let i = 0; i < currentPlayersCells.length; i++) {
+                        splitCell(currentPlayersCells[i]);
                     }
                 }
             }
@@ -295,7 +297,7 @@ const tickPlayer = (currentPlayer) => {
         food.splice(f, 1);
     };
 
-    const eatMass = (m) => {
+    const eatMass = (m, currentCell) => {
         if (SAT.pointInCircle(new Vector(m.x, m.y), playerCircle)){
             if (m.id == currentPlayer.id && m.speed > 0 && z == m.num) return false;
             if (currentCell.mass > m.masa * 1.1) return true;
@@ -304,9 +306,9 @@ const tickPlayer = (currentPlayer) => {
         return false;
     };
 
-    const check = (user) => {
-        for(let i = 0; i < user.cells.length; i++) {
-            if (user.cells[i].mass > 10 && user.id !== currentPlayer.id) {
+    const check = (user, currentCell, playerCollisions) => {
+        for (let i = 0; i < user.cells.length; i++) {
+            if (user.cells[i].mass >= 10 && user.id !== currentPlayer.id) {
                 const response = new SAT.Response();
                 const hasCollided = SAT.testCircleCircle(playerCircle,
                     new Circle(new Vector(user.cells[i].x, user.cells[i].y), user.cells[i].radius),
@@ -322,6 +324,7 @@ const tickPlayer = (currentPlayer) => {
                         num: i,
                         mass: user.cells[i].mass
                     };
+
                     playerCollisions.push(response);
                 }
             }
@@ -342,7 +345,11 @@ const tickPlayer = (currentPlayer) => {
                     users[userIndex].cells.splice(collision.bUser.num, 1);
                 } else {
                     users.splice(userIndex, 1);
-                    io.emit('playerDied', { name: collision.bUser.name });
+                    io.emit('playerDied', { 
+                        playerEatenName: collision.bUser.name,
+                        // TODO: Implement aUser name.
+                        //playerWhoAtePlayerName: collision.aUser.name,
+                    });
                     sockets[collision.bUser.id].emit('RIP');
                 }
             }
@@ -354,7 +361,7 @@ const tickPlayer = (currentPlayer) => {
     for (let i = 0; i < currentPlayer.cells.length; i++) {
         const currentCell = currentPlayer.cells[i];
 
-        const playerCircle = new Circle(
+        playerCircle = new Circle(
             new Vector(currentCell.x, currentCell.y),
             currentCell.radius
         );
@@ -364,7 +371,7 @@ const tickPlayer = (currentPlayer) => {
 
         foodEaten.forEach(deleteFood);
 
-        const massEaten = massFood.map(eatMass)
+        const massEaten = massFood.map((f) => eatMass(f, currentCell))
             .reduce(function(a, b, c) {return b ? a.concat(c) : a; }, []);
 
         const virusCollision = viruses.map(funcFood)
@@ -401,7 +408,7 @@ const tickPlayer = (currentPlayer) => {
         users.forEach(tree.put);
         let playerCollisions = [];
 
-        tree.get(currentPlayer, check);
+        tree.get(currentPlayer, (u) => check(u, currentCell, playerCollisions));
 
         playerCollisions.forEach(collisionCheck);
     }

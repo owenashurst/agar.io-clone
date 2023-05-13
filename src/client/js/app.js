@@ -193,25 +193,29 @@ function setupSocket(socket) {
 		c.focus();
     });
 
-    socket.on('gameSetup', function(data) {
+    socket.on('gameSetup', (data) => {
         global.gameWidth = data.gameWidth;
         global.gameHeight = data.gameHeight;
         resize();
     });
 
-    socket.on('playerDied', function (data) {
-        window.chat.addSystemLine('{GAME} - <b>' + (data.name.length < 1 ? 'An unnamed cell' : data.name) + '</b> was eaten.');
+    socket.on('playerDied', (data) => {
+        const player = isUnnamedCell(data.playerEatenName) ? 'An unnamed cell' : data.playerEatenName;
+        //const killer = isUnnamedCell(data.playerWhoAtePlayerName) ? 'An unnamed cell' : data.playerWhoAtePlayerName;
+        
+        //window.chat.addSystemLine('{GAME} - <b>' + (player) + '</b> was eaten by <b>' + (killer) + '</b>');
+        window.chat.addSystemLine('{GAME} - <b>' + (player) + '</b> was eaten');
     });
 
-    socket.on('playerDisconnect', function (data) {
-        window.chat.addSystemLine('{GAME} - <b>' + (data.name.length < 1 ? 'An unnamed cell' : data.name) + '</b> disconnected.');
+    socket.on('playerDisconnect', (data) => {
+        window.chat.addSystemLine('{GAME} - <b>' + (isUnnamedCell(data.name) ? 'An unnamed cell' : data.name) + '</b> disconnected.');
     });
 
-    socket.on('playerJoin', function (data) {
-        window.chat.addSystemLine('{GAME} - <b>' + (data.name.length < 1 ? 'An unnamed cell' : data.name) + '</b> joined.');
+    socket.on('playerJoin', (data) => {
+        window.chat.addSystemLine('{GAME} - <b>' + (isUnnamedCell(data.name) ? 'An unnamed cell' : data.name) + '</b> joined.');
     });
 
-    socket.on('leaderboard', function (data) {
+    socket.on('leaderboard', (data) => {
         leaderboard = data.leaderboard;
         var status = '<span class="title">Leaderboard</span>';
         for (var i = 0; i < leaderboard.length; i++) {
@@ -272,7 +276,7 @@ function setupSocket(socket) {
     socket.on('RIP', function () {
         global.gameStart = false;
         global.died = true;
-        window.setTimeout(function() {
+        window.setTimeout(() => {
             document.getElementById('gameAreaWrapper').style.opacity = 0;
             document.getElementById('startMenuWrapper').style.maxHeight = '1000px';
             global.died = false;
@@ -296,7 +300,9 @@ function setupSocket(socket) {
     });
 }
 
-function drawCircle(centerX, centerY, radius, sides) {
+const isUnnamedCell = (name) => name.length < 1;
+
+const drawCircle = (centerX, centerY, radius, sides) => {
     var theta = 0;
     var x = 0;
     var y = 0;
@@ -315,7 +321,7 @@ function drawCircle(centerX, centerY, radius, sides) {
     graph.fill();
 }
 
-function drawFood(food) {
+const drawFood = (food) => {
     graph.strokeStyle = 'hsl(' + food.hue + ', 100%, 45%)';
     graph.fillStyle = 'hsl(' + food.hue + ', 100%, 50%)';
     graph.lineWidth = foodConfig.border;
