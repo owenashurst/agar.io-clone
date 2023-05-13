@@ -16,7 +16,7 @@ exports.massToRadius = function (mass) {
 
 
 // overwrite Math.log function
-exports.log = (function () {
+exports.mathLog = (function () {
     var log = Math.log;
     return function (n, base) {
         return log(n) / (base ? log(base) : 1);
