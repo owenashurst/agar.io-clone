@@ -1,6 +1,8 @@
+/* jshint esversion: 8 */ 
+
 const gulp = require('gulp');
 const babel = require('gulp-babel');
-const jshint = require('gulp-jshint');
+const eslint = require('gulp-eslint');
 const nodemon = require('gulp-nodemon');
 const uglify = require('gulp-uglify');
 const util = require('gulp-util');
@@ -10,11 +12,9 @@ const webpack = require('webpack-stream');
 
 gulp.task('lint', () => {
   return gulp.src(['**/*.js', '!node_modules/**/*.js', '!bin/**/*.js'])
-    .pipe(jshint({
-          esnext: true
-      }))
-    .pipe(jshint.reporter('default', { verbose: true}))
-    .pipe(jshint.reporter('fail'));
+    .pipe(eslint())
+    .pipe(eslint.format())
+    .pipe(eslint.failAfterError())
 });
 
 gulp.task('test', gulp.series('lint', () => {
@@ -63,7 +63,6 @@ gulp.task('run', gulp.series('build', () => {
         delay: 10,
         script: './server/server.js',
         cwd: "./bin/",
-        args: ["config.json"],
         ext: 'html,js,css'
     })
     .on('restart', function () {
@@ -76,7 +75,6 @@ gulp.task('run-only', () => {
         delay: 10,
         script: './server/server.js',
         cwd: "./bin/",
-        args: ["config.json"],
         ext: 'html js css'
     })
     .on('restart', function () {
