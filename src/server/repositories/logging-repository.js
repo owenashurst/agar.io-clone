@@ -1,20 +1,15 @@
-const { mysqlPool } = require("../sql.js");
+const db = require("../sql.js");
 
 const logFailedLoginAttempt = async (username, ipAddress) => {
     return new Promise((resolve) => {
-        mysqlPool.getConnection((err, connection) => {
-            if (err) throw err;
-
-            connection.query(
-                "INSERT INTO `failed_login_attempts` (`username`, `ip_address`) VALUES (?, ?)",
-                [username, ipAddress],
-                (err, results) => {
-                    connection.release();
-                    if (err) throw err;
-                    resolve(results);
-                }
-            );
-        });
+        db.run(
+            "INSERT INTO failed_login_attempts (username, ip_address) VALUES (?, ?)",
+            [username, ipAddress],
+            (err) => {
+                if (err) console.error(err);
+                resolve();
+            }
+        );
     });
 };
 

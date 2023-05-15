@@ -33,11 +33,6 @@ module.exports = {
     minMassLoss: 50,
     mergeTimer: 15,
     sqlinfo: {
-      connectionLimit: 100,
-      host: "DEFAULT",
-      user: "root",
-      password: "DEFAULT",
-      database: "DEFAULT",
-      debug: false
+      fileName: "db.sqlite3",
     }
 };

@@ -10,6 +10,7 @@ const SAT = require('sat');
 
 const gameLogic = require('./game-logic');
 const loggingRepositry = require('./repositories/logging-repository');
+const chatRepository = require('./repositories/chat-repository');
 const config = require('../../config');
 const util = require('./lib/util');
 
@@ -144,10 +145,18 @@ io.on('connection', function (socket) {
     socket.on('playerChat', (data) => {
         var _sender = data.sender.replace(/(<([^>]+)>)/ig, '');
         var _message = data.message.replace(/(<([^>]+)>)/ig, '');
+
         if (config.logChat === 1) {
             console.log('[CHAT] [' + (new Date()).getHours() + ':' + (new Date()).getMinutes() + '] ' + _sender + ': ' + _message);
         }
-        socket.broadcast.emit('serverSendPlayerChat', {sender: _sender, message: _message.substring(0,35)});
+
+        socket.broadcast.emit('serverSendPlayerChat', {
+            sender: _sender,
+            message: _message.substring(0,35)
+        });
+
+        chatRepository.logChatMessage(_sender, _message, currentPlayer.ipAddress)
+        .catch((err) => console.error("Error when attempting to log chat message", err));
     });
 
     socket.on('pass', async (data) => {
@@ -159,7 +168,9 @@ io.on('connection', function (socket) {
             currentPlayer.admin = true;
         } else {
             console.log('[ADMIN] ' + currentPlayer.name + ' attempted to log in with incorrect password.');
+            
             socket.emit('serverMSG', 'Password incorrect, attempt logged.');
+
             loggingRepositry.logFailedLoginAttempt(currentPlayer.name, currentPlayer.ipAddress)
             .catch((err) => console.error("Error when attempting to log failed login attempt", err));
         }

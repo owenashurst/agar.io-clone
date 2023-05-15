@@ -189,7 +189,7 @@ const balanceMass = (food, viruses, users) => {
         removeFood(foodToRemove, viruses);
     }
 
-    console.debug('[DEBUG] Mass rebalanced!');
+    //console.debug('[DEBUG] Mass rebalanced!');
 
     const virusesToAdd = config.maxVirus - viruses.length;
     if (virusesToAdd > 0) {
