@@ -3,6 +3,12 @@ const util = require('./lib/util');
 
 const initMassLog = util.mathLog(config.defaultPlayerMass, config.slowBase);
 
+const MIN_SPEED = 6.25;
+const SPEED_DECREMENT = 0.5;
+const MIN_DISTANCE = 50;
+const MERGE_DISTANCE_RATIO = 1.75;
+const BORDER_OFFSET = 5;
+
 const calculateMovement = (target, speed, slowDown = 1) => {
     const degrees = Math.atan2(target.y, target.x);
     const deltaY = speed * Math.sin(degrees) / slowDown;
@@ -43,18 +49,18 @@ const movePlayer = (player) => {
         const distance = calculateDistance(0, 0, target.x, target.y);
 
         let slowDown = 1;
-        if(player.cells[i].speed <= 6.25) {
+        if(player.cells[i].speed <= MIN_SPEED) {
             slowDown = util.mathLog(player.cells[i].mass, config.slowBase) - initMassLog + 1;
         }
 
         let { deltaX, deltaY } = calculateMovement(target, player.cells[i].speed, slowDown);
 
-        if(player.cells[i].speed > 6.25) {
-            player.cells[i].speed -= 0.5;
+        if(player.cells[i].speed > MIN_SPEED) {
+            player.cells[i].speed -= SPEED_DECREMENT;
         }
-        if (distance < (50 + player.cells[i].radius)) {
-            deltaY *= distance / (50 + player.cells[i].radius);
-            deltaX *= distance / (50 + player.cells[i].radius);
+        if (distance < (MIN_DISTANCE + player.cells[i].radius)) {
+            deltaY *= distance / (MIN_DISTANCE + player.cells[i].radius);
+            deltaX *= distance / (MIN_DISTANCE + player.cells[i].radius);
         }
         if (!isNaN(deltaY)) {
             player.cells[i].y += deltaY;
@@ -82,7 +88,7 @@ const movePlayer = (player) => {
                             player.cells[i].y++;
                         }
                     }
-                    else if(newDistance < radiusTotal / 1.75) {
+                    else if(newDistance < radiusTotal / MERGE_DISTANCE_RATIO) {
                         player.cells[i].mass += player.cells[j].mass;
                         player.cells[i].radius = util.massToRadius(player.cells[i].mass);
                         player.cells.splice(j, 1);
@@ -105,7 +111,7 @@ const movePlayer = (player) => {
 const moveMass = (mass) => {
     const { deltaX, deltaY } = calculateMovement(mass.target, mass.speed);
 
-    mass.speed -= 0.5;
+    mass.speed -= SPEED_DECREMENT;
     if(mass.speed < 0) {
         mass.speed = 0;
     }
@@ -116,7 +122,7 @@ const moveMass = (mass) => {
         mass.x += deltaX;
     }
 
-    adjustForBoundaries(mass, mass.radius, 5, config.gameWidth, config.gameHeight);
+    adjustForBoundaries(mass, mass.radius, BORDER_OFFSET, config.gameWidth, config.gameHeight);
 };
 
 module.exports = {
