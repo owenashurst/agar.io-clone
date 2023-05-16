@@ -2,8 +2,6 @@ const { v4: uuidv4 } = require('uuid');
 const config = require('../../config');
 const util = require('./lib/util');
 
-const initMassLog = util.mathLog(config.defaultPlayerMass, config.slowBase);
-
 const addFood = (toAdd, food) => {
     var radius = util.massToRadius(config.foodMass);
 
@@ -81,7 +79,5 @@ module.exports = {
     addFood,
     removeFood,
     addVirus,
-    movePlayer,
-    moveMass,
     balanceMass
 };
