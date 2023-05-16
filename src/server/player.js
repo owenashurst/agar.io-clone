@@ -1,27 +1,49 @@
+const config = require('../../config');
 const util = require('./lib/util');
+
+const initMassLog = util.mathLog(config.defaultPlayerMass, config.slowBase);
+
+const calculateMovement = (target, speed, slowDown = 1) => {
+    const degrees = Math.atan2(target.y, target.x);
+    const deltaY = speed * Math.sin(degrees) / slowDown;
+    const deltaX = speed * Math.cos(degrees) / slowDown;
+    return { deltaX, deltaY };
+};
+
+const adjustForBoundaries = (position, radius, borderOffset, gameWidth, gameHeight) => {
+    const borderCalc = radius + borderOffset;
+    if (position.x > gameWidth - borderCalc) {
+        position.x = gameWidth - borderCalc;
+    }
+    if (position.y > gameHeight - borderCalc) {
+        position.y = gameHeight - borderCalc;
+    }
+    if (position.x < borderCalc) {
+        position.x = borderCalc;
+    }
+    if (position.y < borderCalc) {
+        position.y = borderCalc;
+    }
+};
 
 const movePlayer = (player) => {
     let x = 0;
     let y = 0;
 
-    for (let i = 0; i < player.cells.length; i++)
-    {
+    for (let i = 0; i < player.cells.length; i++) {
         const target = {
             x: player.x - player.cells[i].x + player.target.x,
             y: player.y - player.cells[i].y + player.target.y
         };
 
         const distance = Math.sqrt(Math.pow(target.y, 2) + Math.pow(target.x, 2));
-        const degrees = Math.atan2(target.y, target.x);
 
         let slowDown = 1;
-
         if(player.cells[i].speed <= 6.25) {
             slowDown = util.mathLog(player.cells[i].mass, config.slowBase) - initMassLog + 1;
         }
 
-        let deltaY = player.cells[i].speed * Math.sin(degrees) / slowDown;
-        let deltaX = player.cells[i].speed * Math.cos(degrees) / slowDown;
+        let { deltaX, deltaY } = calculateMovement(target, player.cells[i].speed, slowDown);
 
         if(player.cells[i].speed > 6.25) {
             player.cells[i].speed -= 0.5;
@@ -66,19 +88,7 @@ const movePlayer = (player) => {
         }
 
         if (player.cells.length > i) {
-            var borderCalc = player.cells[i].radius / 3;
-            if (player.cells[i].x > config.gameWidth - borderCalc) {
-                player.cells[i].x = config.gameWidth - borderCalc;
-            }
-            if (player.cells[i].y > config.gameHeight - borderCalc) {
-                player.cells[i].y = config.gameHeight - borderCalc;
-            }
-            if (player.cells[i].x < borderCalc) {
-                player.cells[i].x = borderCalc;
-            }
-            if (player.cells[i].y < borderCalc) {
-                player.cells[i].y = borderCalc;
-            }
+            adjustForBoundaries(player.cells[i], player.cells[i].radius / 3, 0, config.gameWidth, config.gameHeight);
             x += player.cells[i].x;
             y += player.cells[i].y;
         }
@@ -89,9 +99,7 @@ const movePlayer = (player) => {
 };
 
 const moveMass = (mass) => {
-    const degrees = Math.atan2(mass.target.y, mass.target.x);
-    const deltaY = mass.speed * Math.sin(degrees);
-    const deltaX = mass.speed * Math.cos(degrees);
+    const { deltaX, deltaY } = calculateMovement(mass.target, mass.speed);
 
     mass.speed -= 0.5;
     if(mass.speed < 0) {
@@ -104,18 +112,10 @@ const moveMass = (mass) => {
         mass.x += deltaX;
     }
 
-    const borderCalc = mass.radius + 5;
+    adjustForBoundaries(mass, mass.radius, 5, config.gameWidth, config.gameHeight);
+};
 
-    if (mass.x > config.gameWidth - borderCalc) {
-        mass.x = config.gameWidth - borderCalc;
-    }
-    if (mass.y > config.gameHeight - borderCalc) {
-        mass.y = config.gameHeight - borderCalc;
-    }
-    if (mass.x < borderCalc) {
-        mass.x = borderCalc;
-    }
-    if (mass.y < borderCalc) {
-        mass.y = borderCalc;
-    }
+module.exports = {
+    movePlayer,
+    moveMass,
 };
