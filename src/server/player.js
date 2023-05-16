@@ -10,6 +10,10 @@ const calculateMovement = (target, speed, slowDown = 1) => {
     return { deltaX, deltaY };
 };
 
+const calculateDistance = (x1, y1, x2, y2) => {
+    return Math.sqrt(Math.pow(y2 - y1, 2) + Math.pow(x2 - x1, 2));
+};
+
 const adjustForBoundaries = (position, radius, borderOffset, gameWidth, gameHeight) => {
     const borderCalc = radius + borderOffset;
     if (position.x > gameWidth - borderCalc) {
@@ -36,7 +40,7 @@ const movePlayer = (player) => {
             y: player.y - player.cells[i].y + player.target.y
         };
 
-        const distance = Math.sqrt(Math.pow(target.y, 2) + Math.pow(target.x, 2));
+        const distance = calculateDistance(0, 0, target.x, target.y);
 
         let slowDown = 1;
         if(player.cells[i].speed <= 6.25) {
@@ -62,7 +66,7 @@ const movePlayer = (player) => {
         // Find best solution.
         for (let j = 0; j < player.cells.length; j++) {
             if (j != i && player.cells[i] !== undefined) {
-                const newDistance = Math.sqrt(Math.pow(player.cells[j].y-player.cells[i].y,2) + Math.pow(player.cells[j].x-player.cells[i].x,2));
+                const newDistance = calculateDistance(player.cells[i].x, player.cells[i].y, player.cells[j].x, player.cells[j].y);
                 const radiusTotal = (player.cells[i].radius + player.cells[j].radius);
 
                 if (newDistance < radiusTotal) {
