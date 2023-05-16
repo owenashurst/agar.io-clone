@@ -1,3 +1,5 @@
+const util = require('./lib/util');
+
 const movePlayer = (player) => {
     let x = 0;
     let y = 0;
