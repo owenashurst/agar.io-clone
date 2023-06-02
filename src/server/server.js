@@ -9,6 +9,7 @@ const quadtree = require('simple-quadtree');
 const SAT = require('sat');
 
 const gameLogic = require('./game-logic');
+const playerLogic = require('./player');
 const loggingRepositry = require('./repositories/logging-repository');
 const chatRepository = require('./repositories/chat-repository');
 const config = require('../../config');
@@ -297,7 +298,7 @@ const tickPlayer = (currentPlayer) => {
         sockets[currentPlayer.id].disconnect();
     }
 
-    gameLogic.movePlayer(currentPlayer);
+    playerLogic.movePlayer(currentPlayer);
 
     const funcFood = (f) => {
         return SAT.pointInCircle(new Vector(f.x, f.y), playerCircle);
@@ -431,7 +432,7 @@ const moveloop = () => {
     }
     for (let i = 0; i < massFood.length; i++) {
         if(massFood[i].speed > 0) {
-            gameLogic.moveMass(massFood[i]);
+            playerLogic.moveMass(massFood[i]);
         }
     }
 };
