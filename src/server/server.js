@@ -21,6 +21,7 @@ const tree = quadtree(0, 0, config.gameWidth, config.gameHeight);
 let map = new mapUtils.Map(config);
 
 let users = [];
+let spectators = [];
 let sockets = {};
 
 let leaderboard = [];
@@ -34,23 +35,31 @@ let playerCircle = new Circle(new Vector(0, 0), 0);
 app.use(express.static(__dirname + '/../client'));
 
 io.on('connection', function (socket) {
-    console.log('User has connected: ', socket.handshake.query.type);
-
-    var type = socket.handshake.query.type;
-    var radius = util.massToRadius(config.defaultPlayerMass);
-    var position = config.newPlayerInitialPosition == 'farthest' ? util.uniformPosition(users, radius) : util.randomPosition(radius);
-
-    var cells = [];
-    var massTotal = 0;
-    if (type === 'player') {
-        cells = [{
-            mass: config.defaultPlayerMass,
-            x: position.x,
-            y: position.y,
-            radius: radius
-        }];
-        massTotal = config.defaultPlayerMass;
+    let type = socket.handshake.query.type;
+    console.log('User has connected: ', type);
+    switch (type) {
+        case 'player':
+            addPlayer(socket);
+            break;
+        case 'spectator':
+            addSpectator(socket);
+            break;
+        default:
+            console.log('Unknown user type, not doing anything.');
     }
+});
+
+const addPlayer = (socket) => {
+    let radius = util.massToRadius(config.defaultPlayerMass);
+    let position = config.newPlayerInitialPosition == 'farthest' ? util.uniformPosition(users, radius) : util.randomPosition(radius);
+
+    let cells= [{
+        mass: config.defaultPlayerMass,
+        x: position.x,
+        y: position.y,
+        radius: radius
+    }];
+    let massTotal = config.defaultPlayerMass;
 
     var currentPlayer = {
         id: socket.id,
@@ -62,7 +71,7 @@ io.on('connection', function (socket) {
         cells: cells,
         massTotal: massTotal,
         hue: Math.round(Math.random() * 360),
-        type: type,
+        type: 'player',
         lastHeartbeat: new Date().getTime(),
         target: {
             x: 0,
@@ -90,19 +99,13 @@ io.on('connection', function (socket) {
             player.y = position.y;
             player.target.x = 0;
             player.target.y = 0;
-            if (type === 'player') {
-                player.cells = [{
-                    mass: config.defaultPlayerMass,
-                    x: position.x,
-                    y: position.y,
-                    radius: radius
-                }];
-                player.massTotal = config.defaultPlayerMass;
-            }
-            else {
-                player.cells = [];
-                player.massTotal = 0;
-            }
+            player.cells = [{
+                mass: config.defaultPlayerMass,
+                x: position.x,
+                y: position.y,
+                radius: radius
+            }];
+            player.massTotal = config.defaultPlayerMass;
             player.hue = Math.round(Math.random() * 360);
             currentPlayer = player;
             currentPlayer.lastHeartbeat = new Date().getTime();
@@ -268,7 +271,25 @@ io.on('connection', function (socket) {
             currentPlayer.lastSplit = new Date().getTime();
         }
     });
-});
+}
+
+const addSpectator = (socket) => {
+    socket.on('gotit', function () {
+        sockets[socket.id] = socket;
+        spectators.push(socket.id);
+        io.emit('playerJoin', { name: '' });
+
+        socket.emit('gameSetup', {
+            gameWidth: config.gameWidth,
+            gameHeight: config.gameHeight
+        });
+    });
+
+    socket.emit("welcome", {}, {
+        width: config.gameWidth,
+        height: config.gameHeight
+    });
+}
 
 const tickPlayer = (currentPlayer) => {
     if (currentPlayer.lastHeartbeat < new Date().getTime() - config.maxHeartbeatInterval) {
@@ -449,11 +470,8 @@ const gameloop = () => {
 };
 
 const sendUpdates = () => {
+    spectators.forEach(updateSpectator)
     users.forEach((u) => {
-        // center the view if x/y is undefined, this will happen for spectators
-        u.x = u.x || config.gameWidth / 2;
-        u.y = u.y || config.gameHeight / 2;
-
         var visibleFood = map.food.data
             .filter(function (f) {
                 return util.testSquareRectangle(
@@ -506,18 +524,37 @@ const sendUpdates = () => {
             })
             .filter((f) => f);
 
-        sockets[u.id].emit('serverTellPlayerMove', visibleCells, visibleFood, visibleMass, visibleVirus);
+        sockets[u.id].emit('serverTellPlayerMove', u, visibleCells, visibleFood, visibleMass, visibleVirus);
 
         if (leaderboardChanged) {
-            sockets[u.id].emit('leaderboard', {
-                players: users.length,
-                leaderboard
-            });
+            sendLeaderboard(sockets[u.id]);
         }
     });
 
     leaderboardChanged = false;
 };
+
+const sendLeaderboard = (socket) => {
+    socket.emit('leaderboard', {
+        players: users.length,
+        leaderboard
+    });
+}
+const updateSpectator = (socketID) => {
+    let playerData = {
+        x: config.gameWidth / 2,
+        y: config.gameHeight / 2,
+        cells: [],
+        massTotal: 0,
+        hue: 100,
+        id: socketID,
+        name: ''
+    };
+    sockets[socketID].emit('serverTellPlayerMove', playerData, users, map.food.data, map.massFood.data, map.viruses.data);
+    if (leaderboardChanged) {
+        sendLeaderboard(sockets[socketID]);
+    }
+}
 
 setInterval(moveloop, 1000 / 60);
 setInterval(gameloop, 1000);

@@ -53,7 +53,7 @@ window.onload = function() {
         nickErrorText = document.querySelector('#startMenu .input-error');
 
     btnS.onclick = function () {
-        startGame('spectate');
+        startGame('spectator');
     };
 
     btn.onclick = function () {
@@ -184,7 +184,6 @@ function setupSocket(socket) {
         window.chat.player = player;
         socket.emit('gotit', player);
         global.gameStart = true;
-        debug('Game started at: ' + global.gameStart);
         window.chat.addSystemLine('Connected to the game!');
         window.chat.addSystemLine('Type <b>-help</b> for a list of commands.');
         if (global.mobile) {
@@ -246,14 +245,7 @@ function setupSocket(socket) {
     });
 
     // Handle movement.
-    socket.on('serverTellPlayerMove', function (userData, foodsList, massList, virusList) {
-        var playerData;
-        for(var i =0; i< userData.length; i++) {
-            if(typeof(userData[i].id) == "undefined") {
-                playerData = userData[i];
-                i = userData.length;
-            }
-        }
+    socket.on('serverTellPlayerMove', function (playerData, userData, foodsList, massList, virusList) {
         if(global.playerType == 'player') {
             var xoffset = player.x - playerData.x;
             var yoffset = player.y - playerData.y;
@@ -322,6 +314,7 @@ const drawCircle = (centerX, centerY, radius, sides) => {
 }
 
 const drawFood = (food) => {
+    console.log(food);
     graph.strokeStyle = 'hsl(' + food.hue + ', 100%, 45%)';
     graph.fillStyle = 'hsl(' + food.hue + ', 100%, 50%)';
     graph.lineWidth = foodConfig.border;
@@ -616,7 +609,7 @@ function resize() {
     player.screenWidth = c.width = global.screenWidth = global.playerType == 'player' ? window.innerWidth : global.gameWidth;
     player.screenHeight = c.height = global.screenHeight = global.playerType == 'player' ? window.innerHeight : global.gameHeight;
 
-    if (global.playerType == 'spectate') {
+    if (global.playerType == 'spectator') {
         player.x = global.gameWidth / 2;
         player.y = global.gameHeight / 2;
     }
