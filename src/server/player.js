@@ -1,5 +1,6 @@
 const config = require('../../config');
 const util = require('./lib/util');
+const gameLogic = require('./game-logic');
 
 const initMassLog = util.mathLog(config.defaultPlayerMass, config.slowBase);
 
@@ -18,22 +19,6 @@ const calculateMovement = (target, speed, slowDown = 1) => {
 
 const calculateDistance = (x1, y1, x2, y2) => {
     return Math.sqrt(Math.pow(y2 - y1, 2) + Math.pow(x2 - x1, 2));
-};
-
-const adjustForBoundaries = (position, radius, borderOffset, gameWidth, gameHeight) => {
-    const borderCalc = radius + borderOffset;
-    if (position.x > gameWidth - borderCalc) {
-        position.x = gameWidth - borderCalc;
-    }
-    if (position.y > gameHeight - borderCalc) {
-        position.y = gameHeight - borderCalc;
-    }
-    if (position.x < borderCalc) {
-        position.x = borderCalc;
-    }
-    if (position.y < borderCalc) {
-        position.y = borderCalc;
-    }
 };
 
 const movePlayer = (player) => {
@@ -98,7 +83,7 @@ const movePlayer = (player) => {
         }
 
         if (player.cells.length > i) {
-            adjustForBoundaries(player.cells[i], player.cells[i].radius / 3, 0, config.gameWidth, config.gameHeight);
+            gameLogic.adjustForBoundaries(player.cells[i], player.cells[i].radius / 3, 0, config.gameWidth, config.gameHeight);
             x += player.cells[i].x;
             y += player.cells[i].y;
         }
@@ -122,7 +107,7 @@ const moveMass = (mass) => {
         mass.x += deltaX;
     }
 
-    adjustForBoundaries(mass, mass.radius, BORDER_OFFSET, config.gameWidth, config.gameHeight);
+    gameLogic.adjustForBoundaries(mass, mass.radius, BORDER_OFFSET, config.gameWidth, config.gameHeight);
 };
 
 module.exports = {

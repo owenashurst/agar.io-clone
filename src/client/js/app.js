@@ -345,7 +345,7 @@ function drawFireFood(mass) {
     graph.lineWidth = playerConfig.border+10;
     drawCircle(mass.x - player.x + global.screenWidth / 2,
                mass.y - player.y + global.screenHeight / 2,
-               mass.radius-5, 18 + (~~(mass.masa/5)));
+               mass.radius-5, 18 + (~~(mass.mass/5)));
 }
 
 function drawPlayers(order) {

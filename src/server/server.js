@@ -21,7 +21,6 @@ const tree = quadtree(0, 0, config.gameWidth, config.gameHeight);
 let map = new mapUtils.Map(config);
 
 let users = [];
-let massFood = [];
 let sockets = {};
 
 let leaderboard = [];
@@ -30,7 +29,7 @@ let leaderboardChanged = false;
 const Vector = SAT.Vector;
 const Circle = SAT.Circle;
 
-let playerCircle = new Circle(new Vector(0, 0), 0); 
+let playerCircle = new Circle(new Vector(0, 0), 0);
 
 app.use(express.static(__dirname + '/../client'));
 
@@ -43,7 +42,7 @@ io.on('connection', function (socket) {
 
     var cells = [];
     var massTotal = 0;
-    if(type === 'player') {
+    if (type === 'player') {
         cells = [{
             mass: config.defaultPlayerMass,
             x: position.x,
@@ -91,7 +90,7 @@ io.on('connection', function (socket) {
             player.y = position.y;
             player.target.x = 0;
             player.target.y = 0;
-            if(type === 'player') {
+            if (type === 'player') {
                 player.cells = [{
                     mass: config.defaultPlayerMass,
                     x: position.x,
@@ -101,8 +100,8 @@ io.on('connection', function (socket) {
                 player.massTotal = config.defaultPlayerMass;
             }
             else {
-                 player.cells = [];
-                 player.massTotal = 0;
+                player.cells = [];
+                player.massTotal = 0;
             }
             player.hue = Math.round(Math.random() * 360);
             currentPlayer = player;
@@ -154,11 +153,11 @@ io.on('connection', function (socket) {
 
         socket.broadcast.emit('serverSendPlayerChat', {
             sender: _sender,
-            message: _message.substring(0,35)
+            message: _message.substring(0, 35)
         });
 
         chatRepository.logChatMessage(_sender, _message, currentPlayer.ipAddress)
-        .catch((err) => console.error("Error when attempting to log chat message", err));
+            .catch((err) => console.error("Error when attempting to log chat message", err));
     });
 
     socket.on('pass', async (data) => {
@@ -170,11 +169,11 @@ io.on('connection', function (socket) {
             currentPlayer.admin = true;
         } else {
             console.log('[ADMIN] ' + currentPlayer.name + ' attempted to log in with incorrect password.');
-            
+
             socket.emit('serverMSG', 'Password incorrect, attempt logged.');
 
             loggingRepositry.logFailedLoginAttempt(currentPlayer.name, currentPlayer.ipAddress)
-            .catch((err) => console.error("Error when attempting to log failed login attempt", err));
+                .catch((err) => console.error("Error when attempting to log failed login attempt", err));
         }
     });
 
@@ -225,43 +224,21 @@ io.on('connection', function (socket) {
         }
     });
 
-    socket.on('1', function() {
+    socket.on('1', function () {
         // Fire food.
-        for (let i = 0; i < currentPlayer.cells.length; i++)
-        {
-            if (((currentPlayer.cells[i].mass >= config.defaultPlayerMass + config.fireFood) && config.fireFood > 0) || (currentPlayer.cells[i].mass >= 20 && config.fireFood === 0)){
-                let masa = 1;
-
-                if (config.fireFood > 0) {
-                    masa = config.fireFood;
-                }
-                else {
-                    masa = currentPlayer.cells[i].mass*0.1;
-                    currentPlayer.cells[i].mass -= masa;
-                    currentPlayer.massTotal -=masa;
-                    massFood.push({
-                        id: currentPlayer.id,
-                        num: i,
-                        masa: masa,
-                        hue: currentPlayer.hue,
-                        target: {
-                            x: currentPlayer.x - currentPlayer.cells[i].x + currentPlayer.target.x,
-                            y: currentPlayer.y - currentPlayer.cells[i].y + currentPlayer.target.y
-                        },
-                        x: currentPlayer.cells[i].x,
-                        y: currentPlayer.cells[i].y,
-                        radius: util.massToRadius(masa),
-                        speed: 25
-                    });
-                }
+        for (let i = 0; i < currentPlayer.cells.length; i++) {
+            if (currentPlayer.cells[i].mass >= config.defaultPlayerMass + config.fireFood) {
+                currentPlayer.cells[i].mass -= config.fireFood;
+                currentPlayer.massTotal -= config.fireFood;
+                map.massFood.addNew(currentPlayer, i, config.fireFood);
             }
         }
     });
 
     socket.on('2', (virusCell) => {
         const splitCell = (cell) => {
-            if(cell && cell.mass && cell.mass >= config.defaultPlayerMass*2) {
-                cell.mass = cell.mass/2;
+            if (cell && cell.mass && cell.mass >= config.defaultPlayerMass * 2) {
+                cell.mass = cell.mass / 2;
                 cell.radius = util.massToRadius(cell.mass);
                 currentPlayer.cells.push({
                     mass: cell.mass,
@@ -273,14 +250,14 @@ io.on('connection', function (socket) {
             }
         };
 
-        if(currentPlayer.cells.length < config.limitSplit && currentPlayer.massTotal >= config.defaultPlayerMass*2) {
+        if (currentPlayer.cells.length < config.limitSplit && currentPlayer.massTotal >= config.defaultPlayerMass * 2) {
             // Split single cell from virus
             if (virusCell) {
                 splitCell(currentPlayer.cells[virusCell]);
             }
             else {
                 // Split all cells
-                if(currentPlayer.cells.length < config.limitSplit && currentPlayer.massTotal >= config.defaultPlayerMass*2) {
+                if (currentPlayer.cells.length < config.limitSplit && currentPlayer.massTotal >= config.defaultPlayerMass * 2) {
                     const currentPlayersCells = currentPlayer.cells;
                     for (let i = 0; i < currentPlayersCells.length; i++) {
                         splitCell(currentPlayersCells[i]);
@@ -306,9 +283,11 @@ const tickPlayer = (currentPlayer) => {
     };
 
     const eatMass = (m, currentCell) => {
-        if (SAT.pointInCircle(new Vector(m.x, m.y), playerCircle)){
-            if (m.id == currentPlayer.id && m.speed > 0 && z == m.num) return false;
-            if (currentCell.mass > m.masa * 1.1) return true;
+        if (SAT.pointInCircle(new Vector(m.x, m.y), playerCircle)) {
+            if (m.id == currentPlayer.id && m.speed > 0 && z == m.num)
+                return false;
+            if (currentCell.mass > m.mass * 1.1)
+                return true;
         }
 
         return false;
@@ -341,19 +320,19 @@ const tickPlayer = (currentPlayer) => {
     };
 
     const collisionCheck = (collision) => {
-        if (collision.aUser.mass > collision.bUser.mass * 1.1  && collision.aUser.radius > Math.sqrt(Math.pow(collision.aUser.x - collision.bUser.x, 2) + Math.pow(collision.aUser.y - collision.bUser.y, 2))*1.75) {
+        if (collision.aUser.mass > collision.bUser.mass * 1.1 && collision.aUser.radius > Math.sqrt(Math.pow(collision.aUser.x - collision.bUser.x, 2) + Math.pow(collision.aUser.y - collision.bUser.y, 2)) * 1.75) {
             console.log('[DEBUG] Killing user: ' + collision.bUser.id);
             console.log('[DEBUG] Collision info:');
             console.log(collision);
 
             const userIndex = util.findIndex(users, collision.bUser.id);
             if (userIndex > -1) {
-                if(users[userIndex].cells.length > 1) {
+                if (users[userIndex].cells.length > 1) {
                     users[userIndex].massTotal -= collision.bUser.mass;
                     users[userIndex].cells.splice(collision.bUser.num, 1);
                 } else {
                     users.splice(userIndex, 1);
-                    io.emit('playerDied', { 
+                    io.emit('playerDied', {
                         playerEatenName: collision.bUser.name,
                         // TODO: Implement aUser name.
                         //playerWhoAtePlayerName: collision.aUser.name,
@@ -366,8 +345,8 @@ const tickPlayer = (currentPlayer) => {
         }
     };
 
-    for (let i = 0; i < currentPlayer.cells.length; i++) {
-        const currentCell = currentPlayer.cells[i];
+    for (var z = 0; z < currentPlayer.cells.length; z++) {
+        const currentCell = currentPlayer.cells[z];
 
         playerCircle = new Circle(
             new Vector(currentCell.x, currentCell.y),
@@ -375,40 +354,35 @@ const tickPlayer = (currentPlayer) => {
         );
 
         const foodEaten = map.food.data.map(funcFood)
-            .reduce( function(a, b, c) { return b ? a.concat(c) : a; }, []);
+            .reduce(function (a, b, c) { return b ? a.concat(c) : a; }, []);
 
         map.food.delete(foodEaten);
 
-        const massEaten = massFood.map((f) => eatMass(f, currentCell))
-            .reduce(function(a, b, c) {return b ? a.concat(c) : a; }, []);
+        const massEaten = map.massFood.data.map((f) => eatMass(f, currentCell))
+            .reduce(function (a, b, c) { return b ? a.concat(c) : a; }, []);
 
         const virusCollision = map.viruses.data.map(funcFood)
-           .reduce( function(a, b, c) { return b ? a.concat(c) : a; }, []);
+            .reduce(function (a, b, c) { return b ? a.concat(c) : a; }, []);
 
         if (virusCollision > 0 && currentCell.mass > map.viruses.data[virusCollision].mass) {
-          sockets[currentPlayer.id].emit('virusSplit', i);
-          map.viruses.delete(virusCollision)
+            sockets[currentPlayer.id].emit('virusSplit', z);
+            map.viruses.delete(virusCollision)
         }
 
-        let masaGanada = 0;
-        for (let i = 0; i < massEaten.length; i++) {
-            masaGanada += massFood[massEaten[i]].masa;
-            massFood[massEaten[i]] = {};
-            massFood.splice(massEaten[i],1);
-            for(var j = 0; j < massEaten.length; j++) {
-                if(massEaten[i] < massEaten[j]) {
-                    massEaten[j]--;
-                }
-            }
+        let massGained = 0;
+        for (let index of massEaten) { //massEaten is an array of indexes -> "index of" instead of "index in" is intentional
+            massGained += map.massFood.data[index].mass;
         }
 
-        if (typeof(currentCell.speed) == "undefined") {
+        map.massFood.remove(massEaten);
+
+        if (typeof (currentCell.speed) == "undefined") {
             currentCell.speed = 6.25;
         }
 
-        masaGanada += (foodEaten.length * config.foodMass);
-        currentCell.mass += masaGanada;
-        currentPlayer.massTotal += masaGanada;
+        massGained += (foodEaten.length * config.foodMass);
+        currentCell.mass += massGained;
+        currentPlayer.massTotal += massGained;
         currentCell.radius = util.massToRadius(currentCell.mass);
         playerCircle.r = currentCell.radius;
 
@@ -426,17 +400,13 @@ const moveloop = () => {
     for (let i = 0; i < users.length; i++) {
         tickPlayer(users[i]);
     }
-    for (let i = 0; i < massFood.length; i++) {
-        if(massFood[i].speed > 0) {
-            playerLogic.moveMass(massFood[i]);
-        }
-    }
+    map.massFood.move();
 };
 
 const gameloop = () => {
     if (users.length > 0) {
-        users.sort((a, b) => { 
-            return b.massTotal - a.massTotal; 
+        users.sort((a, b) => {
+            return b.massTotal - a.massTotal;
         });
 
         const topUsers = [];
@@ -465,7 +435,7 @@ const gameloop = () => {
         }
 
         for (let i = 0; i < users.length; i++) {
-            for(var j = 0; j < users[i].cells.length; j++) {
+            for (var j = 0; j < users[i].cells.length; j++) {
                 if (users[i].cells[j].mass * (1 - (config.massLossRate / 1000)) > config.defaultPlayerMass && users[i].massTotal > config.minMassLoss) {
                     var massLoss = users[i].cells[j].mass * (1 - (config.massLossRate / 1000));
                     users[i].massTotal -= users[i].cells[j].mass - massLoss;
@@ -484,12 +454,12 @@ const sendUpdates = () => {
         u.x = u.x || config.gameWidth / 2;
         u.y = u.y || config.gameHeight / 2;
 
-        const visibleFood  = map.food.data
+        const visibleFood = map.food.data
             .map((f) => {
-                if ( f.x > u.x - u.screenWidth/2 - 20 &&
-                    f.x < u.x + u.screenWidth/2 + 20 &&
-                    f.y > u.y - u.screenHeight/2 - 20 &&
-                    f.y < u.y + u.screenHeight/2 + 20) {
+                if (f.x > u.x - u.screenWidth / 2 - 20 &&
+                    f.x < u.x + u.screenWidth / 2 + 20 &&
+                    f.y > u.y - u.screenHeight / 2 - 20 &&
+                    f.y < u.y + u.screenHeight / 2 + 20) {
                     return f;
                 }
             })
@@ -497,21 +467,21 @@ const sendUpdates = () => {
 
         const visibleVirus = map.viruses.data
             .map((f) => {
-                if ( f.x > u.x - u.screenWidth/2 - f.radius &&
-                    f.x < u.x + u.screenWidth/2 + f.radius &&
-                    f.y > u.y - u.screenHeight/2 - f.radius &&
-                    f.y < u.y + u.screenHeight/2 + f.radius) {
+                if (f.x > u.x - u.screenWidth / 2 - f.radius &&
+                    f.x < u.x + u.screenWidth / 2 + f.radius &&
+                    f.y > u.y - u.screenHeight / 2 - f.radius &&
+                    f.y < u.y + u.screenHeight / 2 + f.radius) {
                     return f;
                 }
             })
             .filter((f) => f);
 
-        const visibleMass = massFood
+        const visibleMass = map.massFood.data
             .map((f) => {
-                if (f.x+f.radius > u.x - u.screenWidth/2 - 20 &&
-                    f.x-f.radius < u.x + u.screenWidth/2 + 20 &&
-                    f.y+f.radius > u.y - u.screenHeight/2 - 20 &&
-                    f.y-f.radius < u.y + u.screenHeight/2 + 20) {
+                if (f.x + f.radius > u.x - u.screenWidth / 2 - 20 &&
+                    f.x - f.radius < u.x + u.screenWidth / 2 + 20 &&
+                    f.y + f.radius > u.y - u.screenHeight / 2 - 20 &&
+                    f.y - f.radius < u.y + u.screenHeight / 2 + 20) {
                     return f;
                 }
             })
@@ -519,12 +489,11 @@ const sendUpdates = () => {
 
         const visibleCells = users
             .map((f) => {
-                for (let i = 0; i < f.cells.length; i++)
-                {
-                    if (f.cells[i].x+f.cells[i].radius > u.x - u.screenWidth/2 - 20 &&
-                        f.cells[i].x-f.cells[i].radius < u.x + u.screenWidth/2 + 20 &&
-                        f.cells[i].y+f.cells[i].radius > u.y - u.screenHeight/2 - 20 &&
-                        f.cells[i].y-f.cells[i].radius < u.y + u.screenHeight/2 + 20) {
+                for (let i = 0; i < f.cells.length; i++) {
+                    if (f.cells[i].x + f.cells[i].radius > u.x - u.screenWidth / 2 - 20 &&
+                        f.cells[i].x - f.cells[i].radius < u.x + u.screenWidth / 2 + 20 &&
+                        f.cells[i].y + f.cells[i].radius > u.y - u.screenHeight / 2 - 20 &&
+                        f.cells[i].y - f.cells[i].radius < u.y + u.screenHeight / 2 + 20) {
 
                         i = f.cells.lenth;
 
@@ -553,7 +522,7 @@ const sendUpdates = () => {
             .filter((f) => f);
 
         sockets[u.id].emit('serverTellPlayerMove', visibleCells, visibleFood, visibleMass, visibleVirus);
-        
+
         if (leaderboardChanged) {
             sockets[u.id].emit('leaderboard', {
                 players: users.length,
@@ -572,4 +541,4 @@ setInterval(sendUpdates, 1000 / config.networkUpdateFactor);
 // Don't touch, IP configurations.
 var ipaddress = process.env.OPENSHIFT_NODEJS_IP || process.env.IP || config.host;
 var serverport = process.env.OPENSHIFT_NODEJS_PORT || process.env.PORT || config.port;
-http.listen( serverport, ipaddress, () => console.log('[DEBUG] Listening on ' + ipaddress + ':' + serverport));
+http.listen(serverport, ipaddress, () => console.log('[DEBUG] Listening on ' + ipaddress + ':' + serverport));
