@@ -2,23 +2,6 @@ const { v4: uuidv4 } = require('uuid');
 const config = require('../../config');
 const util = require('./lib/util');
 
-const addFood = (toAdd, food) => {
-    var radius = util.massToRadius(config.foodMass);
-
-    while (toAdd--) {
-        const position = config.foodUniformDisposition ? util.uniformPosition(food, radius) : util.randomPosition(radius);
-        food.push({
-            // Make IDs unique.
-            id: uuidv4(),
-            x: position.x,
-            y: position.y,
-            radius: radius,
-            mass: Math.random() + 2,
-            hue: Math.round(Math.random() * 360)
-        });
-    }
-};
-
 const addVirus = (toAdd, viruses) => {
     while (toAdd--) {
         const mass = util.randomInRange(config.virus.defaultMass.from, config.virus.defaultMass.to, true);
@@ -38,14 +21,8 @@ const addVirus = (toAdd, viruses) => {
     }
 };
 
-const removeFood = (toRem) => {
-    while (toRem--) {
-        food.pop();
-    }
-};
-
 const balanceMass = (food, viruses, users) => {
-    const totalMass = food.length * config.foodMass +
+    const totalMass = food.data.length * config.foodMass +
         users
             .map((u) =>  u.massTotal)
             .reduce((pu,cu) => { 
@@ -53,18 +30,18 @@ const balanceMass = (food, viruses, users) => {
             }, 0);
 
     const massDiff = config.gameMass - totalMass;
-    const maxFoodDiff = config.maxFood - food.length;
+    const maxFoodDiff = config.maxFood - food.data.length;
     const foodDiff = parseInt(massDiff / config.foodMass) - maxFoodDiff;
     const foodToAdd = Math.min(foodDiff, maxFoodDiff);
     const foodToRemove = -Math.max(foodDiff, maxFoodDiff);
 
     if (foodToAdd > 0) {
         console.debug('[DEBUG] Adding ' + foodToAdd + ' food');
-        addFood(foodToAdd, food);
+        food.addNew(foodToAdd);
     }
     else if (foodToRemove > 0) {
         console.debug('[DEBUG] Removing ' + foodToRemove + ' food');
-        removeFood(foodToRemove, viruses);
+        food.removeExcess(foodToRemove);
     }
 
     //console.debug('[DEBUG] Mass rebalanced!');
@@ -76,8 +53,6 @@ const balanceMass = (food, viruses, users) => {
 };
 
 module.exports = {
-    addFood,
-    removeFood,
     addVirus,
     balanceMass
 };

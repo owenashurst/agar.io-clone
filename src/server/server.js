@@ -14,12 +14,14 @@ const loggingRepositry = require('./repositories/logging-repository');
 const chatRepository = require('./repositories/chat-repository');
 const config = require('../../config');
 const util = require('./lib/util');
+const mapUtils = require('./map/map');
 
 const tree = quadtree(0, 0, config.gameWidth, config.gameHeight);
 
+let map = new mapUtils.Map(config);
+
 let users = [];
 let massFood = [];
-let food = [];
 let viruses = [];
 let sockets = {};
 
@@ -304,11 +306,6 @@ const tickPlayer = (currentPlayer) => {
         return SAT.pointInCircle(new Vector(f.x, f.y), playerCircle);
     };
 
-    const deleteFood = (f) => {
-        food[f] = {};
-        food.splice(f, 1);
-    };
-
     const eatMass = (m, currentCell) => {
         if (SAT.pointInCircle(new Vector(m.x, m.y), playerCircle)){
             if (m.id == currentPlayer.id && m.speed > 0 && z == m.num) return false;
@@ -378,10 +375,10 @@ const tickPlayer = (currentPlayer) => {
             currentCell.radius
         );
 
-        const foodEaten = food.map(funcFood)
+        const foodEaten = map.food.data.map(funcFood)
             .reduce( function(a, b, c) { return b ? a.concat(c) : a; }, []);
 
-        foodEaten.forEach(deleteFood);
+        map.food.delete(foodEaten);
 
         const massEaten = massFood.map((f) => eatMass(f, currentCell))
             .reduce(function(a, b, c) {return b ? a.concat(c) : a; }, []);
@@ -479,7 +476,7 @@ const gameloop = () => {
         }
     }
 
-    gameLogic.balanceMass(food, viruses, users);
+    gameLogic.balanceMass(map.food, viruses, users);
 };
 
 const sendUpdates = () => {
@@ -488,7 +485,7 @@ const sendUpdates = () => {
         u.x = u.x || config.gameWidth / 2;
         u.y = u.y || config.gameHeight / 2;
 
-        const visibleFood  = food
+        const visibleFood  = map.food.data
             .map((f) => {
                 if ( f.x > u.x - u.screenWidth/2 - 20 &&
                     f.x < u.x + u.screenWidth/2 + 20 &&
