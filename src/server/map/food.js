@@ -39,9 +39,8 @@ exports.FoodManager = class {
     }
 
     delete(foodsToDelete) {
-        for (let foodIndex of foodsToDelete) {
-            this.data[foodIndex] = {};
-            this.data.splice(foodIndex, 1);
+        if (foodsToDelete.length > 0) {
+            this.data = util.removeIndexes(this.data, foodsToDelete);
         }
     }
 };
