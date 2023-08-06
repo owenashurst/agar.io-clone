@@ -114,3 +114,20 @@ exports.removeIndexes = function (inputArray, indexes) {
 
     return result;
 }
+
+/// Checks if the two rectangles are colliding
+exports.testRectangleRectangle =
+    function (centerXA, centerYA, widthA, heightA, centerXB, centerYB, widthB, heightB) {
+        return centerXA + widthA > centerXB - widthB
+            && centerXA - widthA < centerXB + widthB
+            && centerYA + heightA > centerYB - heightB
+            && centerYA - heightA < centerYB + heightB;
+    }
+
+/// Checks if the square (first 3 arguments) and the rectangle (last 4 arguments) are colliding
+exports.testSquareRectangle =
+    function (centerXA, centerYA, edgeLengthA, centerXB, centerYB, widthB, heightB) {
+        return exports.testRectangleRectangle(
+            centerXA, centerYA, edgeLengthA, edgeLengthA,
+            centerXB, centerYB, widthB, heightB);
+    }

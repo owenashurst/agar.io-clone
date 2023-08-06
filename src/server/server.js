@@ -454,49 +454,34 @@ const sendUpdates = () => {
         u.x = u.x || config.gameWidth / 2;
         u.y = u.y || config.gameHeight / 2;
 
-        const visibleFood = map.food.data
-            .map((f) => {
-                if (f.x > u.x - u.screenWidth / 2 - 20 &&
-                    f.x < u.x + u.screenWidth / 2 + 20 &&
-                    f.y > u.y - u.screenHeight / 2 - 20 &&
-                    f.y < u.y + u.screenHeight / 2 + 20) {
-                    return f;
-                }
-            })
-            .filter((f) => f);
+        var visibleFood = map.food.data
+            .filter(function (f) {
+                return util.testSquareRectangle(
+                    f.x, f.y, 0,
+                    u.x, u.y, u.screenWidth / 2 + 20, u.screenHeight / 2 + 20);
+            });
 
-        const visibleVirus = map.viruses.data
-            .map((f) => {
-                if (f.x > u.x - u.screenWidth / 2 - f.radius &&
-                    f.x < u.x + u.screenWidth / 2 + f.radius &&
-                    f.y > u.y - u.screenHeight / 2 - f.radius &&
-                    f.y < u.y + u.screenHeight / 2 + f.radius) {
-                    return f;
-                }
-            })
-            .filter((f) => f);
+        var visibleVirus = map.viruses.data
+            .filter(function (f) {
+                return util.testSquareRectangle(
+                    f.x, f.y, 0,
+                    u.x, u.y, u.screenWidth / 2 + f.radius, u.screenHeight / 2 + f.radius);
+            });
 
-        const visibleMass = map.massFood.data
-            .map((f) => {
-                if (f.x + f.radius > u.x - u.screenWidth / 2 - 20 &&
-                    f.x - f.radius < u.x + u.screenWidth / 2 + 20 &&
-                    f.y + f.radius > u.y - u.screenHeight / 2 - 20 &&
-                    f.y - f.radius < u.y + u.screenHeight / 2 + 20) {
-                    return f;
-                }
-            })
-            .filter((f) => f);
+        var visibleMass = map.massFood.data
+            .filter(function (f) {
+                return util.testSquareRectangle(
+                    f.x, f.y, f.radius,
+                    u.x, u.y, u.screenWidth / 2 + 20, u.screenHeight / 2 + 20);
+            });
+
 
         const visibleCells = users
             .map((f) => {
-                for (let i = 0; i < f.cells.length; i++) {
-                    if (f.cells[i].x + f.cells[i].radius > u.x - u.screenWidth / 2 - 20 &&
-                        f.cells[i].x - f.cells[i].radius < u.x + u.screenWidth / 2 + 20 &&
-                        f.cells[i].y + f.cells[i].radius > u.y - u.screenHeight / 2 - 20 &&
-                        f.cells[i].y - f.cells[i].radius < u.y + u.screenHeight / 2 + 20) {
-
-                        i = f.cells.lenth;
-
+                for (let cell of f.cells) {
+                    if (util.testSquareRectangle(
+                        cell.x, cell.y, cell.radius,
+                        u.x, u.y, u.screenWidth / 2 + 20, u.screenHeight / 2 + 20)) {
                         if (f.id !== u.id) {
                             return {
                                 id: f.id,
