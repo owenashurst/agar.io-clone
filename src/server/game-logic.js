@@ -1,25 +1,4 @@
-const { v4: uuidv4 } = require('uuid');
 const config = require('../../config');
-const util = require('./lib/util');
-
-const addVirus = (toAdd, viruses) => {
-    while (toAdd--) {
-        const mass = util.randomInRange(config.virus.defaultMass.from, config.virus.defaultMass.to, true);
-        const radius = util.massToRadius(mass);
-        const position = config.virusUniformDisposition ? util.uniformPosition(viruses, radius) : util.randomPosition(radius);
-
-        viruses.push({
-            id: uuidv4(),
-            x: position.x,
-            y: position.y,
-            radius: radius,
-            mass: mass,
-            fill: config.virus.fill,
-            stroke: config.virus.stroke,
-            strokeWidth: config.virus.strokeWidth
-        });
-    }
-};
 
 const balanceMass = (food, viruses, users) => {
     const totalMass = food.data.length * config.foodMass +
@@ -46,13 +25,12 @@ const balanceMass = (food, viruses, users) => {
 
     //console.debug('[DEBUG] Mass rebalanced!');
 
-    const virusesToAdd = config.maxVirus - viruses.length;
+    const virusesToAdd = config.maxVirus - viruses.data.length;
     if (virusesToAdd > 0) {
-        addVirus(virusesToAdd, viruses);
+        viruses.addNew(virusesToAdd);
     }
 };
 
 module.exports = {
-    addVirus,
     balanceMass
 };

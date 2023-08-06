@@ -22,7 +22,6 @@ let map = new mapUtils.Map(config);
 
 let users = [];
 let massFood = [];
-let viruses = [];
 let sockets = {};
 
 let leaderboard = [];
@@ -383,12 +382,12 @@ const tickPlayer = (currentPlayer) => {
         const massEaten = massFood.map((f) => eatMass(f, currentCell))
             .reduce(function(a, b, c) {return b ? a.concat(c) : a; }, []);
 
-        const virusCollision = viruses.map(funcFood)
+        const virusCollision = map.viruses.data.map(funcFood)
            .reduce( function(a, b, c) { return b ? a.concat(c) : a; }, []);
 
-        if (virusCollision > 0 && currentCell.mass > viruses[virusCollision].mass) {
+        if (virusCollision > 0 && currentCell.mass > map.viruses.data[virusCollision].mass) {
           sockets[currentPlayer.id].emit('virusSplit', i);
-          viruses.splice(virusCollision, 1);
+          map.viruses.delete(virusCollision)
         }
 
         let masaGanada = 0;
@@ -476,7 +475,7 @@ const gameloop = () => {
         }
     }
 
-    gameLogic.balanceMass(map.food, viruses, users);
+    gameLogic.balanceMass(map.food, map.viruses, users);
 };
 
 const sendUpdates = () => {
@@ -496,7 +495,7 @@ const sendUpdates = () => {
             })
             .filter((f) => f);
 
-        const visibleVirus = viruses
+        const visibleVirus = map.viruses.data
             .map((f) => {
                 if ( f.x > u.x - u.screenWidth/2 - f.radius &&
                     f.x < u.x + u.screenWidth/2 + f.radius &&
