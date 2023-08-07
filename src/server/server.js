@@ -113,10 +113,6 @@ const addPlayer = (socket) => {
 
             io.emit('playerJoin', { name: currentPlayer.name });
 
-            socket.emit('gameSetup', {
-                gameWidth: config.gameWidth,
-                gameHeight: config.gameHeight
-            });
             console.log('Total players: ' + users.length);
         }
 
@@ -134,7 +130,10 @@ const addPlayer = (socket) => {
     socket.on('respawn', () => {
         if (util.findIndex(users, currentPlayer.id) > -1)
             users.splice(util.findIndex(users, currentPlayer.id), 1);
-        socket.emit('welcome', currentPlayer);
+        socket.emit('welcome', currentPlayer, {
+            width: config.gameWidth,
+            height: config.gameHeight
+        });
         console.log('[INFO] User ' + currentPlayer.name + ' has respawned');
     });
 
@@ -278,11 +277,6 @@ const addSpectator = (socket) => {
         sockets[socket.id] = socket;
         spectators.push(socket.id);
         io.emit('playerJoin', { name: '' });
-
-        socket.emit('gameSetup', {
-            gameWidth: config.gameWidth,
-            gameHeight: config.gameHeight
-        });
     });
 
     socket.emit("welcome", {}, {

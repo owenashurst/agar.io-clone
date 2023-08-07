@@ -174,7 +174,7 @@ function setupSocket(socket) {
     });
 
     // Handle connection.
-    socket.on('welcome', function (playerSettings) {
+    socket.on('welcome', function (playerSettings, gameSizes) {
         player = playerSettings;
         player.name = global.playerName;
         player.screenWidth = global.screenWidth;
@@ -190,11 +190,8 @@ function setupSocket(socket) {
             document.getElementById('gameAreaWrapper').removeChild(document.getElementById('chatbox'));
         }
 		c.focus();
-    });
-
-    socket.on('gameSetup', (data) => {
-        global.gameWidth = data.gameWidth;
-        global.gameHeight = data.gameHeight;
+        global.gameWidth = gameSizes.width;
+        global.gameHeight = gameSizes.height;
         resize();
     });
 
@@ -314,7 +311,6 @@ const drawCircle = (centerX, centerY, radius, sides) => {
 }
 
 const drawFood = (food) => {
-    console.log(food);
     graph.strokeStyle = 'hsl(' + food.hue + ', 100%, 45%)';
     graph.fillStyle = 'hsl(' + food.hue + ', 100%, 50%)';
     graph.lineWidth = foodConfig.border;
