@@ -14,20 +14,14 @@ const adjustForBoundaries = (position, radius, borderOffset, gameWidth, gameHeig
         position.y = borderCalc;
     }
 };
-const balanceMass = (food, viruses, users) => {
-    const totalMass = food.data.length * config.foodMass +
-        users
-            .map((u) =>  u.massTotal)
-            .reduce((pu,cu) => { 
-                return pu + cu; 
-            }, 0);
+const balanceMass = (food, viruses, players) => {
+    const totalMass = food.data.length * config.foodMass + players.getTotalMass();
 
     const massDiff = config.gameMass - totalMass;
     const maxFoodDiff = config.maxFood - food.data.length;
     const foodDiff = parseInt(massDiff / config.foodMass) - maxFoodDiff;
     const foodToAdd = Math.min(foodDiff, maxFoodDiff);
     const foodToRemove = -Math.max(foodDiff, maxFoodDiff);
-
     if (foodToAdd > 0) {
         console.debug('[DEBUG] Adding ' + foodToAdd + ' food');
         food.addNew(foodToAdd);

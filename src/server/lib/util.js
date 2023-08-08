@@ -97,14 +97,7 @@ exports.randomColor = function () {
     };
 };
 
-// Removes elements from `inputArray` whose indexes are in the `indexes` array.
-// leaves the original array unchanged, and returns the result.
-exports.removeIndexes = function (inputArray, indexes) {
-    let nullified = inputArray;
-    for (let index of indexes) {
-        nullified[index] = null;
-    }
-
+exports.removeNulls = function (inputArray) {
     let result = [];
     for (let element of inputArray) {
         if (element != null) {
@@ -115,7 +108,18 @@ exports.removeIndexes = function (inputArray, indexes) {
     return result;
 }
 
-/// Checks if the two rectangles are colliding
+// Removes elements from `inputArray` whose indexes are in the `indexes` array.
+// Leaves the original array unchanged, and returns the result.
+exports.removeIndexes = function (inputArray, indexes) {
+    let nullified = inputArray;
+    for (let index of indexes) {
+        nullified[index] = null;
+    }
+
+    return exports.removeNulls(nullified);
+}
+
+// Checks if the two rectangles are colliding
 exports.testRectangleRectangle =
     function (centerXA, centerYA, widthA, heightA, centerXB, centerYB, widthB, heightB) {
         return centerXA + widthA > centerXB - widthB
@@ -124,7 +128,7 @@ exports.testRectangleRectangle =
             && centerYA - heightA < centerYB + heightB;
     }
 
-/// Checks if the square (first 3 arguments) and the rectangle (last 4 arguments) are colliding
+// Checks if the square (first 3 arguments) and the rectangle (last 4 arguments) are colliding
 exports.testSquareRectangle =
     function (centerXA, centerYA, edgeLengthA, centerXB, centerYB, widthB, heightB) {
         return exports.testRectangleRectangle(
