@@ -217,7 +217,7 @@ const tickPlayer = (currentPlayer) => {
         sockets[currentPlayer.id].disconnect();
     }
 
-    currentPlayer.move(config.slowBase, config.gameWidth, config.gameHeight, INIT_MASS_LOG, null)
+    currentPlayer.move(config.slowBase, config.gameWidth, config.gameHeight, INIT_MASS_LOG);
 
     const funcFood = (f) => {
         return SAT.pointInCircle(new Vector(f.x, f.y), playerCircle);
@@ -325,67 +325,15 @@ const gameloop = () => {
         map.players.shrinkCells(config.massLossRate, config.defaultPlayerMass, config.minMassLoss);
     }
 
-    gameLogic.balanceMass(map.food, map.viruses, map.players);
+    map.balanceMass(config.foodMass, config.gameMass, config.maxFood, config.maxVirus);
 };
 
 const sendUpdates = () => {
-    spectators.forEach(updateSpectator)
-    map.players.data.forEach((u) => {
-        var visibleFood = map.food.data
-            .filter(function (f) {
-                return util.testSquareRectangle(
-                    f.x, f.y, 0,
-                    u.x, u.y, u.screenWidth / 2 + 20, u.screenHeight / 2 + 20);
-            });
-        var visibleVirus = map.viruses.data
-            .filter(function (f) {
-                return util.testSquareRectangle(
-                    f.x, f.y, 0,
-                    u.x, u.y, u.screenWidth / 2 + f.radius, u.screenHeight / 2 + f.radius);
-            });
-
-        var visibleMass = map.massFood.data
-            .filter(function (f) {
-                return util.testSquareRectangle(
-                    f.x, f.y, f.radius,
-                    u.x, u.y, u.screenWidth / 2 + 20, u.screenHeight / 2 + 20);
-            });
-
-
-        const visibleCells = map.players.data
-            .map((f) => {
-                for (let cell of f.cells) {
-                    if (util.testSquareRectangle(
-                        cell.x, cell.y, cell.radius,
-                        u.x, u.y, u.screenWidth / 2 + 20, u.screenHeight / 2 + 20)) {
-                        if (f.id !== u.id) {
-                            return {
-                                id: f.id,
-                                x: f.x,
-                                y: f.y,
-                                cells: f.cells,
-                                massTotal: Math.round(f.massTotal),
-                                hue: f.hue,
-                                name: f.name
-                            };
-                        } else {
-                            return {
-                                x: f.x,
-                                y: f.y,
-                                cells: f.cells,
-                                massTotal: Math.round(f.massTotal),
-                                hue: f.hue,
-                            };
-                        }
-                    }
-                }
-            })
-            .filter((f) => f);
-
-        sockets[u.id].emit('serverTellPlayerMove', u, visibleCells, visibleFood, visibleMass, visibleVirus);
-
+    spectators.forEach(updateSpectator);
+    map.enumerateWhatPlayersSee(function (playerData, visiblePlayers, visibleFood, visibleMass, visibleViruses) {
+        sockets[playerData.id].emit('serverTellPlayerMove', playerData, visiblePlayers, visibleFood, visibleMass, visibleViruses);
         if (leaderboardChanged) {
-            sendLeaderboard(sockets[u.id]);
+            sendLeaderboard(sockets[playerData.id]);
         }
     });
 
