@@ -1,6 +1,7 @@
 "use strict";
 
-let util = require('../lib/util');
+const util = require('../lib/util');
+const gameLogic = require('../game-logic');
 
 exports.MassFood = class {
     constructor(playerFiring, cellIndex, mass) {
@@ -33,21 +34,8 @@ exports.MassFood = class {
         if (!isNaN(deltaX)) {
             this.x += deltaX;
         }
-    
-        var borderCalc = this.radius + 5;
-    
-        if (this.x > gameWidth - borderCalc) {
-            this.x = gameWidth - borderCalc;
-        }
-        if (this.y > gameHeight - borderCalc) {
-            this.y = gameHeight - borderCalc;
-        }
-        if (this.x < borderCalc) {
-            this.x = borderCalc;
-        }
-        if (this.y < borderCalc) {
-            this.y = borderCalc;
-        }
+        
+        gameLogic.adjustForBoundaries(this, this.radius, 5, gameWidth, gameHeight);
     }
 }
 

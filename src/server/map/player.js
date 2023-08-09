@@ -1,7 +1,8 @@
 "use strict";
 
-let util = require('../lib/util');
-let sat = require('sat');
+const util = require('../lib/util');
+const sat = require('sat');
+const gameLogic = require('../game-logic');
 
 const MIN_SPEED = 6.25;
 const SPLIT_CELL_SPEED = 20;
@@ -25,22 +26,6 @@ class Cell {
 
     toCircle() {
         return new sat.Circle(new sat.Vector(this.x, this.y), this.radius);
-    }
-
-    moveAwayFromBorders(gameWidth, gameHeight) {
-        var borderCalc = this.radius / 3;
-        if (this.x > gameWidth - borderCalc) {
-            this.x = gameWidth - borderCalc;
-        }
-        if (this.y > gameHeight - borderCalc) {
-            this.y = gameHeight - borderCalc;
-        }
-        if (this.x < borderCalc) {
-            this.x = borderCalc;
-        }
-        if (this.y < borderCalc) {
-            this.y = borderCalc;
-        }
     }
 
     move(playerX, playerY, playerTarget, slowBase, initMassLog) {
@@ -251,7 +236,7 @@ exports.Player = class {
         for (let i = 0; i < this.cells.length; i++) {
             let cell = this.cells[i];
             cell.move(this.x, this.y, this.target, slowBase, initMassLog);
-            cell.moveAwayFromBorders(gameWidth, gameHeight);
+            gameLogic.adjustForBoundaries(cell, cell.radius/3, 0, gameWidth, gameHeight);
 
             xSum += cell.x;
             ySum += cell.y;
