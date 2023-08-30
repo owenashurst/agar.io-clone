@@ -31,7 +31,6 @@ module.exports = {
     newPlayerInitialPosition: "farthest",
     massLossRate: 1,
     minMassLoss: 50,
-    mergeTimer: 15,
     sqlinfo: {
       fileName: "db.sqlite3",
     }

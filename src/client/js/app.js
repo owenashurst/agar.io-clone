@@ -53,7 +53,7 @@ window.onload = function() {
         nickErrorText = document.querySelector('#startMenu .input-error');
 
     btnS.onclick = function () {
-        startGame('spectate');
+        startGame('spectator');
     };
 
     btn.onclick = function () {
@@ -174,7 +174,7 @@ function setupSocket(socket) {
     });
 
     // Handle connection.
-    socket.on('welcome', function (playerSettings) {
+    socket.on('welcome', function (playerSettings, gameSizes) {
         player = playerSettings;
         player.name = global.playerName;
         player.screenWidth = global.screenWidth;
@@ -184,18 +184,14 @@ function setupSocket(socket) {
         window.chat.player = player;
         socket.emit('gotit', player);
         global.gameStart = true;
-        debug('Game started at: ' + global.gameStart);
         window.chat.addSystemLine('Connected to the game!');
         window.chat.addSystemLine('Type <b>-help</b> for a list of commands.');
         if (global.mobile) {
             document.getElementById('gameAreaWrapper').removeChild(document.getElementById('chatbox'));
         }
 		c.focus();
-    });
-
-    socket.on('gameSetup', (data) => {
-        global.gameWidth = data.gameWidth;
-        global.gameHeight = data.gameHeight;
+        global.gameWidth = gameSizes.width;
+        global.gameHeight = gameSizes.height;
         resize();
     });
 
@@ -246,14 +242,7 @@ function setupSocket(socket) {
     });
 
     // Handle movement.
-    socket.on('serverTellPlayerMove', function (userData, foodsList, massList, virusList) {
-        var playerData;
-        for(var i =0; i< userData.length; i++) {
-            if(typeof(userData[i].id) == "undefined") {
-                playerData = userData[i];
-                i = userData.length;
-            }
-        }
+    socket.on('serverTellPlayerMove', function (playerData, userData, foodsList, massList, virusList) {
         if(global.playerType == 'player') {
             var xoffset = player.x - playerData.x;
             var yoffset = player.y - playerData.y;
@@ -292,11 +281,6 @@ function setupSocket(socket) {
         reason = data;
         global.kicked = true;
         socket.close();
-    });
-
-    socket.on('virusSplit', function (virusCell) {
-        socket.emit('2', virusCell);
-        reenviar = false;
     });
 }
 
@@ -345,7 +329,7 @@ function drawFireFood(mass) {
     graph.lineWidth = playerConfig.border+10;
     drawCircle(mass.x - player.x + global.screenWidth / 2,
                mass.y - player.y + global.screenHeight / 2,
-               mass.radius-5, 18 + (~~(mass.masa/5)));
+               mass.radius-5, 18 + (~~(mass.mass/5)));
 }
 
 function drawPlayers(order) {
@@ -616,7 +600,7 @@ function resize() {
     player.screenWidth = c.width = global.screenWidth = global.playerType == 'player' ? window.innerWidth : global.gameWidth;
     player.screenHeight = c.height = global.screenHeight = global.playerType == 'player' ? window.innerHeight : global.gameHeight;
 
-    if (global.playerType == 'spectate') {
+    if (global.playerType == 'spectator') {
         player.x = global.gameWidth / 2;
         player.y = global.gameHeight / 2;
     }

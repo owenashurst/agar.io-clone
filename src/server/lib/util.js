@@ -4,7 +4,7 @@
 
 const cfg = require('../../../config');
 
-exports.validNick = function(nickname) {
+exports.validNick = function (nickname) {
     var regex = /^\w*$/;
     return regex.exec(nickname) !== null;
 };
@@ -40,7 +40,7 @@ exports.randomPosition = function (radius) {
     };
 };
 
-exports.uniformPosition = function(points, radius) {
+exports.uniformPosition = function (points, radius) {
     var bestCandidate, maxDistance = 0;
     var numberOfCandidates = 10;
 
@@ -72,7 +72,7 @@ exports.uniformPosition = function(points, radius) {
     return bestCandidate;
 };
 
-exports.findIndex = function(arr, id) {
+exports.findIndex = function (arr, id) {
     var len = arr.length;
 
     while (len--) {
@@ -84,7 +84,7 @@ exports.findIndex = function(arr, id) {
     return -1;
 };
 
-exports.randomColor = function() {
+exports.randomColor = function () {
     var color = '#' + ('00000' + (Math.random() * (1 << 24) | 0).toString(16)).slice(-6);
     var c = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(color);
     var r = (parseInt(c[1], 16) - 32) > 0 ? (parseInt(c[1], 16) - 32) : 0;
@@ -96,3 +96,42 @@ exports.randomColor = function() {
         border: '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)
     };
 };
+
+exports.removeNulls = function (inputArray) {
+    let result = [];
+    for (let element of inputArray) {
+        if (element != null) {
+            result.push(element);
+        }
+    }
+
+    return result;
+}
+
+// Removes elements from `inputArray` whose indexes are in the `indexes` array.
+// Leaves the original array unchanged, and returns the result.
+exports.removeIndexes = function (inputArray, indexes) {
+    let nullified = inputArray;
+    for (let index of indexes) {
+        nullified[index] = null;
+    }
+
+    return exports.removeNulls(nullified);
+}
+
+// Checks if the two rectangles are colliding
+exports.testRectangleRectangle =
+    function (centerXA, centerYA, widthA, heightA, centerXB, centerYB, widthB, heightB) {
+        return centerXA + widthA > centerXB - widthB
+            && centerXA - widthA < centerXB + widthB
+            && centerYA + heightA > centerYB - heightB
+            && centerYA - heightA < centerYB + heightB;
+    }
+
+// Checks if the square (first 3 arguments) and the rectangle (last 4 arguments) are colliding
+exports.testSquareRectangle =
+    function (centerXA, centerYA, edgeLengthA, centerXB, centerYB, widthB, heightB) {
+        return exports.testRectangleRectangle(
+            centerXA, centerYA, edgeLengthA, edgeLengthA,
+            centerXB, centerYB, widthB, heightB);
+    }
