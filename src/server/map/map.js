@@ -26,8 +26,7 @@ exports.Map = class {
         if (foodToAdd > 0) {
             console.debug('[DEBUG] Adding ' + foodToAdd + ' food');
             this.food.addNew(foodToAdd);
-        }
-        else if (foodToRemove > 0) {
+        } else if (foodToRemove > 0) {
             console.debug('[DEBUG] Removing ' + foodToRemove + ' food');
             this.food.removeExcess(foodToRemove);
         }
@@ -41,8 +40,6 @@ exports.Map = class {
     }
 
     enumerateWhatPlayersSee(callback) {
-
-
         for (let currentPlayer of this.players.data) {
             var visibleFood = this.food.data.filter(entity => util.isVisibleEntity(entity, currentPlayer, false));
             var visibleViruses = this.viruses.data.filter(entity => util.isVisibleEntity(entity, currentPlayer));
