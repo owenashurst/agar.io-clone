@@ -41,26 +41,28 @@ exports.Map = class {
     }
 
     enumerateWhatPlayersSee(callback) {
+        var threshold = (size) => size * 0.1;
+
         for (let currentPlayer of this.players.data) {
             var visibleFood = this.food.data
                 .filter(function (f) {
                     return util.testSquareRectangle(
-                        f.x, f.y, 0,
-                        currentPlayer.x, currentPlayer.y, currentPlayer.screenWidth / 2 + 20, currentPlayer.screenHeight / 2 + 20);
+                        f.x, f.y, f.radius,
+                        currentPlayer.x, currentPlayer.y, currentPlayer.screenWidth / 2, currentPlayer.screenHeight / 2);
                 });
 
             var visibleViruses = this.viruses.data
                 .filter(function (f) {
                     return util.testSquareRectangle(
-                        f.x, f.y, 0,
-                        currentPlayer.x, currentPlayer.y, currentPlayer.screenWidth / 2 + exports.virusUtils.virusRadius, currentPlayer.screenHeight / 2 + exports.virusUtils.virusRadius);
+                        f.x, f.y, f.radius + threshold(f.radius),
+                        currentPlayer.x, currentPlayer.y, currentPlayer.screenWidth / 2, currentPlayer.screenHeight / 2);
                 });
 
             var visibleMass = this.massFood.data
                 .filter(function (f) {
                     return util.testSquareRectangle(
-                        f.x, f.y, f.radius,
-                        currentPlayer.x, currentPlayer.y, currentPlayer.screenWidth / 2 + 20, currentPlayer.screenHeight / 2 + 20);
+                        f.x, f.y, f.radius + threshold(f.radius),
+                        currentPlayer.x, currentPlayer.y, currentPlayer.screenWidth / 2, currentPlayer.screenHeight / 2);
                 });
 
 
