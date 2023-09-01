@@ -41,30 +41,12 @@ exports.Map = class {
     }
 
     enumerateWhatPlayersSee(callback) {
-        var threshold = (size) => size * 0.1;
+
 
         for (let currentPlayer of this.players.data) {
-            var visibleFood = this.food.data
-                .filter(function (f) {
-                    return util.testSquareRectangle(
-                        f.x, f.y, f.radius,
-                        currentPlayer.x, currentPlayer.y, currentPlayer.screenWidth / 2, currentPlayer.screenHeight / 2);
-                });
-
-            var visibleViruses = this.viruses.data
-                .filter(function (f) {
-                    return util.testSquareRectangle(
-                        f.x, f.y, f.radius + threshold(f.radius),
-                        currentPlayer.x, currentPlayer.y, currentPlayer.screenWidth / 2, currentPlayer.screenHeight / 2);
-                });
-
-            var visibleMass = this.massFood.data
-                .filter(function (f) {
-                    return util.testSquareRectangle(
-                        f.x, f.y, f.radius + threshold(f.radius),
-                        currentPlayer.x, currentPlayer.y, currentPlayer.screenWidth / 2, currentPlayer.screenHeight / 2);
-                });
-
+            var visibleFood = this.food.data.filter(entity => util.isVisibleEntity(entity, currentPlayer, false));
+            var visibleViruses = this.viruses.data.filter(entity => util.isVisibleEntity(entity, currentPlayer));
+            var visibleMass = this.massFood.data.filter(entity => util.isVisibleEntity(entity, currentPlayer));
 
             const extractData = (player) => {
                 return {
@@ -81,9 +63,7 @@ exports.Map = class {
             var visiblePlayers = [];
             for (let player of this.players.data) {
                 for (let cell of player.cells) {
-                    if (util.testSquareRectangle(
-                        cell.x, cell.y, cell.radius,
-                        player.x, player.y, player.screenWidth / 2 + 20, player.screenHeight / 2 + 20)) {
+                    if (util.isVisibleEntity(cell, player, false)) {
                         visiblePlayers.push(extractData(player));
                         break;
                     }
