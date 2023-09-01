@@ -63,7 +63,7 @@ exports.Map = class {
             var visiblePlayers = [];
             for (let player of this.players.data) {
                 for (let cell of player.cells) {
-                    if (util.isVisibleEntity(cell, player, false)) {
+                    if (util.isVisibleEntity(cell, currentPlayer)) {
                         visiblePlayers.push(extractData(player));
                         break;
                     }
