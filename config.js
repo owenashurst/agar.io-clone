@@ -14,7 +14,8 @@ module.exports = {
             from: 100,
             to: 150
         },
-        splitMass: 180
+        splitMass: 180,
+        uniformDisposition: false,
 	},
     gameWidth: 5000,
     gameHeight: 5000,
@@ -27,7 +28,6 @@ module.exports = {
     networkUpdateFactor: 40,
     maxHeartbeatInterval: 5000,
     foodUniformDisposition: true,
-    virusUniformDisposition: false,
     newPlayerInitialPosition: "farthest",
     massLossRate: 1,
     minMassLoss: 50,
