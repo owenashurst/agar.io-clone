@@ -137,3 +137,12 @@ exports.testSquareRectangle =
             centerXA, centerYA, edgeLengthA, edgeLengthA,
             centerXB, centerYB, widthB, heightB);
     }
+
+exports.getIndexes = (array, predicate) => {
+    return array.reduce((acc, value, index) => {
+        if (predicate(value)) {
+            acc.push(index)
+        }
+        return acc;
+    }, []);
+}

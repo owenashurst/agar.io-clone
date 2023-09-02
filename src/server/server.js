@@ -27,8 +27,6 @@ let leaderboardChanged = false;
 const Vector = SAT.Vector;
 const Circle = SAT.Circle;
 
-let playerCircle = new Circle(new Vector(0, 0), 0);
-
 app.use(express.static(__dirname + '/../client'));
 
 io.on('connection', function (socket) {
@@ -218,53 +216,48 @@ const tickPlayer = (currentPlayer) => {
 
     currentPlayer.move(config.slowBase, config.gameWidth, config.gameHeight, INIT_MASS_LOG);
 
-    const funcFood = (f) => {
-        return SAT.pointInCircle(new Vector(f.x, f.y), playerCircle);
+    const isEntityInsideCircle = (point, circle) => {
+        return SAT.pointInCircle(new Vector(point.x, point.y), circle);
     };
 
-    const eatMass = (m, currentCell) => {
-        if (SAT.pointInCircle(new Vector(m.x, m.y), playerCircle)) {
-            if (m.id == currentPlayer.id && m.speed > 0 && z == m.num)
+    const canEatMass = (cell, cellCircle, cellIndex, mass) => {
+        if (isEntityInsideCircle(mass, cellCircle)) {
+            if (mass.id === currentPlayer.id && mass.speed > 0 && cellIndex === mass.num)
                 return false;
-            if (currentCell.mass > m.mass * 1.1)
+            if (cell.mass > mass.mass * 1.1)
                 return true;
         }
 
         return false;
     };
 
-    let cellsToSplit = [];
-    for (var z = 0; z < currentPlayer.cells.length; z++) {
-        const currentCell = currentPlayer.cells[z];
+    const cellsToSplit = [];
+    for (let cellIndex = 0; cellIndex < currentPlayer.cells.length; cellIndex++) {
+        const currentCell = currentPlayer.cells[cellIndex];
 
-        playerCircle = new Circle(
+        const playerCircle = new Circle(
             new Vector(currentCell.x, currentCell.y),
             currentCell.radius
         );
 
-        const foodEaten = map.food.data.map(funcFood)
-            .reduce(function (a, b, c) { return b ? a.concat(c) : a; }, []);
+        const eatenFoodIndexes = util.getIndexes(map.food.data, food => isEntityInsideCircle(food, playerCircle));
+        const eatenMassIndexes = util.getIndexes(map.massFood.data, mass => canEatMass(currentCell, playerCircle, cellIndex, mass));
+        const eatenVirusIndexes = util.getIndexes(map.viruses.data, virus => isEntityInsideCircle(virus, playerCircle));
 
-        map.food.delete(foodEaten);
+        map.food.delete(eatenFoodIndexes);
 
-        const massEaten = map.massFood.data.map((f) => eatMass(f, currentCell))
-            .reduce(function (a, b, c) { return b ? a.concat(c) : a; }, []);
-
-        const virusCollision = map.viruses.data.map(funcFood)
-            .reduce(function (a, b, c) { return b ? a.concat(c) : a; }, []);
-
-        if (virusCollision > 0 && currentCell.mass > map.viruses.data[virusCollision].mass) {
-            cellsToSplit.push(z);
-            map.viruses.delete(virusCollision)
+        if (eatenVirusIndexes > 0 && currentCell.mass > map.viruses.data[eatenVirusIndexes].mass) { //TODO wtf??? eatenVirusIndexes is array
+            cellsToSplit.push(cellIndex);
+            map.viruses.delete(eatenVirusIndexes)
         }
 
         let massGained = 0;
-        for (let index of massEaten) { //massEaten is an array of indexes -> "index of" instead of "index in" is intentional
+        for (let index of eatenMassIndexes) { //eatenMassIndexes is an array of indexes -> "index of" instead of "index in" is intentional
             massGained += map.massFood.data[index].mass;
         }
 
-        map.massFood.remove(massEaten);
-        massGained += (foodEaten.length * config.foodMass);
+        map.massFood.remove(eatenMassIndexes);
+        massGained += (eatenFoodIndexes.length * config.foodMass);
         currentCell.mass += massGained;
         currentPlayer.massTotal += massGained;
         currentCell.radius = util.massToRadius(currentCell.mass);
