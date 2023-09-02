@@ -4,9 +4,12 @@ const gulp = require('gulp');
 const babel = require('gulp-babel');
 const eslint = require('gulp-eslint');
 const nodemon = require('gulp-nodemon');
-const mocha = require('gulp-mocha');
 const todo = require('gulp-todo');
 const webpack = require('webpack-stream');
+const Mocha = require('mocha');
+const fs = require("fs");
+const path = require("path");
+const PluginError = require('plugin-error');
 
 function getWebpackConfig() {
     return require('./webpack.config.js')(!process.env.IS_DEV)
@@ -47,6 +50,17 @@ function setDev(done) {
     done();
 }
 
+function mocha(done) {
+    const mochaInstance = new Mocha()
+    const files = fs
+        .readdirSync('test/', {recursive: true})
+        .filter(x => x.endsWith('.js')).map(x => path.resolve('test/' + x));
+    for (const file of files) {
+        mochaInstance.addFile(file);
+    }
+    mochaInstance.run(failures => failures ? done(new PluginError('mocha', `${failures} test(s) failed`)) : done());
+}
+
 gulp.task('lint', () => {
     return gulp.src(['**/*.js', '!node_modules/**/*.js', '!bin/**/*.js'])
         .pipe(eslint())
@@ -54,9 +68,7 @@ gulp.task('lint', () => {
         .pipe(eslint.failAfterError())
 });
 
-gulp.task('test', gulp.series('lint', () => {
-    return gulp.src(['test/**/*.js']).pipe(mocha());
-}));
+gulp.task('test', gulp.series('lint', mocha));
 
 gulp.task('todo', gulp.series('lint', () => {
     return gulp.src('src/**/*.js')

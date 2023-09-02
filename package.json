@@ -50,7 +50,6 @@
     "gulp": "^4.0.2",
     "gulp-babel": "^8.0.0",
     "gulp-eslint": "^6.0.0",
-    "gulp-mocha": "^8.0.0",
     "gulp-nodemon": "^2.5.0",
     "gulp-todo": "^7.1.1",
     "jshint": "^2.13.6",
@@ -65,6 +64,7 @@
     "webpack-stream": "^7.0.0"
   },
   "devDependencies": {
-    "@types/sat": "^0.0.32"
+    "@types/sat": "^0.0.32",
+    "plugin-error": "^2.0.1"
   }
 }
