@@ -137,10 +137,3 @@ exports.testSquareRectangle =
             centerXA, centerYA, edgeLengthA, edgeLengthA,
             centerXB, centerYB, widthB, heightB);
     }
-
-exports.isVisibleEntity = (entity, player, addThreshold = true) => {
-    const entityHalfSize = entity.radius + (addThreshold ? entity.radius * 0.1 : 0);
-    return exports.testRectangleRectangle(
-        entity.x, entity.y, entityHalfSize, entityHalfSize,
-        player.x, player.y, player.screenWidth / 2, player.screenHeight / 2);
-}
