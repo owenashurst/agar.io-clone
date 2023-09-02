@@ -140,9 +140,12 @@ exports.Player = class {
         let cellToSplit = this.cells[cellIndex];
         let maxAllowedPieces = Math.floor(cellToSplit.mass / defaultPlayerMass); // If we split the cell ino more pieces, they will be too small.
         let piecesToCreate = Math.min(maxAllowedPieces, maxRequestedPieces);
-        let newCellMasses = cellToSplit.mass / piecesToCreate;
+        if (piecesToCreate === 0) {
+            return;
+        }
+        let newCellsMass = cellToSplit.mass / piecesToCreate;
         for (let i = 0; i < piecesToCreate - 1; i++) {
-            this.cells.push(new Cell(cellToSplit.x, cellToSplit.y, newCellMasses, SPLIT_CELL_SPEED));
+            this.cells.push(new Cell(cellToSplit.x, cellToSplit.y, newCellsMass, SPLIT_CELL_SPEED));
         }
         cellToSplit.mass = newCellMasses;
         cellToSplit.recalculateRadius();

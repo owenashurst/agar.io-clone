@@ -231,6 +231,10 @@ const tickPlayer = (currentPlayer) => {
         return false;
     };
 
+    const canEatVirus = (cell, cellCircle, virus) => {
+        return virus.mass < cell.mass && isEntityInsideCircle(virus, cellCircle)
+    }
+
     const cellsToSplit = [];
     for (let cellIndex = 0; cellIndex < currentPlayer.cells.length; cellIndex++) {
         const currentCell = currentPlayer.cells[cellIndex];
@@ -242,11 +246,9 @@ const tickPlayer = (currentPlayer) => {
 
         const eatenFoodIndexes = util.getIndexes(map.food.data, food => isEntityInsideCircle(food, playerCircle));
         const eatenMassIndexes = util.getIndexes(map.massFood.data, mass => canEatMass(currentCell, playerCircle, cellIndex, mass));
-        const eatenVirusIndexes = util.getIndexes(map.viruses.data, virus => isEntityInsideCircle(virus, playerCircle));
+        const eatenVirusIndexes = util.getIndexes(map.viruses.data, virus => canEatVirus(currentCell, playerCircle, virus));
 
-        map.food.delete(eatenFoodIndexes);
-
-        if (eatenVirusIndexes > 0 && currentCell.mass > map.viruses.data[eatenVirusIndexes].mass) { //TODO wtf??? eatenVirusIndexes is array
+        if (eatenVirusIndexes.length > 0) {
             cellsToSplit.push(cellIndex);
             map.viruses.delete(eatenVirusIndexes)
         }
@@ -256,13 +258,12 @@ const tickPlayer = (currentPlayer) => {
             massGained += map.massFood.data[index].mass;
         }
 
+        map.food.delete(eatenFoodIndexes);
         map.massFood.remove(eatenMassIndexes);
         massGained += (eatenFoodIndexes.length * config.foodMass);
         currentCell.mass += massGained;
-        currentPlayer.massTotal += massGained;
         currentCell.radius = util.massToRadius(currentCell.mass);
-        playerCircle.r = currentCell.radius;
-
+        currentPlayer.massTotal += massGained;
     }
     currentPlayer.virusSplit(cellsToSplit, config.limitSplit, config.defaultPlayerMass);
 };
