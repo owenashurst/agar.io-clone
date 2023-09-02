@@ -20,6 +20,11 @@ class Cell {
         this.speed = speed;
     }
 
+    setMass(mass) {
+        this.mass = mass;
+        this.recalculateRadius();
+    }
+
     recalculateRadius() {
         this.radius = util.massToRadius(this.mass);
     }
@@ -104,11 +109,11 @@ exports.Player = class {
     }
 
     setLastHeartbeat() {
-        this.lastHeartbeat = new Date().getTime();
+        this.lastHeartbeat = Date.now();
     }
 
     setLastSplit() {
-        this.timeToMerge = new Date().getTime() + 1000 * MERGE_TIMER;
+        this.timeToMerge = Date.now() + 1000 * MERGE_TIMER;
     }
 
     removeMassFromCell(cellIndex, mass) {
@@ -147,8 +152,7 @@ exports.Player = class {
         for (let i = 0; i < piecesToCreate - 1; i++) {
             this.cells.push(new Cell(cellToSplit.x, cellToSplit.y, newCellsMass, SPLIT_CELL_SPEED));
         }
-        cellToSplit.mass = newCellMasses;
-        cellToSplit.recalculateRadius();
+        cellToSplit.setMass(newCellsMass)
         this.setLastSplit();
     }
 
@@ -228,7 +232,7 @@ exports.Player = class {
 
     move(slowBase, gameWidth, gameHeight, initMassLog) {
         if (this.cells.length > 1) {
-            if (this.timeToMerge < new Date().getTime()) {
+            if (this.timeToMerge < Date.now()) {
                 this.mergeCollidingCells();
             } else {
                 this.pushAwayCollidingCells();
