@@ -261,8 +261,7 @@ const tickPlayer = (currentPlayer) => {
         map.food.delete(eatenFoodIndexes);
         map.massFood.remove(eatenMassIndexes);
         massGained += (eatenFoodIndexes.length * config.foodMass);
-        currentCell.mass += massGained;
-        currentCell.radius = util.massToRadius(currentCell.mass);
+        currentCell.addMass(massGained);
         currentPlayer.massTotal += massGained;
     }
     currentPlayer.virusSplit(cellsToSplit, config.limitSplit, config.defaultPlayerMass);

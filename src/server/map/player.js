@@ -25,6 +25,10 @@ class Cell {
         this.recalculateRadius();
     }
 
+    addMass(mass) {
+        this.setMass(this.mass + mass);
+    }
+
     recalculateRadius() {
         this.radius = util.massToRadius(this.mass);
     }
@@ -206,8 +210,7 @@ exports.Player = class {
 
     mergeCollidingCells() {
         this.enumerateCollidingCells(function (cells, cellAIndex, cellBIndex) {
-            cells[cellAIndex].mass += cells[cellBIndex].mass;
-            cells[cellAIndex].recalculateRadius();
+            cells[cellAIndex].addMass(cells[cellBIndex].mass);
             cells[cellBIndex] = null;
         });
     }
