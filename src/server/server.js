@@ -13,6 +13,7 @@ const chatRepository = require('./repositories/chat-repository');
 const config = require('../../config');
 const util = require('./lib/util');
 const mapUtils = require('./map/map');
+const {getPosition} = require("./lib/entityUtils");
 
 let map = new mapUtils.Map(config);
 
@@ -47,9 +48,7 @@ io.on('connection', function (socket) {
 
 function generateSpawnpoint() {
     let radius = util.massToRadius(config.defaultPlayerMass);
-    return config.newPlayerInitialPosition == 'farthest'
-        ? util.uniformPosition(map.players.data, radius)
-        : util.randomPosition(radius);
+    return getPosition(config.newPlayerInitialPosition === 'farthest', radius, map.players.data)
 }
 
 
