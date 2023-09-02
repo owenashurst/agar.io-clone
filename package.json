@@ -66,5 +66,8 @@
     "uuid": "^9.0.0",
     "webpack": "^5.82.1",
     "webpack-stream": "^7.0.0"
+  },
+  "devDependencies": {
+    "@types/sat": "^0.0.32"
   }
 }
