@@ -1,4 +1,5 @@
 var io = require('socket.io-client');
+var render = require('./render');
 var ChatClient = require('./chat-client');
 var Canvas = require('./canvas');
 var global = require('./global');
@@ -11,16 +12,6 @@ var debug = function (args) {
         console.log(args);
     }
 };
-
-function drawErrorMessage(message, graph, screen) {
-    graph.fillStyle = '#333333';
-    graph.fillRect(0, 0, screen.width, screen.height);
-    graph.textAlign = 'center';
-    graph.fillStyle = '#FFFFFF';
-    graph.font = 'bold 30px sans-serif';
-    graph.fillText(message, screen.width / 2, screen.height / 2);
-}
-
 
 if (/Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent)) {
     global.mobile = true;
@@ -158,9 +149,9 @@ $("#split").click(function () {
 });
 
 function handleDisconnect() {
+    socket.close();
     if (!global.kicked) { // We have a more specific error message 
-        socket.close();
-        drawErrorMessage('Disconnected!', graph, global.screen);
+        render.drawErrorMessage('Disconnected!', graph, global.screen);
     }
 }
 
@@ -268,7 +259,7 @@ function setupSocket(socket) {
     // Death.
     socket.on('RIP', function () {
         global.gameStart = false;
-        drawErrorMessage('You died!', graph, global.screen);
+        render.drawErrorMessage('You died!', graph, global.screen);
         window.setTimeout(() => {
             document.getElementById('gameAreaWrapper').style.opacity = 0;
             document.getElementById('startMenuWrapper').style.maxHeight = '1000px';
@@ -283,10 +274,10 @@ function setupSocket(socket) {
         global.gameStart = false;
         global.kicked = true;
         if (reason !== '') {
-            drawErrorMessage('You were kicked for: ' + reason, graph, global.screen);
+            render.drawErrorMessage('You were kicked for: ' + reason, graph, global.screen);
         }
         else {
-            drawErrorMessage('You were kicked!', graph, global.screen);
+            render.drawErrorMessage('You were kicked!', graph, global.screen);
         }
         socket.close();
     });
@@ -294,145 +285,10 @@ function setupSocket(socket) {
 
 const isUnnamedCell = (name) => name.length < 1;
 
-const drawRoundObject = (centerX, centerY, radius, graph) => {
-    graph.beginPath();
-    graph.arc(centerX, centerY, radius, 0, 2 * Math.PI);
-    graph.closePath();
-    graph.fill();
-    graph.stroke();
-}
-
-const drawFood = (food) => {
-    graph.fillStyle = 'hsl(' + food.hue + ', 100%, 50%)';
-    graph.strokeStyle = 'hsl(' + food.hue + ', 100%, 45%)';
-    graph.lineWidth = 0;
-    let x = food.x - player.x + global.screen.width / 2;
-    let y = food.y - player.y + global.screen.height / 2;
-    drawRoundObject(x, y, food.radius, graph);
-}
-
-function drawVirus(virus) {
-    graph.strokeStyle = virus.stroke;
-    graph.fillStyle = virus.fill;
-    graph.lineWidth = virus.strokeWidth;
-    var centerX = virus.x - player.x + global.screen.width / 2;
-    var centerY = virus.y - player.y + global.screen.height / 2;
-    var sides = global.virusSides;
-    var theta = 0;
-    var x = 0;
-    var y = 0;
-
-    graph.beginPath();
-    for (var i = 0; i < sides; i++) {
-        theta = (i / sides) * 2 * Math.PI;
-        x = centerX + virus.radius * Math.sin(theta);
-        y = centerY + virus.radius * Math.cos(theta);
-        graph.lineTo(x, y);
-    }
-    graph.closePath();
-    graph.stroke();
-    graph.fill();
-}
-
-function drawFireFood(mass) {
-    graph.strokeStyle = 'hsl(' + mass.hue + ', 100%, 45%)';
-    graph.fillStyle = 'hsl(' + mass.hue + ', 100%, 50%)';
-    graph.lineWidth = playerConfig.border + 2;
-    let x = mass.x - player.x + global.screen.width / 2;
-    let y = mass.y - player.y + global.screen.height / 2;
-    drawRoundObject(x, y, mass.radius - 1, graph);
-}
-
-function drawCells(cells) {
-    graph.lineWidth = 6;
-    for (let cell of cells) {
-        graph.fillStyle = cell.color;
-        graph.strokeStyle = cell.borderColor;
-
-        drawRoundObject(cell.x, cell.y, cell.radius, graph);
-
-        var fontSize = Math.max(cell.radius / 3, 12);
-        graph.lineWidth = playerConfig.textBorderSize;
-        graph.fillStyle = playerConfig.textColor;
-        graph.strokeStyle = playerConfig.textBorder;
-        graph.miterLimit = 1;
-        graph.lineJoin = 'round';
-        graph.textAlign = 'center';
-        graph.textBaseline = 'middle';
-        graph.font = 'bold ' + fontSize + 'px sans-serif';
-        graph.strokeText(cell.name, cell.x, cell.y);
-        graph.fillText(cell.name, cell.x, cell.y);
-        if (global.toggleMassState === 1) {
-            graph.font = 'bold ' + Math.max(fontSize / 3 * 2, 10) + 'px sans-serif';
-            if (cell.name.length === 0) fontSize = 0;
-            graph.strokeText(Math.round(cell.mass), cell.x, cell.y + fontSize);
-            graph.fillText(Math.round(cell.mass), cell.x, cell.y + fontSize);
-        }
-    }
-}
-
-function drawgrid() {
-    graph.lineWidth = 1;
-    graph.strokeStyle = global.lineColor;
-    graph.globalAlpha = 0.15;
-    graph.beginPath();
-
-    for (var x = global.xoffset - player.x; x < global.screen.width; x += global.screen.height / 18) {
-        graph.moveTo(x, 0);
-        graph.lineTo(x, global.screen.height);
-    }
-
-    for (var y = global.yoffset - player.y; y < global.screen.height; y += global.screen.height / 18) {
-        graph.moveTo(0, y);
-        graph.lineTo(global.screen.width, y);
-    }
-
-    graph.stroke();
-    graph.globalAlpha = 1;
-}
-
-function drawborder() {
-    graph.lineWidth = 1;
-    graph.strokeStyle = playerConfig.borderColor;
-
-    // Left-vertical.
-    if (player.x <= global.screen.width / 2) {
-        graph.beginPath();
-        graph.moveTo(global.screen.width / 2 - player.x, 0 ? player.y > global.screen.height / 2 : global.screen.height / 2 - player.y);
-        graph.lineTo(global.screen.width / 2 - player.x, global.game.height + global.screen.height / 2 - player.y);
-        graph.strokeStyle = global.lineColor;
-        graph.stroke();
-    }
-
-    // Top-horizontal.
-    if (player.y <= global.screen.height / 2) {
-        graph.beginPath();
-        graph.moveTo(0 ? player.x > global.screen.width / 2 : global.screen.width / 2 - player.x, global.screen.height / 2 - player.y);
-        graph.lineTo(global.game.width + global.screen.width / 2 - player.x, global.screen.height / 2 - player.y);
-        graph.strokeStyle = global.lineColor;
-        graph.stroke();
-    }
-
-    // Right-vertical.
-    if (global.game.width - player.x <= global.screen.width / 2) {
-        graph.beginPath();
-        graph.moveTo(global.game.width + global.screen.width / 2 - player.x,
-            global.screen.height / 2 - player.y);
-        graph.lineTo(global.game.width + global.screen.width / 2 - player.x,
-            global.game.height + global.screen.height / 2 - player.y);
-        graph.strokeStyle = global.lineColor;
-        graph.stroke();
-    }
-
-    // Bottom-horizontal.
-    if (global.game.height - player.y <= global.screen.height / 2) {
-        graph.beginPath();
-        graph.moveTo(global.game.width + global.screen.width / 2 - player.x,
-            global.game.height + global.screen.height / 2 - player.y);
-        graph.lineTo(global.screen.width / 2 - player.x,
-            global.game.height + global.screen.height / 2 - player.y);
-        graph.strokeStyle = global.lineColor;
-        graph.stroke();
+const getPosition = (entity, player, screen) => {
+    return {
+        x: entity.x - player.x + screen.width / 2,
+        y: entity.y - player.y + screen.height / 2
     }
 }
 
@@ -461,13 +317,22 @@ function gameLoop() {
         graph.fillStyle = global.backgroundColor;
         graph.fillRect(0, 0, global.screen.width, global.screen.height);
 
-        drawgrid();
-        foods.forEach(drawFood);
-        fireFood.forEach(drawFireFood);
-        viruses.forEach(drawVirus);
+        render.drawGrid(global, player, global.screen, graph);
+        foods.forEach(food => {
+            let position = getPosition(food, player, global.screen);
+            render.drawFood(position, food, graph);
+        });
+        fireFood.forEach(fireFood => {
+            let position = getPosition(fireFood, player, global.screen);
+            render.drawFireFood(position, fireFood, playerConfig, graph);
+        });
+        viruses.forEach(virus => {
+            let position = getPosition(virus, player, global.screen);
+            render.drawVirus(position, virus, graph);
+        });
 
         if (global.borderDraw) {
-            drawborder();
+            render.drawBorder(global.game, global.lineColor, player, playerConfig, global.screen, graph);
         }
 
         var cellsToDraw = [];
@@ -489,7 +354,7 @@ function gameLoop() {
         cellsToDraw.sort(function (obj1, obj2) {
             return obj1.mass - obj2.mass;
         });
-        drawCells(cellsToDraw, global.toggleMassState, graph);
+        render.drawCells(cellsToDraw, playerConfig, global.toggleMassState, graph);
 
         socket.emit('0', window.canvas.target); // playerSendTarget "Heartbeat".
     }
