@@ -10,8 +10,8 @@ class Canvas {
         var self = this;
 
         this.cv = document.getElementById('cvs');
-        this.cv.width = global.screenWidth;
-        this.cv.height = global.screenHeight;
+        this.cv.width = global.screen.width;
+        this.cv.height = global.screen.height;
         this.cv.addEventListener('mousemove', this.gameInput, false);
         this.cv.addEventListener('mouseout', this.outOfBounds, false);
         this.cv.addEventListener('keypress', this.keyInput, false);

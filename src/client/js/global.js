@@ -17,15 +17,18 @@ module.exports = {
     virusSides: 20,
 
     // Canvas
-    screenWidth: window.innerWidth,
-    screenHeight: window.innerHeight,
-    gameWidth: 0,
-    gameHeight: 0,
+    screen: {
+        width: window.innerWidth,
+        height: window.innerHeight
+    },
+    game: {
+        width: 0,
+        height: 0
+    },
     xoffset: -0,
     yoffset: -0,
     gameStart: false,
     disconnected: false,
-    died: false,
     kicked: false,
     continuity: false,
     startPingTime: 0,
