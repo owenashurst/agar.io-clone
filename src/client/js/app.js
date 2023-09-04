@@ -103,10 +103,6 @@ window.onload = function () {
 
 // TODO: Break out into GameControls.
 
-var foodConfig = {
-    border: 0,
-};
-
 var playerConfig = {
     border: 6,
     textColor: '#FFFFFF',
@@ -298,128 +294,64 @@ function setupSocket(socket) {
 
 const isUnnamedCell = (name) => name.length < 1;
 
-const drawCircle = (centerX, centerY, radius, sides) => {
-    var theta = 0;
-    var x = 0;
-    var y = 0;
-
+const drawRoundObject = (centerX, centerY, radius, graph) => {
     graph.beginPath();
-
-    for (var i = 0; i < sides; i++) {
-        theta = (i / sides) * 2 * Math.PI;
-        x = centerX + radius * Math.sin(theta);
-        y = centerY + radius * Math.cos(theta);
-        graph.lineTo(x, y);
-    }
-
+    graph.arc(centerX, centerY, radius, 0, 2 * Math.PI);
     graph.closePath();
-    graph.stroke();
     graph.fill();
+    graph.stroke();
 }
 
 const drawFood = (food) => {
-    graph.strokeStyle = 'hsl(' + food.hue + ', 100%, 45%)';
     graph.fillStyle = 'hsl(' + food.hue + ', 100%, 50%)';
-    graph.lineWidth = foodConfig.border;
-    drawCircle(food.x - player.x + global.screen.width / 2,
-        food.y - player.y + global.screen.height / 2,
-        food.radius, global.foodSides);
+    graph.strokeStyle = 'hsl(' + food.hue + ', 100%, 45%)';
+    graph.lineWidth = 0;
+    let x = food.x - player.x + global.screen.width / 2;
+    let y = food.y - player.y + global.screen.height / 2;
+    drawRoundObject(x, y, food.radius, graph);
 }
 
 function drawVirus(virus) {
     graph.strokeStyle = virus.stroke;
     graph.fillStyle = virus.fill;
     graph.lineWidth = virus.strokeWidth;
-    drawCircle(virus.x - player.x + global.screen.width / 2,
-        virus.y - player.y + global.screen.height / 2,
-        virus.radius, global.virusSides);
+    var centerX = virus.x - player.x + global.screen.width / 2;
+    var centerY = virus.y - player.y + global.screen.height / 2;
+    var sides = global.virusSides;
+    var theta = 0;
+    var x = 0;
+    var y = 0;
+
+    graph.beginPath();
+    for (var i = 0; i < sides; i++) {
+        theta = (i / sides) * 2 * Math.PI;
+        x = centerX + virus.radius * Math.sin(theta);
+        y = centerY + virus.radius * Math.cos(theta);
+        graph.lineTo(x, y);
+    }
+    graph.closePath();
+    graph.stroke();
+    graph.fill();
 }
 
 function drawFireFood(mass) {
     graph.strokeStyle = 'hsl(' + mass.hue + ', 100%, 45%)';
     graph.fillStyle = 'hsl(' + mass.hue + ', 100%, 50%)';
-    graph.lineWidth = playerConfig.border + 10;
-    drawCircle(mass.x - player.x + global.screen.width / 2,
-        mass.y - player.y + global.screen.height / 2,
-        mass.radius - 5, 18 + (~~(mass.mass / 5)));
+    graph.lineWidth = playerConfig.border + 2;
+    let x = mass.x - player.x + global.screen.width / 2;
+    let y = mass.y - player.y + global.screen.height / 2;
+    drawRoundObject(x, y, mass.radius - 1, graph);
 }
 
-function drawPlayers(order) {
-    var start = {
-        x: player.x - (global.screen.width / 2),
-        y: player.y - (global.screen.height / 2)
-    };
+function drawCells(cells) {
+    graph.lineWidth = 6;
+    for (let cell of cells) {
+        graph.fillStyle = cell.color;
+        graph.strokeStyle = cell.borderColor;
 
-    for (var z = 0; z < order.length; z++) {
-        var userCurrent = users[order[z].nCell];
-        var cellCurrent = users[order[z].nCell].cells[order[z].nDiv];
+        drawRoundObject(cell.x, cell.y, cell.radius, graph);
 
-        var x = 0;
-        var y = 0;
-
-        var points = 30 + ~~(cellCurrent.mass / 5);
-        var increase = Math.PI * 2 / points;
-
-        graph.strokeStyle = 'hsl(' + userCurrent.hue + ', 100%, 45%)';
-        graph.fillStyle = 'hsl(' + userCurrent.hue + ', 100%, 50%)';
-        graph.lineWidth = playerConfig.border;
-
-        var xstore = [];
-        var ystore = [];
-
-        global.spin += 0.0;
-
-        var circle = {
-            x: cellCurrent.x - start.x,
-            y: cellCurrent.y - start.y
-        };
-
-        for (var i = 0; i < points; i++) {
-
-            x = cellCurrent.radius * Math.cos(global.spin) + circle.x;
-            y = cellCurrent.radius * Math.sin(global.spin) + circle.y;
-            if (typeof (userCurrent.id) == "undefined") {
-                x = valueInRange(-userCurrent.x + global.screen.width / 2,
-                    global.game.width - userCurrent.x + global.screen.width / 2, x);
-                y = valueInRange(-userCurrent.y + global.screen.height / 2,
-                    global.game.height - userCurrent.y + global.screen.height / 2, y);
-            } else {
-                x = valueInRange(-cellCurrent.x - player.x + global.screen.width / 2 + (cellCurrent.radius / 3),
-                    global.game.width - cellCurrent.x + global.game.width - player.x + global.screen.width / 2 - (cellCurrent.radius / 3), x);
-                y = valueInRange(-cellCurrent.y - player.y + global.screen.height / 2 + (cellCurrent.radius / 3),
-                    global.game.height - cellCurrent.y + global.game.height - player.y + global.screen.height / 2 - (cellCurrent.radius / 3), y);
-            }
-            global.spin += increase;
-            xstore[i] = x;
-            ystore[i] = y;
-        }
-        /*if (wiggle >= player.radius/ 3) inc = -1;
-        *if (wiggle <= player.radius / -3) inc = +1;
-        *wiggle += inc;
-        */
-        for (i = 0; i < points; ++i) {
-            if (i === 0) {
-                graph.beginPath();
-                graph.moveTo(xstore[i], ystore[i]);
-            } else if (i > 0 && i < points - 1) {
-                graph.lineTo(xstore[i], ystore[i]);
-            } else {
-                graph.lineTo(xstore[i], ystore[i]);
-                graph.lineTo(xstore[0], ystore[0]);
-            }
-
-        }
-        graph.lineJoin = 'round';
-        graph.lineCap = 'round';
-        graph.fill();
-        graph.stroke();
-        var nameCell = "";
-        if (typeof (userCurrent.id) == "undefined")
-            nameCell = player.name;
-        else
-            nameCell = userCurrent.name;
-
-        var fontSize = Math.max(cellCurrent.radius / 3, 12);
+        var fontSize = Math.max(cell.radius / 3, 12);
         graph.lineWidth = playerConfig.textBorderSize;
         graph.fillStyle = playerConfig.textColor;
         graph.strokeStyle = playerConfig.textBorder;
@@ -428,23 +360,15 @@ function drawPlayers(order) {
         graph.textAlign = 'center';
         graph.textBaseline = 'middle';
         graph.font = 'bold ' + fontSize + 'px sans-serif';
-
-        if (global.toggleMassState === 0) {
-            graph.strokeText(nameCell, circle.x, circle.y);
-            graph.fillText(nameCell, circle.x, circle.y);
-        } else {
-            graph.strokeText(nameCell, circle.x, circle.y);
-            graph.fillText(nameCell, circle.x, circle.y);
+        graph.strokeText(cell.name, cell.x, cell.y);
+        graph.fillText(cell.name, cell.x, cell.y);
+        if (global.toggleMassState === 1) {
             graph.font = 'bold ' + Math.max(fontSize / 3 * 2, 10) + 'px sans-serif';
-            if (nameCell.length === 0) fontSize = 0;
-            graph.strokeText(Math.round(cellCurrent.mass), circle.x, circle.y + fontSize);
-            graph.fillText(Math.round(cellCurrent.mass), circle.x, circle.y + fontSize);
+            if (cell.name.length === 0) fontSize = 0;
+            graph.strokeText(Math.round(cell.mass), cell.x, cell.y + fontSize);
+            graph.fillText(Math.round(cell.mass), cell.x, cell.y + fontSize);
         }
     }
-}
-
-function valueInRange(min, max, value) {
-    return Math.min(max, Math.max(min, value));
 }
 
 function drawgrid() {
@@ -545,21 +469,28 @@ function gameLoop() {
         if (global.borderDraw) {
             drawborder();
         }
-        var orderMass = [];
+
+        var cellsToDraw = [];
         for (var i = 0; i < users.length; i++) {
+            let color = 'hsl(' + users[i].hue + ', 100%, 50%)';
+            let borderColor = 'hsl(' + users[i].hue + ', 100%, 45%)';
             for (var j = 0; j < users[i].cells.length; j++) {
-                orderMass.push({
-                    nCell: i,
-                    nDiv: j,
-                    mass: users[i].cells[j].mass
+                cellsToDraw.push({
+                    color: color,
+                    borderColor: borderColor,
+                    mass: users[i].cells[j].mass,
+                    name: users[i].name,
+                    radius: users[i].cells[j].radius,
+                    x: users[i].cells[j].x - player.x + global.screen.width / 2,
+                    y: users[i].cells[j].y - player.y + global.screen.height / 2
                 });
             }
         }
-        orderMass.sort(function (obj1, obj2) {
+        cellsToDraw.sort(function (obj1, obj2) {
             return obj1.mass - obj2.mass;
         });
+        drawCells(cellsToDraw, global.toggleMassState, graph);
 
-        drawPlayers(orderMass);
         socket.emit('0', window.canvas.target); // playerSendTarget "Heartbeat".
     }
 }
