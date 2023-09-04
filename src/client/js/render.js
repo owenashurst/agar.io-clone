@@ -42,8 +42,8 @@ const drawFireFood = (position, mass, playerConfig, graph) => {
 };
 
 const drawCells = (cells, playerConfig, toggleMassState, graph) => {
-    graph.lineWidth = 6;
     for (let cell of cells) {
+        graph.lineWidth = 6;
         graph.fillStyle = cell.color;
         graph.strokeStyle = cell.borderColor;
 
