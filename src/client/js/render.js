@@ -75,12 +75,12 @@ const drawGrid = (global, player, screen, graph) => {
     graph.globalAlpha = 0.15;
     graph.beginPath();
 
-    for (var x = global.xoffset - player.x; x < screen.width; x += screen.height / 18) {
+    for (var x = -player.x; x < screen.width; x += screen.height / 18) {
         graph.moveTo(x, 0);
         graph.lineTo(x, screen.height);
     }
 
-    for (var y = global.yoffset - player.y; y < screen.height; y += screen.height / 18) {
+    for (var y = -player.y; y < screen.height; y += screen.height / 18) {
         graph.moveTo(0, y);
         graph.lineTo(screen.width, y);
     }
