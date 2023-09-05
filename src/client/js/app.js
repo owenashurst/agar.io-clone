@@ -326,8 +326,15 @@ function gameLoop() {
             render.drawVirus(position, virus, graph);
         });
 
+
+        let borders = { // Position of the borders on the screen
+            left: global.screen.width / 2 - player.x,
+            right: global.screen.width / 2 + global.game.width - player.x,
+            top: global.screen.height / 2 - player.y,
+            bottom: global.screen.height / 2 + global.game.height - player.y
+        }
         if (global.borderDraw) {
-            render.drawBorder(global.game, global.lineColor, player, playerConfig, global.screen, graph);
+            render.drawBorder(borders, graph);
         }
 
         var cellsToDraw = [];
@@ -349,7 +356,7 @@ function gameLoop() {
         cellsToDraw.sort(function (obj1, obj2) {
             return obj1.mass - obj2.mass;
         });
-        render.drawCells(cellsToDraw, playerConfig, global.toggleMassState, graph);
+        render.drawCells(cellsToDraw, playerConfig, global.toggleMassState, borders, graph);
 
         socket.emit('0', window.canvas.target); // playerSendTarget "Heartbeat".
     }
