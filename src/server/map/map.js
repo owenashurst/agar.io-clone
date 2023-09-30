@@ -19,18 +19,15 @@ exports.Map = class {
         const totalMass = this.food.data.length * foodMass + this.players.getTotalMass();
 
         const massDiff = gameMass - totalMass;
-        const maxFoodDiff = maxFood - this.food.data.length;
-        const foodDiff = parseInt(massDiff / foodMass) - maxFoodDiff;
-        const foodToAdd = Math.min(foodDiff, maxFoodDiff);
-        const foodToRemove = -Math.max(foodDiff, maxFoodDiff);
-        if (foodToAdd > 0) {
-            console.debug('[DEBUG] Adding ' + foodToAdd + ' food');
-            this.food.addNew(foodToAdd);
-        } else if (foodToRemove > 0) {
-            console.debug('[DEBUG] Removing ' + foodToRemove + ' food');
-            this.food.removeExcess(foodToRemove);
+        const foodFreeCapacity = maxFood - this.food.data.length;
+        const foodDiff = Math.min(parseInt(massDiff / foodMass), foodFreeCapacity);
+        if (foodDiff > 0) {
+            console.debug('[DEBUG] Adding ' + foodDiff + ' food');
+            this.food.addNew(foodDiff);
+        } else if (foodDiff && foodFreeCapacity !== maxFood) {
+            console.debug('[DEBUG] Removing ' + -foodDiff + ' food');
+            this.food.removeExcess(-foodDiff);
         }
-
         //console.debug('[DEBUG] Mass rebalanced!');
 
         const virusesToAdd = maxVirus - this.viruses.data.length;
