@@ -2,17 +2,19 @@
 
 const util = require('../lib/util');
 const gameLogic = require('../game-logic');
+const sat = require('sat')
 
 exports.MassFood = class {
+
     constructor(playerFiring, cellIndex, mass) {
         this.id = playerFiring.id;
         this.num = cellIndex;
         this.mass = mass;
         this.hue = playerFiring.hue;
-        this.target = {
-            x: playerFiring.x - playerFiring.cells[cellIndex].x + playerFiring.target.x,
-            y: playerFiring.y - playerFiring.cells[cellIndex].y + playerFiring.target.y
-        };
+        this.direction = new sat.Vector(
+            playerFiring.x - playerFiring.cells[cellIndex].x + playerFiring.target.x,
+            playerFiring.y - playerFiring.cells[cellIndex].y + playerFiring.target.y
+        ).normalize()
         this.x = playerFiring.cells[cellIndex].x;
         this.y = playerFiring.cells[cellIndex].y;
         this.radius = util.massToRadius(mass);
@@ -20,10 +22,9 @@ exports.MassFood = class {
     }
 
     move(gameWidth, gameHeight) {
-        var deg = Math.atan2(this.target.y, this.target.x);
-        var deltaY = this.speed * Math.sin(deg);
-        var deltaX = this.speed * Math.cos(deg);
-    
+        var deltaX = this.speed * this.direction.x;
+        var deltaY = this.speed * this.direction.y;
+
         this.speed -= 0.5;
         if (this.speed < 0) {
             this.speed = 0;
@@ -34,7 +35,7 @@ exports.MassFood = class {
         if (!isNaN(deltaX)) {
             this.x += deltaX;
         }
-        
+
         gameLogic.adjustForBoundaries(this, this.radius, 5, gameWidth, gameHeight);
     }
 }
