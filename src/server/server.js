@@ -25,7 +25,6 @@ let leaderboard = [];
 let leaderboardChanged = false;
 
 const Vector = SAT.Vector;
-const Circle = SAT.Circle;
 
 app.use(express.static(__dirname + '/../client'));
 
@@ -181,10 +180,10 @@ const addPlayer = (socket) => {
 
     socket.on('1', function () {
         // Fire food.
+        const minCellMass = config.defaultPlayerMass + config.fireFood;
         for (let i = 0; i < currentPlayer.cells.length; i++) {
-            if (currentPlayer.cells[i].mass >= config.defaultPlayerMass + config.fireFood) {
-                currentPlayer.cells[i].mass -= config.fireFood;
-                currentPlayer.massTotal -= config.fireFood;
+            if (currentPlayer.cells[i].mass >= minCellMass) {
+                currentPlayer.changeCellMass(i, -config.fireFood);
                 map.massFood.addNew(currentPlayer, i, config.fireFood);
             }
         }
@@ -239,30 +238,23 @@ const tickPlayer = (currentPlayer) => {
     for (let cellIndex = 0; cellIndex < currentPlayer.cells.length; cellIndex++) {
         const currentCell = currentPlayer.cells[cellIndex];
 
-        const playerCircle = new Circle(
-            new Vector(currentCell.x, currentCell.y),
-            currentCell.radius
-        );
+        const cellCircle = currentCell.toCircle();
 
-        const eatenFoodIndexes = util.getIndexes(map.food.data, food => isEntityInsideCircle(food, playerCircle));
-        const eatenMassIndexes = util.getIndexes(map.massFood.data, mass => canEatMass(currentCell, playerCircle, cellIndex, mass));
-        const eatenVirusIndexes = util.getIndexes(map.viruses.data, virus => canEatVirus(currentCell, playerCircle, virus));
+        const eatenFoodIndexes = util.getIndexes(map.food.data, food => isEntityInsideCircle(food, cellCircle));
+        const eatenMassIndexes = util.getIndexes(map.massFood.data, mass => canEatMass(currentCell, cellCircle, cellIndex, mass));
+        const eatenVirusIndexes = util.getIndexes(map.viruses.data, virus => canEatVirus(currentCell, cellCircle, virus));
 
         if (eatenVirusIndexes.length > 0) {
             cellsToSplit.push(cellIndex);
             map.viruses.delete(eatenVirusIndexes)
         }
 
-        let massGained = 0;
-        for (let index of eatenMassIndexes) { //eatenMassIndexes is an array of indexes -> "index of" instead of "index in" is intentional
-            massGained += map.massFood.data[index].mass;
-        }
+        let massGained = eatenMassIndexes.reduce((acc, index) => acc + map.massFood.data[index].mass, 0);
 
         map.food.delete(eatenFoodIndexes);
         map.massFood.remove(eatenMassIndexes);
         massGained += (eatenFoodIndexes.length * config.foodMass);
-        currentCell.addMass(massGained);
-        currentPlayer.massTotal += massGained;
+        currentPlayer.changeCellMass(cellIndex, massGained);
     }
     currentPlayer.virusSplit(cellsToSplit, config.limitSplit, config.defaultPlayerMass);
 };
@@ -272,21 +264,14 @@ const tickGame = () => {
     map.massFood.move(config.gameWidth, config.gameHeight);
 
     map.players.handleCollisions(function (gotEaten, eater) {
-        let cellGotEaten = map.players.getCell(
-            gotEaten.playerIndex,
-            gotEaten.cellIndex
-        );
+        const cellGotEaten = map.players.getCell(gotEaten.playerIndex, gotEaten.cellIndex);
 
-        let eaterPlayer = map.players.data[eater.playerIndex];
-        let eaterCell = eaterPlayer.cells[eater.cellIndex];
+        map.players.data[eater.playerIndex].changeCellMass(eater.cellIndex, cellGotEaten.mass);
 
-        eaterCell.mass += cellGotEaten.mass;
-        eaterPlayer.massTotal += cellGotEaten.mass;
-
-        let playerDied = map.players.removeCell(gotEaten.playerIndex, gotEaten.cellIndex);
+        const playerDied = map.players.removeCell(gotEaten.playerIndex, gotEaten.cellIndex);
         if (playerDied) {
             let playerGotEaten = map.players.data[gotEaten.playerIndex];
-            io.emit('playerDied', { name: playerGotEaten.name });
+            io.emit('playerDied', { name: playerGotEaten.name }); //TODO: on client is is `playerEatenName` instead of `name`
             sockets[playerGotEaten.id].emit('RIP');
             map.players.removePlayerByIndex(gotEaten.playerIndex);
         }

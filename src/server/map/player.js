@@ -120,25 +120,24 @@ exports.Player = class {
         this.timeToMerge = Date.now() + 1000 * MERGE_TIMER;
     }
 
-    removeMassFromCell(cellIndex, mass) {
-        this.cells[cellIndex].mass -= mass;
-        this.massTotal -= mass;
-    }
-
     loseMassIfNeeded(massLossRate, defaultPlayerMass, minMassLoss) {
         for (let i in this.cells) {
             if (this.cells[i].mass * (1 - (massLossRate / 1000)) > defaultPlayerMass && this.massTotal > minMassLoss) {
                 var massLoss = this.cells[i].mass * (massLossRate / 1000);
-                this.removeMassFromCell(i, massLoss);
+                this.changeCellMass(i, -massLoss);
             }
         }
     }
 
+    changeCellMass(cellIndex, massDifference) {
+        this.cells[cellIndex].addMass(massDifference)
+        this.massTotal += massDifference;
+    }
+
     removeCell(cellIndex) {
-        let died = this.cells.length === 1;
         this.massTotal -= this.cells[cellIndex].mass;
         this.cells.splice(cellIndex, 1);
-        return died;
+        return this.cells.length === 0;
     }
 
 
