@@ -13,6 +13,8 @@ html, body, canvas {
     height: 100%;
     margin: 0;
     padding: 0;
+    background: rgba(0, 0, 0, 0.4);
+
 }
 
 div {
@@ -67,7 +69,7 @@ div {
     position: absolute;
     width: 300px;
     height: 320px;
-    background: rgba(255, 255, 255, 0.7);
+    background: rgba(22, 22, 22, 0.7);
     bottom: 5px;
     left: 5px;
     border-radius: 5px;
