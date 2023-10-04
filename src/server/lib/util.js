@@ -120,6 +120,7 @@ exports.removeIndexes = function (inputArray, indexes) {
 }
 
 // Checks if the two rectangles are colliding
+// width and height is for half values (WTF??)
 exports.testRectangleRectangle =
     function (centerXA, centerYA, widthA, heightA, centerXB, centerYB, widthB, heightB) {
         return centerXA + widthA > centerXB - widthB
@@ -129,9 +130,19 @@ exports.testRectangleRectangle =
     }
 
 // Checks if the square (first 3 arguments) and the rectangle (last 4 arguments) are colliding
+// length, width and height is for half values (WTF??)
 exports.testSquareRectangle =
     function (centerXA, centerYA, edgeLengthA, centerXB, centerYB, widthB, heightB) {
         return exports.testRectangleRectangle(
             centerXA, centerYA, edgeLengthA, edgeLengthA,
             centerXB, centerYB, widthB, heightB);
     }
+
+exports.getIndexes = (array, predicate) => {
+    return array.reduce((acc, value, index) => {
+        if (predicate(value)) {
+            acc.push(index)
+        }
+        return acc;
+    }, []);
+}

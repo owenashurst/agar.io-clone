@@ -1,6 +1,6 @@
 "use strict";
 
-const util = require('../lib/util');
+const {isVisibleEntity} = require("../lib/entityUtils");
 
 exports.foodUtils = require('./food');
 exports.virusUtils = require('./virus');
@@ -19,19 +19,15 @@ exports.Map = class {
         const totalMass = this.food.data.length * foodMass + this.players.getTotalMass();
 
         const massDiff = gameMass - totalMass;
-        const maxFoodDiff = maxFood - this.food.data.length;
-        const foodDiff = parseInt(massDiff / foodMass) - maxFoodDiff;
-        const foodToAdd = Math.min(foodDiff, maxFoodDiff);
-        const foodToRemove = -Math.max(foodDiff, maxFoodDiff);
-        if (foodToAdd > 0) {
-            console.debug('[DEBUG] Adding ' + foodToAdd + ' food');
-            this.food.addNew(foodToAdd);
+        const foodFreeCapacity = maxFood - this.food.data.length;
+        const foodDiff = Math.min(parseInt(massDiff / foodMass), foodFreeCapacity);
+        if (foodDiff > 0) {
+            console.debug('[DEBUG] Adding ' + foodDiff + ' food');
+            this.food.addNew(foodDiff);
+        } else if (foodDiff && foodFreeCapacity !== maxFood) {
+            console.debug('[DEBUG] Removing ' + -foodDiff + ' food');
+            this.food.removeExcess(-foodDiff);
         }
-        else if (foodToRemove > 0) {
-            console.debug('[DEBUG] Removing ' + foodToRemove + ' food');
-            this.food.removeExcess(foodToRemove);
-        }
-
         //console.debug('[DEBUG] Mass rebalanced!');
 
         const virusesToAdd = maxVirus - this.viruses.data.length;
@@ -42,27 +38,9 @@ exports.Map = class {
 
     enumerateWhatPlayersSee(callback) {
         for (let currentPlayer of this.players.data) {
-            var visibleFood = this.food.data
-                .filter(function (f) {
-                    return util.testSquareRectangle(
-                        f.x, f.y, 0,
-                        currentPlayer.x, currentPlayer.y, currentPlayer.screenWidth / 2 + 20, currentPlayer.screenHeight / 2 + 20);
-                });
-
-            var visibleViruses = this.viruses.data
-                .filter(function (f) {
-                    return util.testSquareRectangle(
-                        f.x, f.y, 0,
-                        currentPlayer.x, currentPlayer.y, currentPlayer.screenWidth / 2 + exports.virusUtils.virusRadius, currentPlayer.screenHeight / 2 + exports.virusUtils.virusRadius);
-                });
-
-            var visibleMass = this.massFood.data
-                .filter(function (f) {
-                    return util.testSquareRectangle(
-                        f.x, f.y, f.radius,
-                        currentPlayer.x, currentPlayer.y, currentPlayer.screenWidth / 2 + 20, currentPlayer.screenHeight / 2 + 20);
-                });
-
+            var visibleFood = this.food.data.filter(entity => isVisibleEntity(entity, currentPlayer, false));
+            var visibleViruses = this.viruses.data.filter(entity => isVisibleEntity(entity, currentPlayer));
+            var visibleMass = this.massFood.data.filter(entity => isVisibleEntity(entity, currentPlayer));
 
             const extractData = (player) => {
                 return {
@@ -79,9 +57,7 @@ exports.Map = class {
             var visiblePlayers = [];
             for (let player of this.players.data) {
                 for (let cell of player.cells) {
-                    if (util.testSquareRectangle(
-                        cell.x, cell.y, cell.radius,
-                        player.x, player.y, player.screenWidth / 2 + 20, player.screenHeight / 2 + 20)) {
+                    if (isVisibleEntity(cell, currentPlayer)) {
                         visiblePlayers.push(extractData(player));
                         break;
                     }

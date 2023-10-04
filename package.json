@@ -14,9 +14,11 @@
     "url": "https://github.com/owenashurst/agar.io-clone.git"
   },
   "author": "Huy Tran",
-  "maintainers": [{
-    "name": "Owen Ashurst"
-  }],
+  "maintainers": [
+    {
+      "name": "Owen Ashurst"
+    }
+  ],
   "license": "MIT",
   "contributors": [
     "abalabahaha <hi@abal.moe> (https://github.com/abalabahaha)",
@@ -39,26 +41,20 @@
   "dependencies": {
     "@babel/core": "^7.21.8",
     "@babel/eslint-parser": "^7.21.8",
-    "@babel/plugin-transform-runtime": "^7.21.4",
     "@babel/preset-env": "^7.21.5",
     "babel-loader": "^9.1.2",
-    "babel-preset-es2015": "^6.24.1",
     "chai": "^4.3.7",
     "eslint": "^8.40.0",
     "eslint-plugin-import": "^2.27.5",
-    "eslint-plugin-jsx-a11y": "^6.7.1",
     "express": "^4.18.2",
     "gulp": "^4.0.2",
     "gulp-babel": "^8.0.0",
     "gulp-eslint": "^6.0.0",
-    "gulp-mocha": "^8.0.0",
     "gulp-nodemon": "^2.5.0",
     "gulp-todo": "^7.1.1",
-    "gulp-uglify": "^3.0.2",
-    "gulp-util": "^3.0.7",
     "jshint": "^2.13.6",
     "mocha": "^10.2.0",
-    "nodemon": "^2.0.22",
+    "nodemon": "^3.0.1",
     "sat": "^0.9.0",
     "socket.io": "^4.6.1",
     "socket.io-client": "^4.6.1",
@@ -66,5 +62,9 @@
     "uuid": "^9.0.0",
     "webpack": "^5.82.1",
     "webpack-stream": "^7.0.0"
+  },
+  "devDependencies": {
+    "@types/sat": "^0.0.32",
+    "plugin-error": "^2.0.1"
   }
 }

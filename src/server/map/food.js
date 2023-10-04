@@ -2,6 +2,7 @@
 
 const util = require('../lib/util');
 const { v4: uuidv4 } = require('uuid');
+const {getPosition} = require("../lib/entityUtils");
 
 class Food {
     constructor(position, radius) {
@@ -22,18 +23,15 @@ exports.FoodManager = class {
     }
 
     addNew(number) {
-        let radius = util.massToRadius(this.foodMass);
+        const radius = util.massToRadius(this.foodMass);
         while (number--) {
-            let position = this.foodUniformDisposition
-                ? util.uniformPosition(this.data, radius)
-                : util.randomPosition(radius);
-            let newFood = new Food(position, radius);
-            this.data.push(newFood);
+            const position = getPosition(this.foodUniformDisposition, radius, this.data)
+            this.data.push(new Food(position, radius));
         }
     }
 
     removeExcess(number) {
-        while (number--) {
+        while (number-- && this.data.length) {
             this.data.pop();
         }
     }

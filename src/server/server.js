@@ -13,6 +13,7 @@ const chatRepository = require('./repositories/chat-repository');
 const config = require('../../config');
 const util = require('./lib/util');
 const mapUtils = require('./map/map');
+const {getPosition} = require("./lib/entityUtils");
 
 let map = new mapUtils.Map(config);
 
@@ -24,9 +25,6 @@ let leaderboard = [];
 let leaderboardChanged = false;
 
 const Vector = SAT.Vector;
-const Circle = SAT.Circle;
-
-let playerCircle = new Circle(new Vector(0, 0), 0);
 
 app.use(express.static(__dirname + '/../client'));
 
@@ -47,9 +45,7 @@ io.on('connection', function (socket) {
 
 function generateSpawnpoint() {
     let radius = util.massToRadius(config.defaultPlayerMass);
-    return config.newPlayerInitialPosition == 'farthest'
-        ? util.uniformPosition(map.players.data, radius)
-        : util.randomPosition(radius);
+    return getPosition(config.newPlayerInitialPosition === 'farthest', radius, map.players.data)
 }
 
 
@@ -184,10 +180,10 @@ const addPlayer = (socket) => {
 
     socket.on('1', function () {
         // Fire food.
+        const minCellMass = config.defaultPlayerMass + config.fireFood;
         for (let i = 0; i < currentPlayer.cells.length; i++) {
-            if (currentPlayer.cells[i].mass >= config.defaultPlayerMass + config.fireFood) {
-                currentPlayer.cells[i].mass -= config.fireFood;
-                currentPlayer.massTotal -= config.fireFood;
+            if (currentPlayer.cells[i].mass >= minCellMass) {
+                currentPlayer.changeCellMass(i, -config.fireFood);
                 map.massFood.addNew(currentPlayer, i, config.fireFood);
             }
         }
@@ -219,58 +215,46 @@ const tickPlayer = (currentPlayer) => {
 
     currentPlayer.move(config.slowBase, config.gameWidth, config.gameHeight, INIT_MASS_LOG);
 
-    const funcFood = (f) => {
-        return SAT.pointInCircle(new Vector(f.x, f.y), playerCircle);
+    const isEntityInsideCircle = (point, circle) => {
+        return SAT.pointInCircle(new Vector(point.x, point.y), circle);
     };
 
-    const eatMass = (m, currentCell) => {
-        if (SAT.pointInCircle(new Vector(m.x, m.y), playerCircle)) {
-            if (m.id == currentPlayer.id && m.speed > 0 && z == m.num)
+    const canEatMass = (cell, cellCircle, cellIndex, mass) => {
+        if (isEntityInsideCircle(mass, cellCircle)) {
+            if (mass.id === currentPlayer.id && mass.speed > 0 && cellIndex === mass.num)
                 return false;
-            if (currentCell.mass > m.mass * 1.1)
+            if (cell.mass > mass.mass * 1.1)
                 return true;
         }
 
         return false;
     };
 
-    let cellsToSplit = [];
-    for (var z = 0; z < currentPlayer.cells.length; z++) {
-        const currentCell = currentPlayer.cells[z];
+    const canEatVirus = (cell, cellCircle, virus) => {
+        return virus.mass < cell.mass && isEntityInsideCircle(virus, cellCircle)
+    }
 
-        playerCircle = new Circle(
-            new Vector(currentCell.x, currentCell.y),
-            currentCell.radius
-        );
+    const cellsToSplit = [];
+    for (let cellIndex = 0; cellIndex < currentPlayer.cells.length; cellIndex++) {
+        const currentCell = currentPlayer.cells[cellIndex];
 
-        const foodEaten = map.food.data.map(funcFood)
-            .reduce(function (a, b, c) { return b ? a.concat(c) : a; }, []);
+        const cellCircle = currentCell.toCircle();
 
-        map.food.delete(foodEaten);
+        const eatenFoodIndexes = util.getIndexes(map.food.data, food => isEntityInsideCircle(food, cellCircle));
+        const eatenMassIndexes = util.getIndexes(map.massFood.data, mass => canEatMass(currentCell, cellCircle, cellIndex, mass));
+        const eatenVirusIndexes = util.getIndexes(map.viruses.data, virus => canEatVirus(currentCell, cellCircle, virus));
 
-        const massEaten = map.massFood.data.map((f) => eatMass(f, currentCell))
-            .reduce(function (a, b, c) { return b ? a.concat(c) : a; }, []);
-
-        const virusCollision = map.viruses.data.map(funcFood)
-            .reduce(function (a, b, c) { return b ? a.concat(c) : a; }, []);
-
-        if (virusCollision > 0 && currentCell.mass > map.viruses.data[virusCollision].mass) {
-            cellsToSplit.push(z);
-            map.viruses.delete(virusCollision)
+        if (eatenVirusIndexes.length > 0) {
+            cellsToSplit.push(cellIndex);
+            map.viruses.delete(eatenVirusIndexes)
         }
 
-        let massGained = 0;
-        for (let index of massEaten) { //massEaten is an array of indexes -> "index of" instead of "index in" is intentional
-            massGained += map.massFood.data[index].mass;
-        }
+        let massGained = eatenMassIndexes.reduce((acc, index) => acc + map.massFood.data[index].mass, 0);
 
-        map.massFood.remove(massEaten);
-        massGained += (foodEaten.length * config.foodMass);
-        currentCell.mass += massGained;
-        currentPlayer.massTotal += massGained;
-        currentCell.radius = util.massToRadius(currentCell.mass);
-        playerCircle.r = currentCell.radius;
-
+        map.food.delete(eatenFoodIndexes);
+        map.massFood.remove(eatenMassIndexes);
+        massGained += (eatenFoodIndexes.length * config.foodMass);
+        currentPlayer.changeCellMass(cellIndex, massGained);
     }
     currentPlayer.virusSplit(cellsToSplit, config.limitSplit, config.defaultPlayerMass);
 };
@@ -280,21 +264,14 @@ const tickGame = () => {
     map.massFood.move(config.gameWidth, config.gameHeight);
 
     map.players.handleCollisions(function (gotEaten, eater) {
-        let cellGotEaten = map.players.getCell(
-            gotEaten.playerIndex,
-            gotEaten.cellIndex
-        );
+        const cellGotEaten = map.players.getCell(gotEaten.playerIndex, gotEaten.cellIndex);
 
-        let eaterPlayer = map.players.data[eater.playerIndex];
-        let eaterCell = eaterPlayer.cells[eater.cellIndex];
+        map.players.data[eater.playerIndex].changeCellMass(eater.cellIndex, cellGotEaten.mass);
 
-        eaterCell.mass += cellGotEaten.mass;
-        eaterPlayer.massTotal += cellGotEaten.mass;
-
-        let playerDied = map.players.removeCell(gotEaten.playerIndex, gotEaten.cellIndex);
+        const playerDied = map.players.removeCell(gotEaten.playerIndex, gotEaten.cellIndex);
         if (playerDied) {
             let playerGotEaten = map.players.data[gotEaten.playerIndex];
-            io.emit('playerDied', { name: playerGotEaten.name });
+            io.emit('playerDied', { name: playerGotEaten.name }); //TODO: on client it is `playerEatenName` instead of `name`
             sockets[playerGotEaten.id].emit('RIP');
             map.players.removePlayerByIndex(gotEaten.playerIndex);
         }

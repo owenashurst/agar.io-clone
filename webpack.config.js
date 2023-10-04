@@ -1,17 +1,32 @@
-module.exports = {
+module.exports = (isProduction) => ({
     entry: "./src/client/js/app.js",
+    mode: isProduction ? 'production' : 'development',
     output: {
-        path: require("path").resolve("./src/bin/client/js"),
         library: "app",
         filename: "app.js"
     },
+    devtool: false,
     module: {
-        rules: [
+        rules: getRules(isProduction)
+    },
+});
+
+function getRules(isProduction) {
+    if (isProduction) {
+        return [
             {
-                test: /\.jsx?$/,
-                exclude: /(node_modules|bower_components)/,
-                loader: 'babel-loader'
+                test: /\.(?:js|mjs|cjs)$/,
+                exclude: /node_modules/,
+                use: {
+                    loader: 'babel-loader',
+                    options: {
+                        presets: [
+                            ['@babel/preset-env', { targets: "defaults" }]
+                        ]
+                    }
+                }
             }
         ]
     }
-};
+    return [];
+}
