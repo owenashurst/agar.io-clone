@@ -72,6 +72,7 @@ class Cell {
     // 1: A ate B
     // 2: B ate A
     static checkWhoAteWho(cellA, cellB) {
+        if (!cellA || !cellB) return 0;
         let response = new sat.Response();
         let colliding = sat.testCircleCircle(cellA.toCircle(), cellB.toCircle(), response);
         if (!colliding) return 0;
