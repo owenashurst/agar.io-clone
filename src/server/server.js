@@ -122,7 +122,7 @@ const addPlayer = (socket) => {
             socket.broadcast.emit('serverMSG', currentPlayer.name + ' just logged in as an admin.');
             currentPlayer.admin = true;
         } else {
-            console.log('[ADMIN] ' + currentPlayer.name + ' attempted to log in with incorrect password.');
+            console.log('[ADMIN] ' + currentPlayer.name + ' attempted to log in with the incorrect password: ' + password);
 
             socket.emit('serverMSG', 'Password incorrect, attempt logged.');
 
