@@ -16,8 +16,6 @@ A simple but powerful Agar.IO clone built with socket.IO and HTML5 canvas on top
 ## Live Demos
 An updated live list of demos can be found on the [Live Demos wiki page](https://github.com/owenashurst/agar.io-clone/wiki/Live-Demos).
 
-The official Agar.IO-Clone URL can be found [here](https://owenashurst-agario-clone.herokuapp.com).
-
 This is the most up to date version from master. Any merged pull requests will deploy to this URL automatically.
 
 ---
