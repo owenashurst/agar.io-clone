@@ -110,7 +110,7 @@ const addPlayer = (socket) => {
         }
 
         socket.broadcast.emit('serverSendPlayerChat', {
-            sender: _sender,
+            sender: currentPlayer.name,
             message: _message.substring(0, 35)
         });
 
