@@ -61,10 +61,10 @@
     "sqlite3": "^5.1.6",
     "uuid": "^9.0.0",
     "webpack": "^5.82.1",
-    "webpack-stream": "^7.0.0"
+    "webpack-stream": "^7.0.0",
+    "plugin-error": "^2.0.1"
   },
   "devDependencies": {
-    "@types/sat": "^0.0.32",
-    "plugin-error": "^2.0.1"
+    "@types/sat": "^0.0.32"
   }
 }
