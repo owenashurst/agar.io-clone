@@ -1,70 +1,71 @@
 {
-  "name": "agar.io-clone",
-  "version": "1.0.0",
-  "description": "A simple Agar.io clone",
-  "main": "server/server.js",
-  "scripts": {
-    "build": "gulp build",
-    "start": "gulp run",
-    "watch": "gulp watch",
-    "test": "gulp test"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/owenashurst/agar.io-clone.git"
-  },
-  "author": "Huy Tran",
-  "maintainers": [
-    {
-      "name": "Owen Ashurst"
+    "name": "agar.io-clone",
+    "version": "1.0.0",
+    "description": "A simple Agar.io clone",
+    "main": "server/server.js",
+    "scripts": {
+        "build": "gulp build",
+        "start": "gulp run",
+        "watch": "gulp watch",
+        "test": "gulp test",
+        "dev:all": "gulp dev:all"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/owenashurst/agar.io-clone.git"
+    },
+    "author": "Huy Tran",
+    "maintainers": [
+        {
+            "name": "Owen Ashurst"
+        }
+    ],
+    "license": "MIT",
+    "contributors": [
+        "abalabahaha <hi@abal.moe> (https://github.com/abalabahaha)",
+        "Ariamiro <dossantosgusmaosavio@gmail.com> (https://github.com/Ariamiro)",
+        "Bjarne Oeverli <bjarne.oeverli@gmail.com> (https://github.com/bjarneo)",
+        "Chris Morgan <chris.j.r.morgan@gmail.com> (https://github.com/drpotato)",
+        "Damian Dlugosz <bigfootdd@gmail.com> (https://github.com/bigfoot90)",
+        "Dan Prince <dan@astrealdynamics.co.uk> (https://github.com/danprince)",
+        "Igor Antun <igorantunc@hotmail.com> (https://github.com/IgorAntun)",
+        "Juha Tauriainen <juha@bin.fi> (https://github.com/JuhQ)",
+        "Keith Groves <Keithalgroves@gmail.com> (https://github.com/buskcoin)",
+        "Kostas Bariotis <konmpar@gmail.com> (https://github.com/kbariotis)",
+        "Madara Uchiha <me@madara.ninja> (https://github.com/MadaraUchiha)",
+        "Nguyen Huu Thanh <giongto35@yahoo.com> (https://github.com/giongto35)",
+        "PET Computação UFPR <pet@inf.ufpr.br> (http://pet.inf.ufpr.br)",
+        "Saren Currie <saren@sarencurrie.com> (https://github.com/SarenCurrie)",
+        "VILLERS Mickaël <mickael.villers@epitech.eu> (https://github.com/villers)",
+        "wb9688 <wbertrums@gmail.com> (https://github.com/wb9688)"
+    ],
+    "dependencies": {
+        "@babel/core": "^7.21.8",
+        "@babel/eslint-parser": "^7.21.8",
+        "@babel/preset-env": "^7.21.5",
+        "babel-loader": "^9.1.2",
+        "chai": "^4.3.7",
+        "eslint": "^8.40.0",
+        "eslint-plugin-import": "^2.27.5",
+        "express": "^4.18.2",
+        "gulp": "^4.0.2",
+        "gulp-babel": "^8.0.0",
+        "gulp-eslint": "^6.0.0",
+        "gulp-nodemon": "^2.5.0",
+        "gulp-todo": "^7.1.1",
+        "jshint": "^2.13.6",
+        "mocha": "^10.2.0",
+        "nodemon": "^3.0.1",
+        "sat": "^0.9.0",
+        "socket.io": "^4.6.1",
+        "socket.io-client": "^4.6.1",
+        "sqlite3": "^5.1.6",
+        "uuid": "^9.0.0",
+        "webpack": "^5.82.1",
+        "webpack-stream": "^7.0.0"
+    },
+    "devDependencies": {
+        "@types/sat": "^0.0.32",
+        "plugin-error": "^2.0.1"
     }
-  ],
-  "license": "MIT",
-  "contributors": [
-    "abalabahaha <hi@abal.moe> (https://github.com/abalabahaha)",
-    "Ariamiro <dossantosgusmaosavio@gmail.com> (https://github.com/Ariamiro)",
-    "Bjarne Oeverli <bjarne.oeverli@gmail.com> (https://github.com/bjarneo)",
-    "Chris Morgan <chris.j.r.morgan@gmail.com> (https://github.com/drpotato)",
-    "Damian Dlugosz <bigfootdd@gmail.com> (https://github.com/bigfoot90)",
-    "Dan Prince <dan@astrealdynamics.co.uk> (https://github.com/danprince)",
-    "Igor Antun <igorantunc@hotmail.com> (https://github.com/IgorAntun)",
-    "Juha Tauriainen <juha@bin.fi> (https://github.com/JuhQ)",
-    "Keith Groves <Keithalgroves@gmail.com> (https://github.com/buskcoin)",
-    "Kostas Bariotis <konmpar@gmail.com> (https://github.com/kbariotis)",
-    "Madara Uchiha <me@madara.ninja> (https://github.com/MadaraUchiha)",
-    "Nguyen Huu Thanh <giongto35@yahoo.com> (https://github.com/giongto35)",
-    "PET Computação UFPR <pet@inf.ufpr.br> (http://pet.inf.ufpr.br)",
-    "Saren Currie <saren@sarencurrie.com> (https://github.com/SarenCurrie)",
-    "VILLERS Mickaël <mickael.villers@epitech.eu> (https://github.com/villers)",
-    "wb9688 <wbertrums@gmail.com> (https://github.com/wb9688)"
-  ],
-  "dependencies": {
-    "@babel/core": "^7.21.8",
-    "@babel/eslint-parser": "^7.21.8",
-    "@babel/preset-env": "^7.21.5",
-    "babel-loader": "^9.1.2",
-    "chai": "^4.3.7",
-    "eslint": "^8.40.0",
-    "eslint-plugin-import": "^2.27.5",
-    "express": "^4.18.2",
-    "gulp": "^4.0.2",
-    "gulp-babel": "^8.0.0",
-    "gulp-eslint": "^6.0.0",
-    "gulp-nodemon": "^2.5.0",
-    "gulp-todo": "^7.1.1",
-    "jshint": "^2.13.6",
-    "mocha": "^10.2.0",
-    "nodemon": "^3.0.1",
-    "sat": "^0.9.0",
-    "socket.io": "^4.6.1",
-    "socket.io-client": "^4.6.1",
-    "sqlite3": "^5.1.6",
-    "uuid": "^9.0.0",
-    "webpack": "^5.82.1",
-    "webpack-stream": "^7.0.0"
-  },
-  "devDependencies": {
-    "@types/sat": "^0.0.32",
-    "plugin-error": "^2.0.1"
-  }
 }
