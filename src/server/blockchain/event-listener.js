@@ -117,9 +117,13 @@ class EventListener {
         }
 
         try {
+            console.log(`[EventListener] Verifying deposit for ${address} in lobby ${lobbyId}`);
             // Query LobbyJoined events for this address and lobby
+            // Ensure lobbyId is treated correctly (try both number and BigNumber if needed, but Ethers handles it)
             const filter = this.contract.filters.LobbyJoined(lobbyId, address);
-            const events = await this.contract.queryFilter(filter);
+            const events = await this.contract.queryFilter(filter, 0, 'latest');
+            
+            console.log(`[EventListener] Found ${events.length} events for ${address} in lobby ${lobbyId}`);
 
             if (events.length > 0) {
                 const event = events[events.length - 1]; // Get most recent

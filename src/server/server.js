@@ -125,8 +125,10 @@ const addPlayer = (socket) => {
             }
 
             // Verify deposit via event listener
+            console.log(`[Blockchain] Verifying deposit for ${address} in lobby ${lobbyId} (tx: ${txHash})`);
             const verified = eventListener.hasDeposited(address, lobbyId) || 
                             await eventListener.verifyDeposit(address, lobbyId);
+            console.log(`[Blockchain] Deposit verified: ${verified}`);
 
             if (!verified) {
                 socket.emit('serverMSG', 'Deposit not verified. Please wait for confirmation.');

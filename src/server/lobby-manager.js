@@ -69,6 +69,7 @@ class LobbyManager {
      * @param {string} depositTx - Deposit transaction hash
      */
     addPlayer(lobbyId, socketId, address, depositTx) {
+        console.log(`[LobbyManager] addPlayer called for lobby ${lobbyId}, socket ${socketId}, address ${address}`);
         const lobby = this.getLobby(lobbyId);
         
         // Initialize player state
